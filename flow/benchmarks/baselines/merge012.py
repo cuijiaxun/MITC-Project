@@ -7,7 +7,7 @@ import numpy as np
 from flow.core.experiment import Experiment
 from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
-from flow.benchmarks.merge0 import flow_params
+from flow.benchmarks.merge_baseline import flow_params
 
 
 def merge_baseline(num_runs, render=True):
@@ -60,7 +60,7 @@ def merge_baseline(num_runs, render=True):
 
     exp = Experiment(env)
 
-    results = exp.run(num_runs, env_params.horizon)
+    results = exp.run(num_runs, env_params.horizon, convert_to_csv=True)
     avg_speed = np.mean(results['mean_returns'])
 
     return avg_speed
@@ -68,7 +68,7 @@ def merge_baseline(num_runs, render=True):
 
 if __name__ == '__main__':
     runs = 2  # number of simulations to average over
-    res = merge_baseline(num_runs=runs, render=False)
+    res = merge_baseline(num_runs=runs, render=True)
 
     print('---------')
     print('The average speed across {} runs is {}'.format(runs, res))
