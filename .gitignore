@@ -93,6 +93,7 @@ ENV/
 
 # Don't add xml/csv/png
 *.xml
+!*.net.xml
 *.csv
 *.png
 .DS_Store
