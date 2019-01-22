@@ -32,6 +32,7 @@ class USMergeScenario(NetFileScenario):
             "inflow_highway": ["inflow_highway", "left", "center", "center.46"],
             "left": ["left", "center", "center.46"],
             "center": ["center", "center.46"],
+            "center.46": ["center.46"],
             "inflow_merge": ["inflow_merge", "bottom", "center", "center.46"],
             "bottom": ["bottom", "center", "center.46"]
         }
