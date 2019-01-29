@@ -1,12 +1,12 @@
-"""Benchmark for merge0.
+"""Benchmark for us_merge0.
 
 Trains a small percentage of autonomous vehicles to dissipate shockwaves caused
 by merges in an open network. The autonomous penetration rate in this example
-is 0%.
+is 10%.
 
-# Not relevant with 0 RL agents? Action Dimension: (5, )
+# Action Dimension: (5, )
 
-# Not relevant with 0 RL agents? Observation Dimension: (25, )
+# Observation Dimension: (25, )
 
 Horizon: 750 steps
 """
@@ -24,9 +24,9 @@ HORIZON = 750
 # inflow rate at the highway
 FLOW_RATE = 2000
 # percent of autonomous vehicles
-RL_PENETRATION = 0.0
+RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
-NUM_RL = 0
+NUM_RL = 5
 
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -58,12 +58,12 @@ inflow.add(
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
     departLane="free",
     departSpeed=10)
-#inflow.add(
-    #veh_type="rl",
-    #edge="inflow_highway",
-    #vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    #departLane="free",
-    #departSpeed=10)
+inflow.add(
+    veh_type="rl",
+    edge="inflow_highway",
+    vehs_per_hour=RL_PENETRATION * FLOW_RATE,
+    departLane="free",
+    departSpeed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
@@ -73,7 +73,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="us_merge_baseline",
+    exp_tag="us_merge_0",
 
     # name of the flow environment the experiment is running on
     env_name="WaveAttenuationMergePOEnv",
@@ -83,7 +83,6 @@ flow_params = dict(
 
     # sumo-related parameters (see flow.core.params.SumoParams)
     sumo=SumoParams(
-        emission_path="/home/dzgnkq/ray_results/us_merge012_baseline_daniel/",
         restart_instance=True,
         sim_step=0.5,
         render=False,
