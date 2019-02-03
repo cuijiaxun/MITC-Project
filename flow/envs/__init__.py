@@ -10,7 +10,7 @@ from flow.envs.ring.lane_change_accel import LaneChangeAccelEnv, \
 from flow.envs.ring.accel import AccelEnv
 from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
     WaveAttenuationPOEnv
-from flow.envs.merge import MergePOEnv
+from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.test import TestEnv
 
 # deprecated classes whose names have changed
@@ -36,6 +36,9 @@ __all__ = [
     'BottleneckDesiredVelocityEnv',
     'TestEnv',
     'BayBridgeEnv',
+    'MergePORadius2Env', 
+    'MergePORadius4Env', 
+    'MergePORadius7Env',
     # deprecated classes
     'BottleNeckAccelEnv',
     'DesiredVelocityEnv',

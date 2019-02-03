@@ -127,7 +127,8 @@ class MergePOEnv(Env):
         for i, rl_id in enumerate(self.rl_veh):
             this_speed = self.k.vehicle.get_speed(rl_id)
             lead_id = self.k.vehicle.get_leader(rl_id)
-            follower = self.k.vehicle.get_follower(rl_id)
+            follower_id = self.k.vehicle.get_follower(rl_id)
+            follower_id = self.vehicles.get_follower(rl_id)
 
             if lead_id in ["", None]:
                 # in case leader is not visible
@@ -140,14 +141,14 @@ class MergePOEnv(Env):
                     - self.k.vehicle.get_x_by_id(rl_id) \
                     - self.k.vehicle.get_length(rl_id)
 
-            if follower in ["", None]:
-                # in case follower is not visible
+            if follower_id in ["", None]:
+                # in case follower_id is not visible
                 follow_speed = 0
                 follow_head = max_length
             else:
-                self.follower.append(follower)
-                follow_speed = self.k.vehicle.get_speed(follower)
-                follow_head = self.k.vehicle.get_headway(follower)
+                self.follower.append(follower_id)
+                follow_speed = self.k.vehicle.get_speed(follower_id)
+                follow_head = self.k.vehicle.get_headway(follower_id)
 
             observation[5 * i + 0] = this_speed / max_speed
             observation[5 * i + 1] = (lead_speed - this_speed) / max_speed
@@ -229,3 +230,107 @@ class MergePOEnv(Env):
         self.leader = []
         self.follower = []
         return super().reset()
+
+
+class MergePORadiusEnv(MergePOEnv):
+    """Partially observable merge environment.
+
+    This environment is similar to WaveAttenuationMergePOEnv, except that
+    each RL car sees OBSERVATION_RADIUS cars infront and in the back of it instead of 1.
+    """
+
+    OBSERVATION_RADIUS = 1 # default, like WaveAttenuationMergePOEnv
+
+    @property
+    def observation_space(self):
+        """See class definition."""
+        num_attributes_self = 1 # observe just self speed
+        num_attributes_others = 2 # observe others' speed and distance
+        num_directions = 2 # observe back and front
+        self.obs_dimension_per_rl = num_attributes_self + \
+          self.OBSERVATION_RADIUS * num_attributes_others * num_directions
+        return Box(low=0, high=1, shape=(self.obs_dimension_per_rl *
+          self.num_rl, ), dtype=np.float32)
+
+    def get_state(self, rl_id=None, **kwargs):
+        """Generalization of the WaveAttenuationMergePOEnv code to radius > 1."""
+        self.leader = []
+        self.follower = []
+        
+        # normalizing constants
+        max_speed = self.scenario.max_speed
+        max_length = self.scenario.length
+
+        observation = []
+        for i, rl_id in enumerate(self.rl_veh):
+            # fill with observations of self
+            this_speed = self.vehicles.get_speed(rl_id)
+            observation.append(this_speed / max_speed)
+
+            # fill with observations of leading vehicles
+            lead_id = rl_id
+            for _ in range(self.OBSERVATION_RADIUS):
+              lead_id = self.vehicles.get_leader(lead_id)
+              if lead_id in ["", None]:
+                  # in case leader is not visible
+                  lead_speed = max_speed
+                  lead_head = max_length
+              else:
+                  self.leader.append(lead_id)
+                  lead_speed = self.vehicles.get_speed(lead_id)
+                  lead_head = self.get_x_by_id(lead_id) \
+                      - self.get_x_by_id(rl_id) - self.vehicles.get_length(rl_id)
+              observation.append((lead_speed - this_speed) / max_speed)
+              observation.append(lead_head / max_length)
+
+            # fill with observations of following vehicles
+            follower_id = rl_id
+            for _ in range(self.OBSERVATION_RADIUS):
+              follower_id = self.vehicles.get_follower(follower_id)
+              if follower_id in ["", None]:
+                  # in case follower_id is not visible
+                  follow_speed = 0
+                  follow_head = max_length
+              else:
+                  self.follower.append(follower_id)
+                  follow_speed = self.vehicles.get_speed(follower_id)
+                  follow_head = self.vehicles.get_headway(follower_id)
+              observation.append((this_speed - follow_speed) / max_speed)
+              observation.append(follow_head / max_length)
+
+        # if doesn't see enough RL vehicles, pad with 0s, as was done originally
+        obs_dimension = self.obs_dimension_per_rl * self.num_rl
+        if len(observation) < obs_dimension:
+          observation += [0] * (obs_dimension - len(observation)) 
+         
+        return observation
+
+
+# alias for MergePORadiusEnv classes with different observation
+# radii. An alternative software solution would be to send a parameter through
+# ADDITIONAL_ENV_PARAMS, but that would require updating ADDITIONAL_ENV_PARAMS
+# above and in every calling location, breaking backward compatibility
+class MergePORadius2Env(MergePORadiusEnv):
+    """Partially observable merge environment.
+
+    This environment is just an alias for specific OBSERVATION_RADIUS.
+    """
+    OBSERVATION_RADIUS = 2 
+class MergePORadius4Env(MergePORadiusEnv):
+    """Partially observable merge environment.
+
+    This environment is just an alias for specific OBSERVATION_RADIUS.
+    """
+    OBSERVATION_RADIUS = 4 
+class MergePORadius6Env(MergePORadiusEnv):
+    """Partially observable merge environment.
+
+    This environment is just an alias for specific OBSERVATION_RADIUS.
+    """
+    OBSERVATION_RADIUS = 6 
+class MergePORadius7Env(MergePORadiusEnv):
+    """Partially observable merge environment.
+
+    This environment is just an alias for specific OBSERVATION_RADIUS.
+    """
+    OBSERVATION_RADIUS = 7 
