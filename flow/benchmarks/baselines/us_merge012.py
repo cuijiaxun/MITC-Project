@@ -72,8 +72,8 @@ def merge_baseline(num_runs, render=True):
 
 
 if __name__ == '__main__':
-    runs = 2  # number of simulations to average over
-    res = merge_baseline(num_runs=runs, render=True)
+    runs = 30  # number of simulations to average over
+    res = merge_baseline(num_runs=runs, render=False)
 
     print('---------')
-    print('The average speed across {} runs is {}'.format(runs, res))
+    print('TODO SEEMS WRONG The average speed across {} runs is {}'.format(runs, res))
