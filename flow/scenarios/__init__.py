@@ -16,6 +16,8 @@ from flow.scenarios.multi_ring import MultiRingScenario
 from flow.scenarios.minicity import MiniCityScenario
 from flow.scenarios.highway_ramps import HighwayRampsScenario
 
+from flow.scenarios.i696 import i696Scenario
+
 # deprecated classes whose names have changed
 from flow.scenarios.figure_eight import Figure8Scenario
 from flow.scenarios.loop import LoopScenario
@@ -36,6 +38,7 @@ __all__ = [
     "MultiRingScenario",
     "MiniCityScenario",
     "HighwayRampsScenario",
+    "i696Scenario",
     # deprecated classes
     "Figure8Scenario",
     "LoopScenario",
