@@ -65,7 +65,10 @@ class TraCISimulation(KernelSimulation):
 
     def check_collision(self):
         """See parent class."""
-        return self.kernel_api.simulation.getStartingTeleportNumber() != 0
+        # Daniel: bugfix - previous code didn't check collisions, since
+        # teleport doesn't always happen after a collision (depends on
+        # configuration)
+        return self.kernel_api.simulation.getCollidingVehiclesNumber() != 0
 
     def start_simulation(self, network, sim_params):
         """Start a sumo simulation instance.
