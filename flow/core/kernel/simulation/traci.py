@@ -11,6 +11,7 @@ import time
 import logging
 import subprocess
 import signal
+import datetime
 
 
 # Number of retries on restarting SUMO before giving up
@@ -93,6 +94,13 @@ class TraCISimulation(KernelSimulation):
                     "--num-clients", str(sim_params.num_clients),
                     "--step-length", str(sim_params.sim_step)
                 ]
+
+                if sim_params.logs_path:
+                  sumo_call = sumo_call + [
+                    "--message-log", sim_params.logs_path +   "/sumo_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_') + ".msg.log",
+                    "--error-log", sim_params.logs_path + "/sumo_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_') + ".error.log",
+                    "--log", sim_params.logs_path + "/sumo_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_') + ".log"
+                  ] 
 
                 # add step logs (if requested)
                 if sim_params.no_step_log:

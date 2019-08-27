@@ -1,5 +1,11 @@
 """Utility method for registering environments with OpenAI gym."""
 
+import os
+import datetime
+import pickle 
+import random
+import numpy as np
+
 import gym
 from gym.envs.registration import register
 
@@ -10,7 +16,7 @@ from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
 
 
-def make_create_env(params, version=0, render=None):
+def make_create_env(params, version=0, render=None, seeds_file=None):
     """Create a parametrized flow environment compatible with OpenAI gym.
 
     This environment creation method allows for the specification of several
@@ -50,6 +56,8 @@ def make_create_env(params, version=0, render=None):
     render : bool, optional
         specifies whether to use the gui during execution. This overrides
         the render attribute in SumoParams
+    seeds_file : string, optional
+        specifies a path to load random seeds for flow from
 
     Returns
     -------
@@ -81,7 +89,29 @@ def make_create_env(params, version=0, render=None):
     traffic_lights = params.get("tls", TrafficLightParams())
 
     def create_env(*_):
+
+        # creating path to experiments' log files, using current time
+        logs_path = os.path.expanduser("~/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+        if not os.path.exists(logs_path):
+            os.makedirs(logs_path)
+
+        # Random seeds recording and optionally loading
+        if seeds_file:
+          print("SEEDS_FILE" + seeds_file)
+          with open(seeds_file, 'rb') as handle:
+              loaded_seeds = pickle.load(handle)
+              random.setstate(loaded_seeds['old_state_random'])
+              np.random.set_state(loaded_seeds['old_state_np'])
+        seeds = { 
+          'old_state_random' : random.getstate(),
+          'old_state_np' : np.random.get_state() 
+        }
+        with open(logs_path + "/seeds.pkl", 'wb') as handle:
+          pickle.dump(seeds, handle)
+
         sim_params = deepcopy(params['sim'])
+        # send logs_path to sumo to write logs (TODO: but after constructor, a bit hacky)
+        sim_params.logs_path=logs_path
         vehicles = deepcopy(params['veh'])
 
         network = network_class(

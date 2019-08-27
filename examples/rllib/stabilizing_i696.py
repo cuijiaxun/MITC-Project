@@ -5,6 +5,10 @@ merges in an open network.
 """
 import json
 import os
+import random
+import numpy as np
+import pickle
+from argparse import ArgumentParser
 
 import ray
 try:
@@ -242,7 +246,7 @@ flow_params = dict(
 )
 
 
-def setup_exps():
+def setup_exps(seeds_file=None):
 
     alg_run = "PPO"
 
@@ -265,7 +269,7 @@ def setup_exps():
     config['env_config']['flow_params'] = flow_json
     config['env_config']['run'] = alg_run
 
-    create_env, gym_name = make_create_env(params=flow_params, version=0)
+    create_env, gym_name = make_create_env(params=flow_params, version=0, seeds_file=seeds_file)
 
     # Register as rllib env
     register_env(gym_name, create_env)
@@ -273,7 +277,13 @@ def setup_exps():
 
 
 if __name__ == "__main__":
-    alg_run, gym_name, config = setup_exps()
+
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--seeds_file", dest="seeds_file",
+                        help="pickle file containing seeds", default=None)
+    args = parser.parse_args()
+
+    alg_run, gym_name, config = setup_exps(args.seeds_file)
     ray.init(num_cpus=N_CPUS + 1, redirect_output=False)
     trials = run_experiments({
         flow_params["exp_tag"]: {

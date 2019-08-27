@@ -556,6 +556,8 @@ class SumoParams(SimParams):
         they teleport after teleport_time seconds
     num_clients : int, optional
         Number of clients that will connect to Traci
+    logs_path : string, optional 
+        Path to log files
     """
 
     def __init__(self,
@@ -574,7 +576,8 @@ class SumoParams(SimParams):
                  restart_instance=False,
                  print_warnings=True,
                  teleport_time=-1,
-                 num_clients=1):
+                 num_clients=1,
+                 logs_path=None):
         """Instantiate SumoParams."""
         super(SumoParams, self).__init__(
             sim_step, render, restart_instance, emission_path, save_render,
@@ -587,6 +590,7 @@ class SumoParams(SimParams):
         self.print_warnings = print_warnings
         self.teleport_time = teleport_time
         self.num_clients = num_clients
+        self.logs_path = logs_path
 
 
 class EnvParams:
