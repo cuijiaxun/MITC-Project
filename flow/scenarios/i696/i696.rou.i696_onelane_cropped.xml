@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2018-11-12 09:43:03.609000 by $Id$ via randomTrips.py
+  options: 
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <!-- sw2w -->
+    <route id="404969345#0" edges="404969345#1 456864110 40788302 124433730#0 124433730#1-AddedOnRampEdge 124433730#1 124433730#2-AddedOnRampEdge 124433730#2" />
+    <!-- se2w -->
+    <route id="59440544#0" edges="491266613 422314897#0 422314897#1 489256509 456864110 40788302 124433730#0 124433730#1-AddedOnRampEdge 124433730#1 124433730#2-AddedOnRampEdge 124433730#2" />
+    <!-- e2w -->
+    <route id="124433709" edges="124433709 422314897#0 422314897#1 489256509 456864110 40788302 124433730#0 124433730#1-AddedOnRampEdge 124433730#1 124433730#2-AddedOnRampEdge 124433730#2" />
+    <!-- n2w -->
+    <route id="38726647" edges="8666737 40788302 124433730#0 124433730#1-AddedOnRampEdge 124433730#1 124433730#2-AddedOnRampEdge 124433730#2" />
+    <!-- adding route from last edge, since from some reason rerouting is called then -->
+    <route id="124433730#2" edges="124433730#2"/>
+
+</routes>

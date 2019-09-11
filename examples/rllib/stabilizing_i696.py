@@ -192,7 +192,6 @@ flow_params = dict(
     env_name="WaveAttenuationMergePOEnv",
 
     # name of the scenario class the experiment is running on
-    #scenario="i696Scenario",
     scenario="Scenario",
 
     # simulator that is used by the experiment
@@ -225,10 +224,17 @@ flow_params = dict(
         inflows=inflow,
         no_internal_links=False,
         additional_params=additional_net_params,
-        # TODO this is not moduar, since i696Scenario in another file expects this
         template={
-          "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), # Daniel added to load i696 net from file
-          "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
+          #
+          # UNCOMMENT ONE OF THE FOLLOWING:
+          #
+          # One-lane, cropped i696 
+          "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane_cropped.xml'), 
+          "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_cropped.xml')]
+          #
+          # Full i696 test
+          #"net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), 
+          #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
         }
     ),
 
@@ -239,8 +245,7 @@ flow_params = dict(
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
-      # Daniel: distributing only at the beginning of routes specified
-      # in the i696Scenario
+      # Distributing only at the beginning of routes 
       edges_distribution=["404969345#0", "59440544#0", "124433709", "38726647"] 
     ),
 )
