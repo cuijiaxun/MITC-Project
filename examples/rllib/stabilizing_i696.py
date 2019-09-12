@@ -232,6 +232,10 @@ flow_params = dict(
           "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane_cropped.xml'), 
           "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_cropped.xml')]
           #
+          # One-lane i696 test
+          #"net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
+          #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
+          #
           # Full i696 test
           #"net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), 
           #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
