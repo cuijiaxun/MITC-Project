@@ -127,83 +127,75 @@ inflow = InFlows()
 inflow.add(
     veh_type="human",
     edge="404969345#0", # flow id sw2w1 from xml file
-    begin=0,
+    begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     departSpeed="max",
     departLane="free",
-    departPos="free",
     )
-inflow.add(
-    veh_type="rl",
-    edge="404969345#0", # flow id sw2w1 from xml file
-    begin=0,
-    end=90000,
-    probability=RL_PENETRATION, #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
-    departPos="free",
-    )
+#inflow.add(
+#    veh_type="rl",
+#    edge="404969345#0", # flow id sw2w1 from xml file
+#    begin=10,#0,
+#    end=90000,
+#    probability=RL_PENETRATION * 0.8, #* FLOW_RATE,
+#    departSpeed="max",
+#    departLane="free",
+#    )
 inflow.add(
     veh_type="human",
     edge="59440544#0", # flow id se2w1 from xml file
-    begin=0,
+    begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     departSpeed="max",
     departLane="free",
-    departPos="free",
     )
-inflow.add(
-    veh_type="rl",
-    edge="59440544#0", # flow id se2w1 from xml file
-    begin=0,
-    end=90000,
-    probability=RL_PENETRATION, #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
-    departPos="free",
-    )
+#inflow.add(
+#    veh_type="rl",
+#    edge="59440544#0", # flow id se2w1 from xml file
+#    begin=10,#0,
+#    end=90000,
+#    probability=RL_PENETRATION * 0.8, #* FLOW_RATE,
+#    departSpeed="max",
+#    departLane="free",
+#    )
 inflow.add(
     veh_type="human",
     edge="124433709", # flow id e2w1 from xml file
-    begin=0,
+    begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     departSpeed="max",
     departLane="free",
-    departPos="free",
     )
-inflow.add(
-    veh_type="rl",
-    edge="124433709", # flow id e2w1 from xml file
-    begin=0,
-    end=90000,
-    probability=RL_PENETRATION, # * FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
-    departPos="free",
-    )
+#inflow.add(
+#    veh_type="rl",
+#    edge="124433709", # flow id e2w1 from xml file
+#    begin=10,#0,
+#    end=90000,
+#    probability=RL_PENETRATION * 0.8, # * FLOW_RATE,
+#    departSpeed="max",
+#    departLane="free",
+#    )
 inflow.add(
     veh_type="human",
     edge="38726647", # flow id n2w1 from xml file
-    begin=0,
+    begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), # * FLOW_RATE,
     departSpeed="max",
     departLane="free",
-    departPos="free",
     )
-inflow.add(
-    veh_type="rl",
-    edge="38726647", # flow id n2w1 from xml file
-    begin=0,
-    end=90000,
-    probability=RL_PENETRATION, # * FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
-    departPos="free",
-    )
+#inflow.add(
+#    veh_type="rl",
+#    edge="38726647", # flow id n2w1 from xml file
+#    begin=10,#0,
+#    end=90000,
+#    probability=RL_PENETRATION * 0.8, # * FLOW_RATE,
+#    departSpeed="max",
+#    departLane="free",
+#    )
 
 flow_params = dict(
     # name of the experiment
