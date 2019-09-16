@@ -36,7 +36,7 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"), 'local', 'flow_2019_07', 
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 600
+HORIZON = 3000 #128#600
 # number of rollouts per training iteration
 N_ROLLOUTS = 20
 # number of parallel workers
@@ -47,7 +47,8 @@ FLOW_RATE = 2000
 # percent of autonomous vehicles
 RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
-NUM_RL = [5, 13, 17][EXP_NUM]
+#NUM_RL = [5, 13, 17][EXP_NUM]
+NUM_RL = [100, 250, 333][EXP_NUM]
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -62,43 +63,63 @@ vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
     acceleration_controller=(IDMController, {
-        "noise": 0.2
+        #"noise": 0.2
     }),
     lane_change_controller=(SimLaneChangeController, {}),
-    routing_controller=(ContinuousRouter, {}),
+    #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
-      speed_mode="no_collide",
+      # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
+      speed_mode="right_of_way", #"all_checks", #no_collide",
+      decel=7.5,  # avoid collisions at emergency stops 
+      # desired time-gap from leader
+      tau=1.5, #7,
       min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1
     ),
     lane_change_params=SumoLaneChangeParams(
       model="SL2015",
+      # Define a lane changing mode that will allow lane changes
+      # See: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#lane_change_mode_.280xb6.29
+      # and: ~/local/flow_2019_07/flow/core/params.py, see LC_MODES = {"aggressive": 0 /*bug, 0 is no lane-changes*/, "no_lat_collide": 512, "strategic": 1621}, where "strategic" is the default behavior
+      lane_change_mode=1621,#0b011000000001, # (like default 1621 mode, but no lane changes other than strategic to follow route, # 512, #(collision avoidance and safety gap enforcement) # "strategic", 
       lc_speed_gain=1000000,
-      lc_pushy=1,
-      lc_assertive=20,
-      #lc_impatience=1,
+      lc_pushy=0, #0.5, #1,
+      lc_assertive=5, #20,
+      # the following two replace default values which are not read well by xml parser
+      lc_impatience=1e-8,
+      lcTimeToImpatience=1e12
     ), 
-    num_vehicles=5)
+    num_vehicles=0)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
-    routing_controller=(ContinuousRouter, {}),
+    #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
-      speed_mode="no_collide",
+      # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
+      speed_mode="right_of_way", #"all_checks", #no_collide",
+      decel=7.5,  # avoid collisions at emergency stops 
+      # desired time-gap from leader
+      tau=1.5, #7,
       min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1
     ),
     lane_change_params=SumoLaneChangeParams(
       model="SL2015",
+      # Define a lane changing mode that will allow lane changes
+      # See: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#lane_change_mode_.280xb6.29
+      # and: ~/local/flow_2019_07/flow/core/params.py, see LC_MODES = {"aggressive": 0 /*bug, 0 is no lane-changes*/, "no_lat_collide": 512, "strategic": 1621}, where "strategic" is the default behavior
+      lane_change_mode=1621,#0b011000000001, # (like default 1621 mode, but no lane changes other than strategic to follow route, # 512, #(collision avoidance and safety gap enforcement) # "strategic", 
       lc_speed_gain=1000000,
-      lc_pushy=1,
-      lc_assertive=20,
-      #lc_impatience=1,
+      lc_pushy=0, #0.5, #1,
+      lc_assertive=5, #20,
+      # the following two replace default values which are not read well by xml parser
+      lc_impatience=1e-8,
+      lcTimeToImpatience=1e12
     ), 
-    num_vehicles=1)
+    num_vehicles=0)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
@@ -199,9 +220,10 @@ flow_params = dict(
 
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
+        no_step_log=False,       # this disables log writing?
         sim_step=0.5,            # Daniel updated from osm.sumocfg
-        #lateral_resolution=0.25, # Daniel added from osm.sumocfg
-        render=False,
+        lateral_resolution=0.25, # determines lateral discretization of lanes
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     ),
 
