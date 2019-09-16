@@ -92,6 +92,9 @@ class TraCISimulation(KernelSimulation):
                     sumo_binary, "-c", network.cfg,
                     "--remote-port", str(sim_params.port),
                     "--num-clients", str(sim_params.num_clients),
+                    # "--print-options", "true", # for debugging
+                    "--verbose", "true",
+                    #"--collision.stoptime", "3000", #don't take any action after collision
                     "--step-length", str(sim_params.sim_step)
                 ]
 

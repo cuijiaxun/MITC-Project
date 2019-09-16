@@ -808,6 +808,22 @@ class TraCIKernelNetwork(BaseKernelNetwork):
         t.append(E('begin', value=repr(0)))
         cfg.append(t)
 
+        # Adding options to config like in sumocfg file
+        #
+        # report messages and errors
+        #p = E('report')
+        #p.append(E('log', value="~/sumo.log" ))
+        #cfg.append(p)
+
+        # TO make similar to the i696 scenario that works in SUMO, but didn't help to change behavior
+        #p = E('processing')
+        #p.append(E('ignore-route-errors', value='true'))
+        #cfg.append(p)
+
+        #r = E('routing')
+        #r.append(E('device.rerouting.adaptation-steps', value='180'))
+        #cfg.append(r)
+
         printxml(cfg, self.cfg_path + self.sumfn)
         return self.sumfn
 
