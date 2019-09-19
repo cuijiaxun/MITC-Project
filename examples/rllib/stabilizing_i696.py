@@ -29,6 +29,33 @@ from flow.controllers import IDMController, RLController, SimLaneChangeControlle
 # TODO hard coded
 scenarios_dir = os.path.join(os.path.expanduser("~/"), 'local', 'flow_2019_07', 'flow', 'scenarios')
 
+# UNCOMMENT ONE OF THE FOLLOWING 3 VARIATIONS OF I696 SCENARIO 
+#
+#one-lane (no lane-changes), smaller
+####################################
+scenario_road_data = {"name" : "I696_ONE_LANE_CROPPED",
+            "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane_cropped.xml'), 
+            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_cropped.xml')],
+            "edges_distribution" : ["8666737", "124433709", "491266613", "404969345#1"] 
+            }
+#
+#one-lane (no lane-changes)
+###########################
+#scenario_road_data = {"name" : "I696_ONE_LANE",
+#            "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
+#            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+#            "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
+#            }
+#
+#the full I696 test
+###################
+#scenario_road_data = {"name" : "I696_FULL",
+#            "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), 
+#            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+#            "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
+#            }
+            
+
 # experiment number
 # - 0: 10% RL penetration,  5 max controllable vehicles
 # - 1: 25% RL penetration, 13 max controllable vehicles
@@ -239,20 +266,8 @@ flow_params = dict(
         no_internal_links=False,
         additional_params=additional_net_params,
         template={
-          #
-          # UNCOMMENT ONE OF THE FOLLOWING:
-          #
-          # One-lane, cropped i696 
-          "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane_cropped.xml'), 
-          "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_cropped.xml')]
-          #
-          # One-lane i696 test
-          #"net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
-          #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
-          #
-          # Full i696 test
-          #"net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), 
-          #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')]
+          "net" : scenario_road_data["net"],# see above
+          "rou" : scenario_road_data["rou"],# see above 
         }
     ),
 
@@ -264,7 +279,7 @@ flow_params = dict(
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
       # Distributing only at the beginning of routes 
-      edges_distribution=["404969345#0", "59440544#0", "124433709", "38726647"] 
+      scenario_road_data["edges_distribution"]
     ),
 )
 
