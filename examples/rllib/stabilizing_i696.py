@@ -165,7 +165,7 @@ inflow.add(
     edge="404969345#0", # flow id sw2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION * 0.8, #* FLOW_RATE,
+    probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
@@ -183,7 +183,7 @@ inflow.add(
     edge="59440544#0", # flow id se2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION * 0.8, #* FLOW_RATE,
+    probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
@@ -201,7 +201,7 @@ inflow.add(
     edge="124433709", # flow id e2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION * 0.8, # * FLOW_RATE,
+    probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
@@ -219,7 +219,7 @@ inflow.add(
     edge="38726647", # flow id n2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION * 0.8, # * FLOW_RATE,
+    probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
@@ -334,7 +334,7 @@ if __name__ == "__main__":
             "checkpoint_at_end": True,
             "max_failures": 999,
             "stop": {
-                "training_iteration": 200,
+                "training_iteration": 500,
             },
         }
     })
