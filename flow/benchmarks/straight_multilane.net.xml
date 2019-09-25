@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Wed 25 Sep 2019 05:02:39 PM IDT by Eclipse SUMO netedit Version 1.0.1
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="straight_multilane.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="straight_multilane.net.xml"/>
+    </output>
+
+    <processing>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="false"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="false"/>
+    </pedestrian>
+
+</configuration>
+-->
+
+<net version="1.0" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="100.00,141.42" convBoundary="0.00,141.42,1100.00,141.42" origBoundary="-100.00,-141.42,600.00,0.00" projParameter="!"/>
+
+    <type id="highwayType" numLanes="1" speed="30.00"/>
+    <type id="mergeType" numLanes="1" speed="30.00"/>
+
+    <edge id=":center_0" function="internal">
+        <lane id=":center_0_0" index="0" speed="21.95" length="0.10" shape="949.44,136.62 949.44,136.62"/>
+        <lane id=":center_0_1" index="1" speed="21.95" length="0.10" shape="949.44,139.82 949.44,139.82"/>
+    </edge>
+    <edge id=":left_0" function="internal">
+        <lane id=":left_0_0" index="0" speed="30.00" length="0.10" shape="100.00,136.62 100.00,136.62"/>
+        <lane id=":left_0_1" index="1" speed="30.00" length="0.10" shape="100.00,139.82 100.00,139.82"/>
+    </edge>
+
+    <edge id="center" from="center" to="right" priority="-1">
+        <lane id="center_0" index="0" speed="13.89" length="150.56" shape="949.44,136.62 1100.00,136.62"/>
+        <lane id="center_1" index="1" speed="13.89" length="150.56" shape="949.44,139.82 1100.00,139.82"/>
+    </edge>
+    <edge id="inflow_highway" from="inflow_highway" to="left" priority="-1" type="highwayType" length="100.00">
+        <lane id="inflow_highway_0" index="0" speed="30.00" length="100.00" shape="0.00,136.62 100.00,136.62"/>
+        <lane id="inflow_highway_1" index="1" speed="30.00" length="100.00" shape="0.00,139.82 100.00,139.82"/>
+    </edge>
+    <edge id="left" from="left" to="center" priority="-1" type="highwayType" length="849.44">
+        <lane id="left_0" index="0" speed="30.00" length="849.44" shape="100.00,136.62 949.44,136.62"/>
+        <lane id="left_1" index="1" speed="30.00" length="849.44" shape="100.00,139.82 949.44,139.82"/>
+    </edge>
+
+    <junction id="center" type="priority" x="949.44" y="141.42" incLanes="left_0 left_1" intLanes=":center_0_0 :center_0_1" shape="949.44,141.42 949.44,135.02 949.44,141.42">
+        <request index="0" response="00" foes="00" cont="0"/>
+        <request index="1" response="00" foes="00" cont="0"/>
+    </junction>
+    <junction id="inflow_highway" type="dead_end" x="0.00" y="141.42" incLanes="" intLanes="" shape="0.00,141.42 0.00,135.02"/>
+    <junction id="left" type="priority" x="100.00" y="141.42" incLanes="inflow_highway_0 inflow_highway_1" intLanes=":left_0_0 :left_0_1" shape="100.00,141.42 100.00,135.02 100.00,141.42">
+        <request index="0" response="00" foes="00" cont="0"/>
+        <request index="1" response="00" foes="00" cont="0"/>
+    </junction>
+    <junction id="right" type="dead_end" x="1100.00" y="141.42" incLanes="center_0 center_1" intLanes="" shape="1100.00,135.02 1100.00,141.42"/>
+
+    <connection from="inflow_highway" to="left" fromLane="0" toLane="0" via=":left_0_0" dir="s" state="M"/>
+    <connection from="inflow_highway" to="left" fromLane="1" toLane="1" via=":left_0_1" dir="s" state="M"/>
+    <connection from="left" to="center" fromLane="0" toLane="0" via=":center_0_0" dir="s" state="M"/>
+    <connection from="left" to="center" fromLane="1" toLane="1" via=":center_0_1" dir="s" state="M"/>
+
+    <connection from=":center_0" to="center" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":center_0" to="center" fromLane="1" toLane="1" dir="s" state="M"/>
+    <connection from=":left_0" to="left" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":left_0" to="left" fromLane="1" toLane="1" dir="s" state="M"/>
+
+</net>

@@ -54,7 +54,7 @@ inflow = InFlows()
 inflow.add(
     veh_type="human",
     edge="inflow_highway",
-    vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
+    vehs_per_hour=1 * FLOW_RATE, #(1 - RL_PENETRATION) * FLOW_RATE,
     departLane="free",
     departSpeed=10)
 #inflow.add(
