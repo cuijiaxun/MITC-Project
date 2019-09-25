@@ -35,7 +35,6 @@ def merge_baseline(num_runs):
     initial_config = flow_params.get('initial', InitialConfig())
     traffic_lights = flow_params.get('tls', TrafficLightParams())
 
-
     # set the evaluation flag to True
     env_params.evaluate = True
 

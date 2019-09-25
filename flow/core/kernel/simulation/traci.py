@@ -146,6 +146,9 @@ class TraCISimulation(KernelSimulation):
                 sumo_call.append("--collision.check-junctions")
                 sumo_call.append("true")
 
+                # start simulation without waiting for a click on "play"
+                sumo_call.append("--start")
+
                 logging.info(" Starting SUMO on port " + str(port))
                 logging.debug(" Cfg file: " + str(network.cfg))
                 if sim_params.num_clients > 1:
