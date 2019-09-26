@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2018-11-12 09:43:03.609000 by $Id$ via randomTrips.py
+  options: 
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <route id="center" edges="center" />
+    <route id="left" edges="left center" />
+    <route id="inflow_highway" edges="inflow_highway left center" />
+</routes>
