@@ -198,17 +198,18 @@ class MergePOEnv(Env):
           Then, the next vehicle in the queue is added to the state space and
           provided with actions from the policy.
         """
+        rl_ids = self.k.vehicle.get_rl_ids()
         # add rl vehicles that just entered the network into the rl queue
-        for veh_id in self.k.vehicle.get_rl_ids():
+        for veh_id in rl_ids:
             if veh_id not in list(self.rl_queue) + self.rl_veh:
                 self.rl_queue.append(veh_id)
 
         # remove rl vehicles that exited the network
         for veh_id in list(self.rl_queue):
-            if veh_id not in self.k.vehicle.get_rl_ids():
+            if veh_id not in rl_ids:
                 self.rl_queue.remove(veh_id)
         for veh_id in self.rl_veh:
-            if veh_id not in self.k.vehicle.get_rl_ids():
+            if veh_id not in rl_ids:
                 self.rl_veh.remove(veh_id)
 
         # fil up rl_veh until they are enough controlled vehicles
