@@ -13,3 +13,4 @@ class BottleneckScenario(BottleneckNetwork):
     """See parent class."""
 
     pass
+
