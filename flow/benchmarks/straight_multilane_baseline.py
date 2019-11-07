@@ -105,7 +105,7 @@ inflow.add(
     edge="inflow_highway",
     begin=10,#0,
     end=90000,
-    probability=0.9, #(1 - RL_PENETRATION), #* FLOW_RATE,
+    probability=1, #0.9, #(1 - RL_PENETRATION), #* FLOW_RATE,
     #vehs_per_hour= 1 * FLOW_RATE,
     departSpeed=30, #"random", #30, #"max",
     departLane="random", #"free", 
