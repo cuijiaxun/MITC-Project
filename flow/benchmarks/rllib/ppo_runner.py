@@ -55,6 +55,10 @@ parser.add_argument(
     default=2,
     help="The number of cpus to use.")
 
+parser.add_argument("-s", "--seeds_file", dest="seeds_file",
+                    help="pickle file containing seeds", default=None)
+
+
 if __name__ == "__main__":
     benchmark_name = 'grid0'
     args = parser.parse_args()
@@ -73,7 +77,7 @@ if __name__ == "__main__":
     flow_params = benchmark.flow_params
 
     # get the env name and a creator for the environment
-    create_env, env_name = make_create_env(params=flow_params, version=0)
+    create_env, env_name = make_create_env(params=flow_params, version=0, seeds_file=args.seeds_file)
 
     # initialize a ray instance
     ray.init()
@@ -101,6 +105,7 @@ if __name__ == "__main__":
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["model"]["fcnet_hiddens"] = [100, 50, 25]
     config["observation_filter"] = "NoFilter"
+    #config["seed"] = 123 # seed for PPO?
 
     # save the flow params for replay
     flow_json = json.dumps(
