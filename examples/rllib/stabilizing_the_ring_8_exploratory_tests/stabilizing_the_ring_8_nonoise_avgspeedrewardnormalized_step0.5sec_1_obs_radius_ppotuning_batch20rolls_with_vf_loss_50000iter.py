@@ -7,7 +7,10 @@ vehicles in a variable length ring road.
 import json
 
 import ray
-from ray.rllib.agents.agent import get_agent_class
+try:
+    from ray.rllib.agents.agent import get_agent_class
+except ImportError:
+    from ray.rllib.agents.registry import get_agent_class
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
@@ -120,7 +123,7 @@ def setup_exps():
 
 if __name__ == "__main__":
     alg_run, gym_name, config = setup_exps()
-    ray.init(num_cpus=N_CPUS + 1, redirect_output=False)
+    ray.init(num_cpus=N_CPUS + 1)
     trials = run_experiments({
         flow_params["exp_tag"]: {
             "run": alg_run,
