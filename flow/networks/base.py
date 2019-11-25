@@ -355,13 +355,14 @@ class Network(object):
                 veh, rou = self._vehicle_infos(net_params.template['rou'])
 
                 vtypes = self._vehicle_type(net_params.template.get('vtype'))
-                cf = self._get_cf_params(vtypes)
-                lc = self._get_lc_params(vtypes)
+                if vtypes:
+                  cf = self._get_cf_params(vtypes)
+                  lc = self._get_lc_params(vtypes)
 
-                # add the vehicle types to the VehicleParams object
-                for t in vtypes:
-                    vehicles.add(veh_id=t, car_following_params=cf[t],
-                                 lane_change_params=lc[t], num_vehicles=0)
+                  # add the vehicle types to the VehicleParams object
+                  for t in vtypes:
+                      vehicles.add(veh_id=t, car_following_params=cf[t],
+                                   lane_change_params=lc[t], num_vehicles=0)
 
                 # add the routes of the vehicles that will be departed later
                 # under the name of the vehicle. This will later be identified
