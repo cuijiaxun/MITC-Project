@@ -155,6 +155,31 @@ class MergePOEnv(Env):
             observation[5 * i + 3] = (this_speed - follow_speed) / max_speed
             observation[5 * i + 4] = follow_head / max_length
 
+            for j in range(5):
+                if observation[5*i+j] < -1:
+                #if np.random.random() < 0.01 or observation[5*i+2] < -1:
+                  print(
+                    "ERROR OBSERVATION OUT OF RANGE " + 
+                    " rl_veh " + str(self.rl_veh) +
+                    " rl_ids " + str(self.k.vehicle.get_rl_ids()) +
+                    " lead_id " + str(lead_id) +
+                    " rl_id " + str(rl_id) +
+                    " follower_id " + str(follower_id) +
+                    " this_speed " + str(this_speed) +
+                    " max_speed " + str(max_speed) +
+                    " lead_speed " + str(lead_speed) +
+                    " lead_head " + str(lead_head) +
+                    " max_length " + str(max_length) +
+                    " follow_speed " + str(follow_speed) +
+                    " follow_head " + str(follow_head) +
+                    " lead_x " + str(self.k.vehicle.get_x_by_id(lead_id)) +
+                    " self_length " + str(self.k.vehicle.get_length(rl_id)) +
+                    " rl_x " + str(self.k.vehicle.get_x_by_id(rl_id)) +
+                    " follower_x " + str(self.k.vehicle.get_x_by_id(follower_id))
+                    )
+                  #while True:
+                  #  pass
+
         return observation
 
     def compute_reward(self, rl_actions, **kwargs):
@@ -198,19 +223,27 @@ class MergePOEnv(Env):
           Then, the next vehicle in the queue is added to the state space and
           provided with actions from the policy.
         """
+        #print("additional_command()")
         rl_ids = self.k.vehicle.get_rl_ids()
+        #print("rl_ids " + str(rl_ids))
         # add rl vehicles that just entered the network into the rl queue
+        #print("rl_queue before " + str(self.rl_queue))
         for veh_id in rl_ids:
             if veh_id not in list(self.rl_queue) + self.rl_veh:
                 self.rl_queue.append(veh_id)
+        #print("rl_queue after " + str(self.rl_queue))
 
         # remove rl vehicles that exited the network
+        #print("rl_queue before " + str(self.rl_queue))
         for veh_id in list(self.rl_queue):
             if veh_id not in rl_ids:
                 self.rl_queue.remove(veh_id)
+        #print("rl_queue after " + str(self.rl_queue))
+        #print("rl_veh before " + str(self.rl_veh))
         for veh_id in self.rl_veh:
             if veh_id not in rl_ids:
                 self.rl_veh.remove(veh_id)
+        #print("rl_veh after " + str(self.rl_veh))
 
         # fil up rl_veh until they are enough controlled vehicles
         while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
