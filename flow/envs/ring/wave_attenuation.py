@@ -105,8 +105,8 @@ class WaveAttenuationEnv(Env):
         # low-speeds and is not the real-reward
         #
         #return rewards.desired_velocity(self, fail=kwargs["fail"])
-        veh_ids = self.vehicles.get_ids() 
-        vel = np.array(self.vehicles.get_speed(veh_ids))
+        veh_ids = self.k.vehicle.get_ids() 
+        vel = np.array(self.k.vehicle.get_speed(veh_ids))
         num_vehicles = len(veh_ids)
 
         if any(vel < -100):
@@ -387,8 +387,8 @@ class WaveAttenuationPOEnvSmallAccelPenalty(WaveAttenuationPOEnv):
             return 0
 
         vel = np.array([
-            self.vehicles.get_speed(veh_id)
-            for veh_id in self.vehicles.get_ids()
+            self.k.vehicle.get_speed(veh_id)
+            for veh_id in self.k.vehicle.get_ids()
         ])
 
         if any(vel < -100) or kwargs['fail']:
@@ -416,8 +416,8 @@ class WaveAttenuationPOEnvMediumAccelPenalty(WaveAttenuationPOEnv):
             return 0
 
         vel = np.array([
-            self.vehicles.get_speed(veh_id)
-            for veh_id in self.vehicles.get_ids()
+            self.k.vehicle.get_speed(veh_id)
+            for veh_id in self.k.vehicle.get_ids()
         ])
 
         if any(vel < -100) or kwargs['fail']:
@@ -479,8 +479,8 @@ class WaveAttenuationPORadiusEnv(WaveAttenuationEnv):
         num_directions = 2 # observe back and front
         self.obs_dimension_per_rl = num_attributes_self + \
           self.OBSERVATION_RADIUS * num_attributes_others * num_directions
-        return Box(low=0, high=1, shape=(self.obs_dimension_per_rl *
-          self.vehicles.num_rl_vehicles, ), dtype=np.float32)
+        return Box(low=-1, high=1, shape=(self.obs_dimension_per_rl *
+          self.k.vehicle.num_rl_vehicles, ), dtype=np.float32)
 
     # TODO: REFACTOR? taken from .../flow/envs/merge.py::WaveAttenuationMergePORadiusEnv
     def get_state(self):
@@ -494,43 +494,43 @@ class WaveAttenuationPORadiusEnv(WaveAttenuationEnv):
         observation = []
         #
         # if more than 1 RL vehicle, add a loop here like in merge.py
-        rl_id = self.vehicles.get_rl_ids()[0]
+        rl_id = self.k.vehicle.get_rl_ids()[0]
         #
         # fill with observations of self
-        this_speed = self.vehicles.get_speed(rl_id)
+        this_speed = self.k.vehicle.get_speed(rl_id)
         observation.append(this_speed / max_speed)
 
         # fill with observations of leading vehicles
         lead_id = rl_id
         for _ in range(self.OBSERVATION_RADIUS):
-          lead_id = self.vehicles.get_leader(lead_id)
+          lead_id = self.k.vehicle.get_leader(lead_id)
           if lead_id in ["", None]:
               # in case leader is not visible
               lead_speed = max_speed
               lead_head = max_length
           else:
               self.leader.append(lead_id)
-              lead_speed = self.vehicles.get_speed(lead_id)
+              lead_speed = self.k.vehicle.get_speed(lead_id)
               # modulo resolves the cycle start-crossing issue
-              lead_head = (self.get_x_by_id(lead_id) \
-                  - self.get_x_by_id(rl_id) - self.vehicles.get_length(rl_id)) % max_length
+              lead_head = (self.k.vehicle.get_x_by_id(lead_id) \
+                  - self.k.vehicle.get_x_by_id(rl_id) - self.k.vehicle.get_length(rl_id)) % max_length
           observation.append((lead_speed - this_speed) / max_speed)
           observation.append(lead_head / max_length)
 
         # fill with observations of following vehicles
         follower_id = rl_id
         for _ in range(self.OBSERVATION_RADIUS):
-          follower_id = self.vehicles.get_follower(follower_id)
+          follower_id = self.k.vehicle.get_follower(follower_id)
           if follower_id in ["", None]:
               # in case follower_id is not visible
               follow_speed = 0
               follow_head = max_length
           else:
               self.follower.append(follower_id)
-              follow_speed = self.vehicles.get_speed(follower_id)
+              follow_speed = self.k.vehicle.get_speed(follower_id)
               # modulo resolves the cycle start-crossing issue
-              follow_head = (self.get_x_by_id(rl_id) \
-                  - self.get_x_by_id(follower_id) - self.vehicles.get_length(follower_id)) % max_length
+              follow_head = (self.k.vehicle.get_x_by_id(rl_id) \
+                  - self.k.vehicle.get_x_by_id(follower_id) - self.k.vehicle.get_length(follower_id)) % max_length
           observation.append((this_speed - follow_speed) / max_speed)
           observation.append(follow_head / max_length)
 
@@ -542,7 +542,7 @@ class WaveAttenuationPORadiusEnv(WaveAttenuationEnv):
 
         # specify observed vehicles
         for veh_id in self.leader + self.follower:
-            self.vehicles.set_observed(veh_id)
+            self.k.vehicle.set_observed(veh_id)
 
     # TODO: REFACTOR? taken from WaveAttenuationPOEnvAvgSpeedreward
     def compute_reward(self, rl_actions, **kwargs):
