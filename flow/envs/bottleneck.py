@@ -474,6 +474,7 @@ class BottleneckEnv(Env):
 
     def compute_reward(self, rl_actions, **kwargs):
         """Outflow rate over last ten seconds normalized to max of 1."""
+        # TODO: brittle code - 2000 is a hard-coded constant used with assumption of inflow \in [1000,2000] above
         reward = self.k.vehicle.get_outflow_rate(10 * self.sim_step) / \
             (2000.0 * self.scaling)
         return reward
