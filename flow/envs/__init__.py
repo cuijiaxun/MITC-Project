@@ -9,7 +9,9 @@ from flow.envs.ring.lane_change_accel import LaneChangeAccelEnv, \
     LaneChangeAccelPOEnv
 from flow.envs.ring.accel import AccelEnv
 from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
-    WaveAttenuationPOEnv
+    WaveAttenuationPOEnv, WaveAttenuationPOEnvNoisy, WaveAttenuationPOEnvSpeedreward, WaveAttenuationPOEnvAvgSpeedreward, WaveAttenuationEnvAvgSpeedreward, WaveAttenuationPORadiusEnv, WaveAttenuationPORadius1Env, WaveAttenuationPORadius2Env, \
+      WaveAttenuationPOEnvSmallAccelPenalty, \
+      WaveAttenuationPOEnvMediumAccelPenalty  
 from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.test import TestEnv
 
@@ -44,4 +46,13 @@ __all__ = [
     'DesiredVelocityEnv',
     'PO_TrafficLightGridEnv',
     'GreenWaveTestEnv',
+    'WaveAttenuationPOEnvNoisy', 
+    'WaveAttenuationPOEnvSpeedreward',
+    'WaveAttenuationPOEnvAvgSpeedreward', 
+    'WaveAttenuationEnvAvgSpeedreward',
+    'WaveAttenuationPORadiusEnv', 
+    'WaveAttenuationPORadius1Env',
+    'WaveAttenuationPORadius2Env', 
+    'WaveAttenuationPOEnvSmallAccelPenalty',
+    'WaveAttenuationPOEnvMediumAccelPenalty',
 ]

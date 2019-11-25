@@ -11,6 +11,7 @@ abs/1710.05465, 2017. [Online]. Available: https://arxiv.org/abs/1710.05465
 from flow.core.params import InitialConfig
 from flow.core.params import NetParams
 from flow.envs.base import Env
+from flow.core import rewards
 
 from gym.spaces.box import Box
 
@@ -214,6 +215,38 @@ class WaveAttenuationEnv(Env):
 
         return observation
 
+class WaveAttenuationEnvAvgSpeedreward(WaveAttenuationEnv):
+    """Fully observable wave attenuation environment.
+
+    overriding reward to be average speed reward since WaveAttenuationEnv's reward seems completely wrong (mostly negative unless vehicle stops)
+    """
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        # return a reward of 0 if a collision occurred
+        if kwargs["fail"]:
+            return 0
+
+        # reward high system-level velocities, but according to their L_2 norm,
+        # which is bad, since encourages increase in high-speeds more than in
+        # low-speeds and is not the real-reward
+        #
+        #return rewards.desired_velocity(self, fail=kwargs["fail"])
+        veh_ids = self.vehicles.get_ids() 
+        vel = np.array(self.vehicles.get_speed(veh_ids))
+        num_vehicles = len(veh_ids)
+
+        if any(vel < -100):
+            return 0.
+
+        target_vel = self.env_params.additional_params['target_velocity']
+        max_reward = target_vel
+        print("max_reward " + str(max_reward))
+
+        reward = np.sum(vel) / num_vehicles
+        print("reward " + str(reward))
+        
+        #return reward / max_reward
+        return reward
 
 class WaveAttenuationPOEnv(WaveAttenuationEnv):
     """POMDP version of WaveAttenuationEnv.
@@ -279,3 +312,279 @@ class WaveAttenuationPOEnv(WaveAttenuationEnv):
         rl_id = self.k.vehicle.get_rl_ids()[0]
         lead_id = self.k.vehicle.get_leader(rl_id) or rl_id
         self.k.vehicle.set_observed(lead_id)
+
+class WaveAttenuationPOEnvNoisy(WaveAttenuationPOEnv):
+    """Adding observation noise to WaveAttenuationPOEnv
+    """
+
+    def get_state(self):
+        """See class definition."""
+
+        # add gaussian noise with 0.05 standard deviation => 2sigma is 10% error
+        observation = super().get_state()
+        return observation + np.random.normal(0,0.05,len(observation))
+
+class WaveAttenuationPOEnvSpeedreward(WaveAttenuationPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+#        """See class definition."""
+#        # return a reward of 0 if a collision occurred
+#        if kwargs["fail"]:
+#            return 0
+#
+#        # reward high system-level velocities, but according to their L_2 norm,
+#        # which is bad, since encourages increase in high-speeds more than in
+#        # low-speeds and is not the real-reward
+#        #
+#        #return rewards.desired_velocity(self, fail=kwargs["fail"])
+#        veh_ids = self.vehicles.get_ids() 
+#        vel = np.array(self.vehicles.get_speed(veh_ids))
+#        num_vehicles = len(veh_ids)
+#
+#        if any(vel < -100):
+#            return 0.
+#
+#        target_vel = self.env_params.additional_params['target_velocity']
+#        max_reward = np.array([target_vel])
+#        print("max_reward " + str(max_reward))
+#
+#        reward = np.sum(vel) / num_vehicles
+#        print("reward " + str(reward))
+#        
+#        #return reward / max_reward
+#        return reward
+        """See class definition."""
+        # return a reward of 0 if a collision occurred
+        if kwargs["fail"]:
+            return 0
+        
+        # reward high system-level velocities
+        return rewards.desired_velocity(self, fail=kwargs["fail"])
+
+class WaveAttenuationPOEnvAvgSpeedreward(WaveAttenuationPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        # return a reward of 0 if a collision occurred
+        if kwargs["fail"]:
+            return 0
+
+        # reward high system-level velocities, but according to their L_2 norm,
+        # which is bad, since encourages increase in high-speeds more than in
+        # low-speeds and is not the real-reward
+        #
+        #return rewards.desired_velocity(self, fail=kwargs["fail"])
+        veh_ids = self.vehicles.get_ids() 
+        vel = np.array(self.vehicles.get_speed(veh_ids))
+        num_vehicles = len(veh_ids)
+
+        if any(vel < -100):
+            return 0.
+
+        target_vel = self.env_params.additional_params['target_velocity']
+        max_reward = target_vel
+        print("max_reward " + str(max_reward))
+
+        reward = np.sum(vel) / num_vehicles
+        print("reward " + str(reward))
+        
+        #return reward / max_reward
+        return reward
+
+class WaveAttenuationPOEnvSmallAccelPenalty(WaveAttenuationPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        # in the warmup steps
+        if rl_actions is None:
+            return 0
+
+        vel = np.array([
+            self.vehicles.get_speed(veh_id)
+            for veh_id in self.vehicles.get_ids()
+        ])
+
+        if any(vel < -100) or kwargs['fail']:
+            return 0.
+
+        # reward average velocity
+        eta_2 = 4.
+        reward = eta_2 * np.mean(vel) / 20
+
+        # punish accelerations (should lead to reduced stop-and-go waves)
+        eta = 2  # 0.25
+        rl_actions = np.array(rl_actions)
+        accel_threshold = 0
+
+        if np.mean(np.abs(rl_actions)) > accel_threshold:
+            reward += eta * (accel_threshold - np.mean(np.abs(rl_actions)))
+
+        return float(reward)
+
+class WaveAttenuationPOEnvMediumAccelPenalty(WaveAttenuationPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        # in the warmup steps
+        if rl_actions is None:
+            return 0
+
+        vel = np.array([
+            self.vehicles.get_speed(veh_id)
+            for veh_id in self.vehicles.get_ids()
+        ])
+
+        if any(vel < -100) or kwargs['fail']:
+            return 0.
+
+        # reward average velocity
+        eta_2 = 4.
+        reward = eta_2 * np.mean(vel) / 20
+
+        # punish accelerations (should lead to reduced stop-and-go waves)
+        eta = 4  # 0.25
+        rl_actions = np.array(rl_actions)
+        accel_threshold = 0
+
+        if np.mean(np.abs(rl_actions)) > accel_threshold:
+            reward += eta * (accel_threshold - np.mean(np.abs(rl_actions)))
+
+        return float(reward)
+
+class WaveAttenuationPORadiusEnv(WaveAttenuationEnv):
+    """POMDP version of WaveAttenuationEnv.
+
+    Note that this environment only works when there is one autonomous vehicle
+    on the network.
+
+    Required from env_params:
+
+    * max_accel: maximum acceleration of autonomous vehicles
+    * max_decel: maximum deceleration of autonomous vehicles
+    * ring_length: bounds on the ranges of ring road lengths the autonomous
+      vehicle is trained on
+
+    States
+        The state consists of the speed and headway of the ego vehicle, as well
+        as the difference in speed between the ego vehicle and its leader.
+        There is no assumption on the number of vehicles in the network.
+
+    Actions
+        See parent class
+
+    Rewards
+        See parent class
+
+    Termination
+        See parent class
+
+    """
+    # TODO toggle comments in the next two lines
+    OBSERVATION_RADIUS = 1 # default, like WaveAttenuationMergePOEnv
+    #OBSERVATION_RADIUS = obs_radius # factory parameter
+
+    # TODO: REFACTOR? taken from .../flow/envs/merge.py::WaveAttenuationMergePORadiusEnv
+    @property
+    def observation_space(self):
+        """See class definition."""
+        # taken from .../flow/envs/merge.py::WaveAttenuationMergePORadiusEnv
+        num_attributes_self = 1 # observe just self speed
+        num_attributes_others = 2 # observe others' speed and distance
+        num_directions = 2 # observe back and front
+        self.obs_dimension_per_rl = num_attributes_self + \
+          self.OBSERVATION_RADIUS * num_attributes_others * num_directions
+        return Box(low=0, high=1, shape=(self.obs_dimension_per_rl *
+          self.vehicles.num_rl_vehicles, ), dtype=np.float32)
+
+    # TODO: REFACTOR? taken from .../flow/envs/merge.py::WaveAttenuationMergePORadiusEnv
+    def get_state(self):
+        """See class definition."""
+        self.leader = []
+        self.follower = []
+
+        max_speed = 15.
+        max_length = self.env_params.additional_params['ring_length'][1]
+
+        observation = []
+        #
+        # if more than 1 RL vehicle, add a loop here like in merge.py
+        rl_id = self.vehicles.get_rl_ids()[0]
+        #
+        # fill with observations of self
+        this_speed = self.vehicles.get_speed(rl_id)
+        observation.append(this_speed / max_speed)
+
+        # fill with observations of leading vehicles
+        lead_id = rl_id
+        for _ in range(self.OBSERVATION_RADIUS):
+          lead_id = self.vehicles.get_leader(lead_id)
+          if lead_id in ["", None]:
+              # in case leader is not visible
+              lead_speed = max_speed
+              lead_head = max_length
+          else:
+              self.leader.append(lead_id)
+              lead_speed = self.vehicles.get_speed(lead_id)
+              # modulo resolves the cycle start-crossing issue
+              lead_head = (self.get_x_by_id(lead_id) \
+                  - self.get_x_by_id(rl_id) - self.vehicles.get_length(rl_id)) % max_length
+          observation.append((lead_speed - this_speed) / max_speed)
+          observation.append(lead_head / max_length)
+
+        # fill with observations of following vehicles
+        follower_id = rl_id
+        for _ in range(self.OBSERVATION_RADIUS):
+          follower_id = self.vehicles.get_follower(follower_id)
+          if follower_id in ["", None]:
+              # in case follower_id is not visible
+              follow_speed = 0
+              follow_head = max_length
+          else:
+              self.follower.append(follower_id)
+              follow_speed = self.vehicles.get_speed(follower_id)
+              # modulo resolves the cycle start-crossing issue
+              follow_head = (self.get_x_by_id(rl_id) \
+                  - self.get_x_by_id(follower_id) - self.vehicles.get_length(follower_id)) % max_length
+          observation.append((this_speed - follow_speed) / max_speed)
+          observation.append(follow_head / max_length)
+
+        return observation
+
+    # TODO: REFACTOR? taken from .../flow/envs/merge.py::WaveAttenuationMergePORadiusEnv
+    def additional_command(self):
+        """Define which vehicles are observed for visualization purposes."""
+
+        # specify observed vehicles
+        for veh_id in self.leader + self.follower:
+            self.vehicles.set_observed(veh_id)
+
+    # TODO: REFACTOR? taken from WaveAttenuationPOEnvAvgSpeedreward
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        # return a reward of 0 if a collision occurred
+        if kwargs["fail"]:
+            return 0
+
+        # reward high system-level velocities, but according to their L_2 norm,
+        # which is bad, since encourages increase in high-speeds more than in
+        # low-speeds and is not the real-reward
+        #
+        #return rewards.desired_velocity(self, fail=kwargs["fail"])
+        veh_ids = self.vehicles.get_ids() 
+        vel = np.array(self.vehicles.get_speed(veh_ids))
+        num_vehicles = len(veh_ids)
+
+        if any(vel < -100):
+            return 0.
+
+        target_vel = self.env_params.additional_params['target_velocity']
+        max_reward = target_vel
+        print("max_reward " + str(max_reward))
+
+        reward = np.sum(vel) / num_vehicles
+        print("reward " + str(reward))
+        
+        #return reward / max_reward
+        return reward
+
+class WaveAttenuationPORadius1Env(WaveAttenuationPORadiusEnv):
+    OBSERVATION_RADIUS = 1 # default 
+
+class WaveAttenuationPORadius2Env(WaveAttenuationPORadiusEnv):
+    OBSERVATION_RADIUS = 2 # default 
