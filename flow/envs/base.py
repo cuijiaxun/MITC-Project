@@ -354,13 +354,15 @@ class Env(gym.Env):
 
             self.apply_rl_actions(rl_actions)
 
-            self.additional_command()
+            #self.additional_command()
 
             # advance the simulation in the simulator by one step
             self.k.simulation.simulation_step()
 
             # store new observations in the vehicles and traffic lights class
             self.k.update(reset=False)
+            #print ("ANOTHER ADDITIONAL COMMAND")
+            self.additional_command()
 
             # update the colors of vehicles
             if self.sim_params.render:

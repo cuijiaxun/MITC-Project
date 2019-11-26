@@ -227,6 +227,9 @@ class MergePOEnv(Env):
         In addition, a few variables that are specific to this class are
         emptied before they are used by the new rollout.
         """
+        # initializing like in constructor
+        self.rl_queue = collections.deque()
+        self.rl_veh = []
         self.leader = []
         self.follower = []
         return super().reset()
