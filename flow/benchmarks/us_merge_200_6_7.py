@@ -14,7 +14,6 @@ Horizon: 750 steps
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
-from flow.scenarios.merge import ADDITIONAL_NET_PARAMS
 from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController
 import os
@@ -30,11 +29,7 @@ NUM_RL = 3
 
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
-additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 # is the following OK
-additional_net_params["merge_lanes"] = 1
-additional_net_params["highway_lanes"] = 1
-additional_net_params["pre_merge_length"] = 500
 
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
@@ -83,7 +78,7 @@ flow_params = dict(
     env_name="WaveAttenuationMergePORadius7Env",
 
     # name of the scenario class the experiment is running on
-    scenario="USMergeScenario",
+    scenario="Scenario",
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -111,11 +106,12 @@ flow_params = dict(
     # network-related parameters (see flow.core.params.NetParams and the
     # scenario's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
-        template= os.path.join(
-          os.path.dirname(os.path.abspath(__file__)), "us_merge.net.xml"),
+        template= {
+          "net" : os.path.join(os.path.dirname(os.path.abspath(__file__)), "us_merge.net.xml"),
+          "rou" : os.path.join(os.path.dirname(os.path.abspath(__file__)), "us_merge.rou.xml")
+        },
         inflows=inflow,
         no_internal_links=False,
-        additional_params=additional_net_params,
     ),
 
     # vehicles to be placed in the network at the start of a rollout (see

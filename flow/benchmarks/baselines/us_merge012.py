@@ -10,7 +10,7 @@ from flow.core.params import TrafficLightParams
 from flow.benchmarks.us_merge_baseline import flow_params
 
 
-def merge_baseline(num_runs, render=True):
+def merge_baseline(num_runs):
     """Run script for all merge baselines.
 
     Parameters
@@ -21,8 +21,6 @@ def merge_baseline(num_runs, render=True):
         flow_params : dict
             the flow meta-parameters describing the structure of a benchmark.
             Must be one of the merge flow_params
-        render: bool, optional
-            specifies whether to use the gui during execution
 
     Returns
     -------
@@ -36,9 +34,6 @@ def merge_baseline(num_runs, render=True):
     net_params = flow_params['net']
     initial_config = flow_params.get('initial', InitialConfig())
     traffic_lights = flow_params.get('tls', TrafficLightParams())
-
-    # modify the rendering to match what is requested
-    sim_params.render = render
 
     # set the evaluation flag to True
     env_params.evaluate = True
@@ -73,7 +68,7 @@ def merge_baseline(num_runs, render=True):
 
 if __name__ == '__main__':
     runs = 30  # number of simulations to average over
-    res = merge_baseline(num_runs=runs, render=False)
+    res = merge_baseline(num_runs=runs)
 
     print('---------')
     print('TODO SEEMS WRONG The average speed across {} runs is {}'.format(runs, res))
