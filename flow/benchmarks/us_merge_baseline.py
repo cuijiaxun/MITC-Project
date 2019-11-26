@@ -83,6 +83,9 @@ flow_params = dict(
     # simulator that is used by the experiment
     simulator='traci',
 
+    # simulator that is used by the experiment
+    simulator='traci',
+
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
         emission_path="/home/dzgnkq/ray_results/us_merge012_baseline_daniel/",
