@@ -12,6 +12,8 @@ Horizon: 750 steps
 """
 
 from copy import deepcopy
+from flow.envs import MergePOEnv
+from flow.networks import BottleneckNetwork3to2
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.core.params import VehicleParams, SumoCarFollowingParams, SumoLaneChangeParams
@@ -64,7 +66,7 @@ vehicles.add(
       lc_assertive=1.5, #1, #2, #0.1, #5, #20, ## 1.5 seems more natural from the numbers here
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
-      lcTimeToImpatience=1e12
+      lc_time_to_impatience=1e12
     ), 
     num_vehicles=0)
 vehicles.add(
@@ -93,7 +95,7 @@ vehicles.add(
       lc_assertive=1.5, #1, #2, #0.1, #5, #20, ## 1.5 seems more natural from the numbers here
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
-      lcTimeToImpatience=1e12
+      lc_time_to_impatience =1e12
     ), 
     num_vehicles=0)
 
@@ -107,8 +109,8 @@ inflow.add(
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     #vehs_per_hour= 1 * FLOW_RATE,
-    departSpeed=30, #"random", #30, #"max",
-    departLane="random", #"free", 
+    depart_speed=30, #"random", #30, #"max",
+    depart_lane="random", #"free", 
     )
 inflow.add(
     veh_type="rl",
@@ -116,8 +118,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
-    departSpeed=30, #"random", #30, #"max",
-    departLane=0, #"random", #"free",
+    depart_speed=30, #"random", #30, #"max",
+    depart_lane=0, #"random", #"free",
     )
 
 flow_params = dict(
@@ -125,10 +127,10 @@ flow_params = dict(
     exp_tag="bottleneck_3_2",
 
     # name of the flow environment the experiment is running on
-    env_name="WaveAttenuationMergePOEnv",
+    env_name=MergePOEnv,
 
     # name of the scenario class the experiment is running on
-    scenario="BottleneckScenario3to2", #"Scenario", # Scenario is for xml template, but has some bug with internal edges that don't appear. Fixed it in BottleneckScenario3to2
+    network=BottleneckNetwork3to2, #"Scenario", # Scenario is for xml template, but has some bug with internal edges that don't appear. Fixed it in BottleneckNetwork3to2
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -165,7 +167,7 @@ flow_params = dict(
         #  "rou" : os.path.join(os.path.dirname(os.path.abspath(__file__)), "bottleneck_3_2.rou.xml")
         #},
         inflows=inflow,
-        no_internal_links=False,
+        #no_internal_links=False,
         additional_params = {"scaling" : 1, "speed_limit": 30} 
     ),
 

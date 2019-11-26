@@ -12,6 +12,8 @@ Horizon: 750 steps
 """
 
 from copy import deepcopy
+from flow.envs import MergePOEnv
+from flow.networks import Network
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.core.params import VehicleParams
@@ -55,33 +57,30 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    departLane="free",
-    departSpeed=10)
+    depart_lane="free",
+    depart_speed=10)
 inflow.add(
     veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    departLane="free",
-    departSpeed=10)
+    depart_lane="free",
+    depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=200, #500, #200, #100
-    departLane="free",
-    departSpeed=7.5)
+    depart_lane="free",
+    depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
     exp_tag="us_merge_1",
 
     # name of the flow environment the experiment is running on
-    env_name="WaveAttenuationMergePOEnv",
+    env_name=MergePOEnv,
 
     # name of the scenario class the experiment is running on
-    scenario="Scenario",
-
-    # simulator that is used by the experiment
-    simulator='traci',
+    network=Network,
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -114,7 +113,7 @@ flow_params = dict(
           "rou" : os.path.join(os.path.dirname(os.path.abspath(__file__)), "us_merge.rou.xml")
         },
         inflows=inflow,
-        no_internal_links=False,
+        #no_internal_links=False,
     ),
 
     # vehicles to be placed in the network at the start of a rollout (see

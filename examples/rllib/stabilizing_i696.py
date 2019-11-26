@@ -18,6 +18,8 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
+from flow.envs import MergePOEnv
+from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -115,7 +117,7 @@ vehicles.add(
       lc_assertive=5, #20,
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
-      lcTimeToImpatience=1e12
+      lc_time_to_impatience=1e12
     ), 
     num_vehicles=0)
 vehicles.add(
@@ -144,7 +146,7 @@ vehicles.add(
       lc_assertive=5, #20,
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
-      lcTimeToImpatience=1e12
+      lc_time_to_impatience=1e12
     ), 
     num_vehicles=0)
 
@@ -157,8 +159,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="rl",
@@ -166,8 +168,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="human",
@@ -175,8 +177,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="rl",
@@ -184,8 +186,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="human",
@@ -193,8 +195,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), #* FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="rl",
@@ -202,8 +204,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="human",
@@ -211,8 +213,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=(1 - RL_PENETRATION), # * FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 inflow.add(
     veh_type="rl",
@@ -220,8 +222,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
-    departSpeed="max",
-    departLane="free",
+    depart_speed="max",
+    depart_lane="free",
     )
 
 flow_params = dict(
@@ -229,10 +231,10 @@ flow_params = dict(
     exp_tag="stabilizing_i696",
 
     # name of the flow environment the experiment is running on
-    env_name="WaveAttenuationMergePOEnv",
+    env_name=MergePOEnv,
 
     # name of the scenario class the experiment is running on
-    scenario="Scenario",
+    network=Network,
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -263,7 +265,7 @@ flow_params = dict(
     # scenario's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
         inflows=inflow,
-        no_internal_links=False,
+        #no_internal_links=False,
         additional_params=additional_net_params,
         template={
           "net" : scenario_road_data["net"],# see above
@@ -322,7 +324,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     alg_run, gym_name, config = setup_exps(args.seeds_file)
-    ray.init(num_cpus=N_CPUS + 1, redirect_output=False)
+    ray.init(num_cpus=N_CPUS + 1)
     trials = run_experiments({
         flow_params["exp_tag"]: {
             "run": alg_run,

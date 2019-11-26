@@ -14,6 +14,8 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
+from flow.envs import WaveAttenuationPORadius1EnvAvgSpeedNormalized
+from flow.networks import RingNetwork
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
@@ -58,10 +60,11 @@ flow_params = dict(
     exp_tag="stabilizing_the_ring_8_nonoise_avgspeedrewardnormalized_step0.5sec_1_obs_radius_ppotuning_batch20rolls_with_vf_loss_50000iter",
 
     # name of the flow environment the experiment is running on
-    env_name="WaveAttenuationPORadius1EnvAvgSpeedNormalized",
+    env_name=WaveAttenuationPORadius1EnvAvgSpeedNormalized,
 
     # name of the scenario class the experiment is running on
-    scenario="LoopScenario",
+    network=RingNetwork,
+
 
     # simulator that is used by the experiment
     simulator='traci',

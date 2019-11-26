@@ -9,7 +9,7 @@ from flow.scenarios.bay_bridge_toll import BayBridgeTollScenario
 from flow.scenarios.bottleneck import BottleneckScenario
 from flow.scenarios.figure_eight import FigureEightScenario
 from flow.scenarios.traffic_light_grid import TrafficLightGridScenario
-from flow.scenarios.bottleneck import BottleneckScenario3to2
+from flow.networks.bottleneck import BottleneckNetwork3to2
 from flow.scenarios.highway import HighwayScenario
 from flow.scenarios.ring import RingScenario
 from flow.scenarios.merge import MergeScenario
@@ -46,5 +46,5 @@ __all__ = [
     "SimpleGridScenario",
     "MultiLoopScenario",
     "i696Scenario",
-    "BottleneckScenario3to2",
+    "BottleneckNetwork3to2",
 ]

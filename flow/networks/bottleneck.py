@@ -239,7 +239,7 @@ class BottleneckNetwork(Network):
         """Return the reduced number of lanes."""
         return [int(lane / 2), int(lane / 4)]
 
-class BottleneckScenario3to2(Scenario):
+class BottleneckNetwork3to2(Network):
     """Scenario class for bottleneck simulations.
 
     This network acts as a scalable representation of the Bay Bridge. It

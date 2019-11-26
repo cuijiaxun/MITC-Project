@@ -1,6 +1,7 @@
 """Contains the merge scenario class."""
 
-from flow.scenarios.base_scenario import Scenario
+#from flow.scenarios.base_scenario import Scenario
+from flow.networks.base import Network
 from flow.core.params import InitialConfig
 from flow.core.params import TrafficLightParams
 from flow.core.params import NetParams
@@ -30,7 +31,7 @@ ADDITIONAL_NET_PARAMS = {
 #)
 
 
-class i696Scenario(Scenario):
+class i696Scenario(Network):
 
 #    def __init__(self,
 #                 name,
