@@ -11,7 +11,10 @@ from flow.envs.ring.accel import AccelEnv
 from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
     WaveAttenuationPOEnv, WaveAttenuationPOEnvNoisy, WaveAttenuationPOEnvSpeedreward, WaveAttenuationPOEnvAvgSpeedreward, WaveAttenuationEnvAvgSpeedreward, WaveAttenuationPORadiusEnv, WaveAttenuationPORadius1Env, WaveAttenuationPORadius2Env, \
       WaveAttenuationPOEnvSmallAccelPenalty, \
-      WaveAttenuationPOEnvMediumAccelPenalty  
+      WaveAttenuationPOEnvMediumAccelPenalty, \
+      WaveAttenuationPORadiusEnvAvgSpeedNormalized, \
+      WaveAttenuationPORadius1EnvAvgSpeedNormalized, \
+      WaveAttenuationPORadius2EnvAvgSpeedNormalized  
 from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.test import TestEnv
 
@@ -55,4 +58,7 @@ __all__ = [
     'WaveAttenuationPORadius2Env', 
     'WaveAttenuationPOEnvSmallAccelPenalty',
     'WaveAttenuationPOEnvMediumAccelPenalty',
+    'WaveAttenuationPORadiusEnvAvgSpeedNormalized', 
+    'WaveAttenuationPORadius1EnvAvgSpeedNormalized',
+    'WaveAttenuationPORadius2EnvAvgSpeedNormalized',
 ]

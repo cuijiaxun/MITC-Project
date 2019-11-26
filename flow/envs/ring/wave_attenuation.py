@@ -87,6 +87,46 @@ class WaveAttenuationEnv(Env):
 
         super().__init__(env_params, sim_params, network, simulator)
 
+    #########################################
+    # TODO: UTILITY FUNCTIONS TO MOVE - START
+    #########################################
+    # temporarily putting here reward utility functions to be used by
+    # derived classes. We don't want to put these as "compute_reward"
+    # implementations to avoid combinatorical blow up, and we don't want to
+    # extract them to an external class, as they access base class data members
+    # and this would require some code reorganization... 
+    def _compute_reward_avgspeed(self, rl_actions, **kwargs):
+        # return a reward of 0 if a collision occurred
+        if kwargs["fail"]:
+            return 0
+
+        # reward high system-level velocities, but according to their L_2 norm,
+        # which is bad, since encourages increase in high-speeds more than in
+        # low-speeds and is not the real-reward
+        #
+        #return rewards.desired_velocity(self, fail=kwargs["fail"])
+        veh_ids = self.vehicles.get_ids() 
+        vel = np.array(self.vehicles.get_speed(veh_ids))
+        num_vehicles = len(veh_ids)
+
+        if any(vel < -100):
+            return 0.
+
+        reward = np.sum(vel) / num_vehicles
+        print("reward " + str(reward))
+        return reward
+
+    def _compute_reward_avgspeednormalized(self, rl_actions, **kwargs):
+        reward = self._compute_reward_avgspeed(rl_actions, **kwargs)
+        target_vel = self.env_params.additional_params['target_velocity']
+        max_reward = target_vel
+        print("max_reward " + str(max_reward))
+        return reward / max_reward
+    #######################################
+    # TODO: UTILITY FUNCTIONS TO MOVE - END
+    #######################################
+
+
     @property
     def action_space(self):
         """See class definition."""
@@ -221,32 +261,7 @@ class WaveAttenuationEnvAvgSpeedreward(WaveAttenuationEnv):
     overriding reward to be average speed reward since WaveAttenuationEnv's reward seems completely wrong (mostly negative unless vehicle stops)
     """
     def compute_reward(self, rl_actions, **kwargs):
-        """See class definition."""
-        # return a reward of 0 if a collision occurred
-        if kwargs["fail"]:
-            return 0
-
-        # reward high system-level velocities, but according to their L_2 norm,
-        # which is bad, since encourages increase in high-speeds more than in
-        # low-speeds and is not the real-reward
-        #
-        #return rewards.desired_velocity(self, fail=kwargs["fail"])
-        veh_ids = self.vehicles.get_ids() 
-        vel = np.array(self.vehicles.get_speed(veh_ids))
-        num_vehicles = len(veh_ids)
-
-        if any(vel < -100):
-            return 0.
-
-        target_vel = self.env_params.additional_params['target_velocity']
-        max_reward = target_vel
-        print("max_reward " + str(max_reward))
-
-        reward = np.sum(vel) / num_vehicles
-        print("reward " + str(reward))
-        
-        #return reward / max_reward
-        return reward
+        return self._compute_reward_avgspeed(rl_actions, **kwargs)
 
 class WaveAttenuationPOEnv(WaveAttenuationEnv):
     """POMDP version of WaveAttenuationEnv.
@@ -362,32 +377,7 @@ class WaveAttenuationPOEnvSpeedreward(WaveAttenuationPOEnv):
 
 class WaveAttenuationPOEnvAvgSpeedreward(WaveAttenuationPOEnv):
     def compute_reward(self, rl_actions, **kwargs):
-        """See class definition."""
-        # return a reward of 0 if a collision occurred
-        if kwargs["fail"]:
-            return 0
-
-        # reward high system-level velocities, but according to their L_2 norm,
-        # which is bad, since encourages increase in high-speeds more than in
-        # low-speeds and is not the real-reward
-        #
-        #return rewards.desired_velocity(self, fail=kwargs["fail"])
-        veh_ids = self.vehicles.get_ids() 
-        vel = np.array(self.vehicles.get_speed(veh_ids))
-        num_vehicles = len(veh_ids)
-
-        if any(vel < -100):
-            return 0.
-
-        target_vel = self.env_params.additional_params['target_velocity']
-        max_reward = target_vel
-        print("max_reward " + str(max_reward))
-
-        reward = np.sum(vel) / num_vehicles
-        print("reward " + str(reward))
-        
-        #return reward / max_reward
-        return reward
+        return self._compute_reward_avgspeed(rl_actions, **kwargs)
 
 class WaveAttenuationPOEnvSmallAccelPenalty(WaveAttenuationPOEnv):
     def compute_reward(self, rl_actions, **kwargs):
@@ -556,35 +546,25 @@ class WaveAttenuationPORadiusEnv(WaveAttenuationEnv):
 
     # TODO: REFACTOR? taken from WaveAttenuationPOEnvAvgSpeedreward
     def compute_reward(self, rl_actions, **kwargs):
-        """See class definition."""
-        # return a reward of 0 if a collision occurred
-        if kwargs["fail"]:
-            return 0
-
-        # reward high system-level velocities, but according to their L_2 norm,
-        # which is bad, since encourages increase in high-speeds more than in
-        # low-speeds and is not the real-reward
-        #
-        #return rewards.desired_velocity(self, fail=kwargs["fail"])
-        veh_ids = self.vehicles.get_ids() 
-        vel = np.array(self.vehicles.get_speed(veh_ids))
-        num_vehicles = len(veh_ids)
-
-        if any(vel < -100):
-            return 0.
-
-        target_vel = self.env_params.additional_params['target_velocity']
-        max_reward = target_vel
-        print("max_reward " + str(max_reward))
-
-        reward = np.sum(vel) / num_vehicles
-        print("reward " + str(reward))
-        
-        #return reward / max_reward
-        return reward
+        return self._compute_reward_avgspeed(rl_actions, **kwargs)
 
 class WaveAttenuationPORadius1Env(WaveAttenuationPORadiusEnv):
     OBSERVATION_RADIUS = 1 # default 
 
 class WaveAttenuationPORadius2Env(WaveAttenuationPORadiusEnv):
+    OBSERVATION_RADIUS = 2 # default 
+
+###############################################################################
+# TODO: TEMPORARY CHANGE THROUGH INHERITENCE - NEED TO REORG CODE WITH ALL THE
+# INHERITENCES TO BE MORE MODULAR
+###############################################################################
+class WaveAttenuationPORadiusEnvAvgSpeedNormalized(WaveAttenuationPORadiusEnv):
+    # overriding
+    def compute_reward(self, rl_actions, **kwargs):
+        return self._compute_reward_avgspeednormalized(rl_actions, **kwargs)
+
+class WaveAttenuationPORadius1EnvAvgSpeedNormalized(WaveAttenuationPORadiusEnvAvgSpeedNormalized):
+    OBSERVATION_RADIUS = 1 # default 
+
+class WaveAttenuationPORadius2EnvAvgSpeedNormalized(WaveAttenuationPORadiusEnvAvgSpeedNormalized):
     OBSERVATION_RADIUS = 2 # default 
