@@ -19,6 +19,8 @@ import numpy as np
 import os
 import sys
 import time
+import pprint
+import matplotlib.pyplot as plt
 
 import ray
 try:
@@ -43,6 +45,57 @@ Here the arguments are:
 2 - the number of the checkpoint
 """
 
+# global variables configuring diagnostics
+PRINT_TO_SCREEN = True
+SUMMARY_PLOTS = True
+REALTIME_PLOTS = False
+
+def generateHtmlplots(actions, rewards, states):
+    import plotly.graph_objs as go
+    from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+
+    # time series
+    plot([go.Scatter(x=[i for i in range(len(actions))], y=[a[0] for a in actions])], filename="actions-plot-checkpoint_" + args.checkpoint_num)
+    plot([go.Scatter(x=[i for i in range(len(rewards))], y=rewards)], filename="rewards-plot-checkpoint_" + args.checkpoint_num)
+    plot([go.Scatter(x=[i for i in range(len(states))], y=[s[0] for s in states])], filename="state0-plot_" + args.checkpoint_num)
+    plot([go.Scatter(x=[i for i in range(len(states))], y=[s[1] for s in states])], filename="state1-plot_" + args.checkpoint_num)
+    plot([go.Scatter(x=[i for i in range(len(states))], y=[s[2] for s in states])], filename="state2-plot_" + args.checkpoint_num)
+    # histograms
+    plot([go.Histogram(x=[a[0] for a in actions], nbinsx=100)], filename="actions-hist_" + args.checkpoint_num)
+    plot([go.Histogram(x=rewards, nbinsx=100)], filename="rewards-hist_" + args.checkpoint_num)
+    plot([go.Histogram(x=[s[0] for s in states], nbinsx=100)], filename="state0-hist_" + args.checkpoint_num)
+    plot([go.Histogram(x=[s[1] for s in states], nbinsx=100)], filename="state1-hist_" + args.checkpoint_num)
+    plot([go.Histogram(x=[s[2] for s in states], nbinsx=100)], filename="state2-hist_" + args.checkpoint_num)
+    # 3d scatter of policy
+    trace1 = go.Scatter3d(
+        x=[s[0] for s in states],
+        y=[s[2] for s in states],
+        z=[np.clip(a[0], -5, 5) for a in actions],
+        mode='markers',
+        marker=dict(
+            size=0.5,
+            line=dict(
+                color='rgba(217, 217, 217, 0.14)',
+                width=0.1
+            ),
+            opacity=0.8
+        )
+    )
+    data = [trace1]
+    layout = go.Layout(
+      margin=dict(
+          l=0,
+          r=0,
+          b=0,
+          t=0
+      ),
+      scene = dict(
+        xaxis = dict( title='speed' ),
+        yaxis = dict( title='distance' ),
+        zaxis = dict( title='action' ) # not supported here, but appears in example?
+      )
+    )
+    plot(go.Figure(data=data, layout=layout), filename='speed-dist-2-action')
 
 def visualizer_rllib(args):
     """Visualizer for RLlib experiments.
@@ -194,6 +247,46 @@ def visualizer_rllib(args):
     final_inflows = []
     mean_speed = []
     std_speed = []
+
+    if PRINT_TO_SCREEN:
+      pp = pprint.PrettyPrinter(indent=2)
+      print("config " )
+      pp.pprint(config)
+      print("flow_params " )
+      pp.pprint(flow_params)
+
+    if REALTIME_PLOTS:
+      # prepare plots
+      # You probably won't need this if you're embedding things in a tkinter plot...
+      plt.ion()
+      fig = plt.figure()
+      axA = fig.add_subplot(331)
+      axA.set_title("Actions")
+      axR = fig.add_subplot(332)
+      axR.set_title("Rewards")
+      axS = fig.add_subplot(333)
+      axS.set_title("States")
+      axS0 = fig.add_subplot(334)
+      axS0.set_title("S0")
+      axS1= fig.add_subplot(335)
+      axS1.set_title("S1")
+      axS2 = fig.add_subplot(336)
+      axS2.set_title("S2")
+      axA_hist = fig.add_subplot(337)
+      axA_hist.set_title("Actions")
+      axR_hist = fig.add_subplot(338)
+      axR_hist.set_title("Rewards")
+      axS_hist = fig.add_subplot(339)
+      axS_hist.set_title("States")
+      axS.set_ylim((-2, 3))
+      axA.set_ylim((-5, 5))
+      axR.set_ylim((-1, 1))
+      initialized_plot = False
+
+    # record for visualization purposes
+    actions = []
+    rewards = []
+    states = []
     for i in range(args.num_rollouts):
         vel = []
         state = env.reset()
@@ -218,6 +311,35 @@ def visualizer_rllib(args):
             else:
                 action = agent.compute_action(state)
             state, reward, done, _ = env.step(action)
+
+            if SUMMARY_PLOTS:
+              # record for visualization purposes
+              actions.append(action)
+              rewards.append(reward)
+              states.append(state)
+
+            if PRINT_TO_SCREEN:
+              print("action")
+              pp.pprint(action)
+              print("reward")
+              pp.pprint(reward)
+              print("state")
+              pp.pprint(state)
+              print("after step ")
+
+            if REALTIME_PLOTS:
+              # Update plots. 
+              if not initialized_plot: # initialize
+                lineA, = axA.plot([0] * len(action), 'g^') # Returns a tuple of line objects, thus the comma
+                lineR, = axR.plot(0, 'bs') # Returns a tuple of line objects, thus the comma 
+                lineS, = axS.plot([0] * len(state), 'r+') # Returns a tuple of line objects, thus the comma 
+                initialized_plot = True
+              lineA.set_ydata(action)
+              lineR.set_ydata(reward)
+              lineS.set_ydata(state) 
+              fig.canvas.draw()
+              fig.canvas.flush_events()    
+
             if multiagent:
                 for actor, rew in reward.items():
                     ret[policy_map_fn(actor)][0] += rew
@@ -289,6 +411,9 @@ def visualizer_rllib(args):
     print(throughput_efficiency)
     print('Average, std: {}, {}'.format(np.mean(throughput_efficiency),
                                         np.std(throughput_efficiency)))
+
+    if SUMMARY_PLOTS:
+      generateHtmlplots(actions, rewards, states)
 
     # terminate the environment
     env.unwrapped.terminate()

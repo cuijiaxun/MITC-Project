@@ -232,6 +232,7 @@ class MergePOEnv(Env):
         return super().reset()
 
 
+#def factoryMergePORadiusEnv(obs_radius):
 class MergePORadiusEnv(MergePOEnv):
     """Partially observable merge environment.
 
@@ -239,7 +240,9 @@ class MergePORadiusEnv(MergePOEnv):
     each RL car sees OBSERVATION_RADIUS cars infront and in the back of it instead of 1.
     """
 
+    # TODO toggle comments in the next two lines
     OBSERVATION_RADIUS = 1 # default, like WaveAttenuationMergePOEnv
+    #OBSERVATION_RADIUS = obs_radius # factory parameter
 
     @property
     def observation_space(self):
@@ -311,6 +314,11 @@ class MergePORadiusEnv(MergePOEnv):
 # ADDITIONAL_ENV_PARAMS, but that would require updating ADDITIONAL_ENV_PARAMS
 # above and in every calling location, breaking backward compatibility
 class MergePORadius2Env(MergePORadiusEnv):
+#
+#MergePORadius2Env = factoryMergePORadiusEnv(2)
+#MergePORadius4Env = factoryMergePORadiusEnv(4)
+#MergePORadius6Env = factoryMergePORadiusEnv(6)
+#MergePORadius7Env = factoryMergePORadiusEnv(7)
     """Partially observable merge environment.
 
     This environment is just an alias for specific OBSERVATION_RADIUS.
@@ -334,3 +342,26 @@ class MergePORadius7Env(MergePORadiusEnv):
     This environment is just an alias for specific OBSERVATION_RADIUS.
     """
     OBSERVATION_RADIUS = 7 
+
+# Actually can do a factory 
+#def WaveAttenuationMergePORadiusEnvFactory(obs_radius):
+#  cls = WaveAttenuationMergePORadiusEnv()
+#
+#def silly(n):
+#    class Silly(object):
+#            buh = ' '.join(n * ['hello'])
+#                return Silly
+#
+#Silly1 = silly(1)
+#Silly2 = silly(2)
+#a = Silly1()
+#print(a.buh)
+#b = Silly2()
+#print(b.buh)
+#
+#will print
+#
+#hello
+#hello hello
+#
+#
