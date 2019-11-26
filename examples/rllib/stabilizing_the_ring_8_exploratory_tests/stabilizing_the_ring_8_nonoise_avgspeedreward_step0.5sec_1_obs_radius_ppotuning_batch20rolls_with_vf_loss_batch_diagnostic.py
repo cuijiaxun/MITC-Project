@@ -14,7 +14,7 @@ from ray.tune.registry import register_env
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
-from flow.core.vehicles import Vehicles
+from flow.core.params import VehicleParams
 from flow.controllers import RLController, IDMController, ContinuousRouter
 
 # that's the baseline scenario for this learning agent
@@ -48,7 +48,7 @@ N_CPUS = 1 #8
 ######## END REMOVE LISTENING TO SIGNAL FOR STACK TRACE
 
 # We place one autonomous vehicle and 22 human-driven vehicles in the network
-vehicles = Vehicles()
+vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
     acceleration_controller=(IDMController, {

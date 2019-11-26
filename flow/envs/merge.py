@@ -128,7 +128,6 @@ class MergePOEnv(Env):
             this_speed = self.k.vehicle.get_speed(rl_id)
             lead_id = self.k.vehicle.get_leader(rl_id)
             follower_id = self.k.vehicle.get_follower(rl_id)
-            follower_id = self.vehicles.get_follower(rl_id)
 
             if lead_id in ["", None]:
                 # in case leader is not visible

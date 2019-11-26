@@ -13,10 +13,10 @@ Horizon: 750 steps
 
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
-    InFlows
+    InFlows, SumoCarFollowingParams
 from flow.scenarios.merge import ADDITIONAL_NET_PARAMS
-from flow.core.vehicles import Vehicles
-from flow.controllers import SumoCarFollowingController, RLController
+from flow.core.params import VehicleParams
+from flow.controllers import SimCarFollowingController, RLController
 import os
 
 # time horizon of a single rollout
@@ -37,16 +37,20 @@ additional_net_params["highway_lanes"] = 1
 additional_net_params["pre_merge_length"] = 500
 
 # RL vehicles constitute 5% of the total number of vehicles
-vehicles = Vehicles()
+vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
-    acceleration_controller=(SumoCarFollowingController, {}),
-    speed_mode="no_collide",
+    acceleration_controller=(SimCarFollowingController, {}),
+    car_following_params=SumoCarFollowingParams(
+      speed_mode="no_collide",
+    ),
     num_vehicles=5)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
-    speed_mode="no_collide",
+    car_following_params=SumoCarFollowingParams(
+      speed_mode="no_collide",
+    ),
     num_vehicles=0)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
@@ -81,8 +85,11 @@ flow_params = dict(
     # name of the scenario class the experiment is running on
     scenario="USMergeScenario",
 
+    # simulator that is used by the experiment
+    simulator='traci',
+
     # sumo-related parameters (see flow.core.params.SumoParams)
-    sumo=SumoParams(
+    sim=SumoParams(
         emission_path="/home/dzgnkq/ray_results/us_merge012_baseline_daniel/",
         restart_instance=True,
         sim_step=0.5,
@@ -105,7 +112,7 @@ flow_params = dict(
     # network-related parameters (see flow.core.params.NetParams and the
     # scenario's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
-        netfile= os.path.join(
+        template= os.path.join(
           os.path.dirname(os.path.abspath(__file__)), "us_merge.net.xml"),
         inflows=inflow,
         no_internal_links=False,

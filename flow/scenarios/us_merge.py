@@ -1,8 +1,7 @@
 """Contains the us merge scenario class."""
 
-from flow.scenarios.netfile import NetFileScenario
+from flow.scenarios.base_scenario import Scenario
 from flow.core.params import InitialConfig
-from flow.core.traffic_lights import TrafficLights
 from numpy import pi, sin, cos
 
 INFLOW_EDGE_LEN = 100  # length of the inflow edges (needed for resets)
@@ -25,7 +24,7 @@ ADDITIONAL_NET_PARAMS = {
 }
 
 
-class USMergeScenario(NetFileScenario):
+class USMergeScenario(Scenario):
     def specify_routes(self, net_params):
         """See parent class."""
         rts = {
@@ -40,7 +39,7 @@ class USMergeScenario(NetFileScenario):
         return rts
   
     # in .../flow/scenarios/bay_bridgy.py this function was also implemented but
-    # there is also an implementation in NetFileScenario, and I don't know if
+    # there is also an implementation in Scenario, and I don't know if
     # it's a must to implement here, so I keep it commented as a reminder
     #def generate_starting_positions(self, num_vehicles=None, **kwargs):
 

@@ -21,3 +21,4 @@ class WaveAttenuationPOEnv(WAPOEnv):
     """See parent class."""
 
     pass
+
