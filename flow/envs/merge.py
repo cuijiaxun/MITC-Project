@@ -156,7 +156,7 @@ class MergePOEnv(Env):
             observation[5 * i + 4] = follow_head / max_length
 
             for j in range(5):
-                if observation[5*i+j] < -1:
+                if observation[5*i+j] < -1 or observation[5*i+j] > 1:
                 #if np.random.random() < 0.01 or observation[5*i+2] < -1:
                   print(
                     "ERROR OBSERVATION OUT OF RANGE " + 
