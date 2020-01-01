@@ -201,6 +201,12 @@ class TraCIVehicle(KernelVehicle):
             self._arrived_ids.append(sim_obs[tc.VAR_ARRIVED_VEHICLES_IDS])
 
         # update the "headway", "leader", and "follower" variables
+        # Since there could be multiple followers and the below defines
+        # "follower" as the closest one, by iterative minimization, we need
+        # to clear the follower data before the new update
+        for v in self.__vehicles.values():
+            v.pop("follower_headway", None)
+            v.pop("follower", None)
         for veh_id in self.__ids:
             try:
                 _position = vehicle_obs.get(veh_id, {}).get(
