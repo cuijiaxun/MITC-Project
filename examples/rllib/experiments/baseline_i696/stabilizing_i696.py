@@ -18,7 +18,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnv,TestEnv
+from flow.envs import MergePOEnv,TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -231,8 +231,8 @@ flow_params = dict(
     exp_tag="stabilizing_i696",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnv,
-    #env_name=TestEnv,
+    #env_name=MergePOEnv,
+    env_name=Env,
     # name of the scenario class the experiment is running on
     network=Network,
 
