@@ -154,13 +154,13 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.5,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.25, # determines lateral discretization of lanes
-        render=True,#True,             # False for training, True for debugging
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
 env_params=EnvParams(
         sims_per_step=1,
-        warmup_steps=0,
+        warmup_steps=20,
         additional_params={
             "max_accel": 30,
             "max_decel": 30,
@@ -190,5 +190,5 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,3000)
+    _ = exp.run(100,1380)
     

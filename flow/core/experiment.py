@@ -139,7 +139,8 @@ class Experiment:
         info_dict["mean_returns"] = mean_rets
         info_dict["per_step_returns"] = ret_lists
         info_dict["mean_outflows"] = np.mean(outflows)
-
+        print("Iter spped:{}".format(
+            mean_vels))
         print("Average, std return: {}, {}".format(
             np.mean(rets), np.std(rets)))
         print("Average, std speed: {}, {}".format(
