@@ -154,7 +154,7 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.5,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.25, # determines lateral discretization of lanes
-        render=False,#True,             # False for training, True for debugging
+        render=True,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
