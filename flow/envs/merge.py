@@ -148,13 +148,13 @@ class MergePOEnv(Env):
                 self.follower.append(follower_id)
                 follow_speed = self.k.vehicle.get_speed(follower_id)
                 follow_head = self.k.vehicle.get_headway(follower_id)
+            #FIXME do not clip!!!
 
-            observation[5 * i + 0] = this_speed / max_speed
-            observation[5 * i + 1] = (lead_speed - this_speed) / max_speed
-            observation[5 * i + 2] = lead_head / max_length
-            observation[5 * i + 3] = (this_speed - follow_speed) / max_speed
-            observation[5 * i + 4] = follow_head / max_length
-
+            observation[5 * i + 0] = np.clip(this_speed / max_speed,-1,1)
+            observation[5 * i + 1] = np.clip((lead_speed - this_speed) / max_speed,-1,1)
+            observation[5 * i + 2] = np.clip(lead_head / max_length,-1,1)
+            observation[5 * i + 3] = np.clip((this_speed - follow_speed) / max_speed,-1,1)
+            observation[5 * i + 4] = np.clip(follow_head / max_length,-1,1)
             for j in range(5):
                 if observation[5*i+j] < -1 or observation[5*i+j] > 1:
                 #if np.random.random() < 0.01 or observation[5*i+2] < -1:
@@ -288,7 +288,7 @@ class MergePORadiusEnv(MergePOEnv):
         num_directions = 2 # observe back and front
         self.obs_dimension_per_rl = num_attributes_self + \
           self.OBSERVATION_RADIUS * num_attributes_others * num_directions
-        return Box(low=0, high=1, shape=(self.obs_dimension_per_rl *
+        return Box(low=-1, high=1, shape=(self.obs_dimension_per_rl *
           self.num_rl, ), dtype=np.float32)
 
     def get_state(self, rl_id=None, **kwargs):

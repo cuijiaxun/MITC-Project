@@ -363,17 +363,19 @@ class Env(gym.Env):
             self.k.update(reset=False)
             #print ("ANOTHER ADDITIONAL COMMAND")
             self.additional_command()
-
+    
             # update the colors of vehicles
             if self.sim_params.render:
                 self.k.vehicle.update_vehicle_colors()
-
+            from IPython import embed
+            
             # crash encodes whether the simulator experienced a collision
             crash = self.k.simulation.check_collision()
 
             # stop collecting new simulation steps if there is a collision
             if crash:
                 print("Crash!!!!!!")
+                embed()
                 break
 
             # render a frame
