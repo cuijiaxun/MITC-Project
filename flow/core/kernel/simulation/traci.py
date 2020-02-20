@@ -147,7 +147,7 @@ class TraCISimulation(KernelSimulation):
                 sumo_call.append("true")
 
                 # start simulation without waiting for a click on "play"
-                sumo_call.append("--start")
+                #sumo_call.append("--start")
 
                 logging.info(" Starting SUMO on port " + str(port))
                 logging.debug(" Cfg file: " + str(network.cfg))

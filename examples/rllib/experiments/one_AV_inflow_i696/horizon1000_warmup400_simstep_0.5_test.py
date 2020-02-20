@@ -72,7 +72,8 @@ N_ROLLOUTS = 20#1#20
 N_CPUS = 0#1#8#2
 
 # inflow rate at the highway
-FLOW_RATE = 200
+FLOW_RATE = 2000
+MERGE_RATE = 300
 # percent of autonomous vehicles
 RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -159,10 +160,11 @@ inflow.add(
     begin=10,#0,
     end=90000,
     #probability=(1 - RL_PENETRATION), #* FLOW_RATE,
-    vehs_per_hour = (1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
+'''
 inflow.add(
     veh_type="rl",
     edge="404969345#0", # flow id sw2w1 from xml file
@@ -172,6 +174,7 @@ inflow.add(
     depart_speed="max",
     depart_lane="free",
     )
+'''
 inflow.add(
     veh_type="human",
     edge="59440544#0", # flow id se2w1 from xml file
@@ -181,7 +184,7 @@ inflow.add(
     departSpeed="max",
     departLane="free",
     )
-'''
+
 inflow.add(
     veh_type="rl",
     edge="59440544#0", # flow id se2w1 from xml file
@@ -191,13 +194,13 @@ inflow.add(
     depart_speed="max",
     depart_lane="free",
     )
-'''
+
 inflow.add(
     veh_type="human",
     edge="124433709", # flow id e2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = (1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE, #(1 - RL_PENETRATION)*FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )
@@ -217,7 +220,7 @@ inflow.add(
     edge="38726647", # flow id n2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = (1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
     departSpeed="max",
     departLane="free",
     )

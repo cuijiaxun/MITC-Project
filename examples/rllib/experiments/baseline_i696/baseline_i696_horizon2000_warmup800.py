@@ -7,9 +7,8 @@ import json
 import os
 import random
 import numpy as np
-import pickle
 from argparse import ArgumentParser
-
+import pickle
 import ray
 try:
     from ray.rllib.agents.agent import get_agent_class
@@ -193,13 +192,13 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.5,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.25, # determines lateral discretization of lanes
-        render=True,#True,             # False for training, True for debugging
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
 env_params=EnvParams(
         sims_per_step=1,
-        warmup_steps=400,
+        warmup_steps=800,
         additional_params={
             "max_accel": 30,
             "max_decel": 30,
@@ -229,5 +228,9 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(100,1000)
-    
+    _ = exp.run(1,2000)#,convert_to_csv=True)
+    #from IPython import embed
+    #embed()
+    with open("info.pkl","wb") as f:
+        pickle.dump(_,f)
+

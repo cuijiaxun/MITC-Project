@@ -133,12 +133,14 @@ class Experiment:
             std_vels.append(np.std(vel))
             outflows.append(self.env.k.vehicle.get_outflow_rate(int(500)))
             print("Round {0}, return: {1}".format(i, ret))
+            print("vel:{}".format(vel))
 
         info_dict["returns"] = rets
         info_dict["velocities"] = vels
         info_dict["mean_returns"] = mean_rets
         info_dict["per_step_returns"] = ret_lists
         info_dict["mean_outflows"] = np.mean(outflows)
+        print("vel:{}".format(vel))
         print("Iter spped:{}".format(
             mean_vels))
         print("Average, std return: {}, {}".format(
