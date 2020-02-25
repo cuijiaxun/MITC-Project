@@ -46,8 +46,8 @@ Here the arguments are:
 """
 
 # global variables configuring diagnostics
-PRINT_TO_SCREEN = True
-SUMMARY_PLOTS = True
+PRINT_TO_SCREEN = False
+SUMMARY_PLOTS = False
 REALTIME_PLOTS = False
 
 def generateHtmlplots(actions, rewards, states):
@@ -296,6 +296,8 @@ def visualizer_rllib(args):
             ret = 0
         for _ in range(env_params.horizon):
             vehicles = env.unwrapped.k.vehicle
+            #if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
+            #    vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
             vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
             if multiagent:
                 action = {}

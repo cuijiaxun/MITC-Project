@@ -146,6 +146,9 @@ class TraCISimulation(KernelSimulation):
                 sumo_call.append("--collision.check-junctions")
                 sumo_call.append("true")
 
+                # disable collision teleporting
+                sumo_call.append("--collision.action")
+                sumo_call.append("none")
                 # start simulation without waiting for a click on "play"
                 #sumo_call.append("--start")
 

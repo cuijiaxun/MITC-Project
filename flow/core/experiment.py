@@ -109,6 +109,7 @@ class Experiment:
         vels = []
         mean_vels = []
         std_vels = []
+        vels_each_veh = []
         outflows = []
         for i in range(num_runs):
             vel = np.zeros(num_steps)
@@ -122,7 +123,10 @@ class Experiment:
                     self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
                 ret += reward
                 ret_list.append(reward)
-
+                if(vel[j]<0):
+                    print(self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
+                    if(vel[j-1]<0):
+                        break
                 if done:
                     break
             rets.append(ret)
@@ -134,7 +138,7 @@ class Experiment:
             outflows.append(self.env.k.vehicle.get_outflow_rate(int(500)))
             print("Round {0}, return: {1}".format(i, ret))
             print("vel:{}".format(vel))
-
+        info_dict["vel_each_veh"] = vels_each_veh
         info_dict["returns"] = rets
         info_dict["velocities"] = vels
         info_dict["mean_returns"] = mean_rets
