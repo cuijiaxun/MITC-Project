@@ -21,7 +21,6 @@ import sys
 import time
 import pprint
 import matplotlib.pyplot as plt
-
 import ray
 try:
     from ray.rllib.agents.agent import get_agent_class
@@ -287,6 +286,7 @@ def visualizer_rllib(args):
     actions = []
     rewards = []
     states = []
+    WARMUP=
     for i in range(args.num_rollouts):
         vel = []
         state = env.reset()
@@ -294,11 +294,12 @@ def visualizer_rllib(args):
             ret = {key: [0] for key in rets.keys()}
         else:
             ret = 0
-        for _ in range(env_params.horizon):
+        for _ in range(env_params.horizon+warmup):
             vehicles = env.unwrapped.k.vehicle
             #if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
             #    vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
-            vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
+            if(_>=warmup):
+                vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
             if multiagent:
                 action = {}
                 for agent_id in state.keys():
@@ -510,6 +511,10 @@ def create_parser():
         '--horizon',
         type=int,
         help='Specifies the horizon.')
+    parser.add_argument(
+        '--warmup',
+        type=int,
+        default=800,)
     return parser
 
 

@@ -39,54 +39,39 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
             
-random.seed(30)
+random.seed(10)
 # experiment number
 # - 0: 10% RL penetration,  5 max controllable vehicles
 # - 1: 25% RL penetration, 13 max controllable vehicles
 # - 2: 33% RL penetration, 17 max controllable vehicles
-EXP_NUM = 0
 
-# time horizon of a single rollout
-HORIZON = 2000#750 #128#600
-# number of rollouts per training iteration
-N_ROLLOUTS = 1 #1#20
-# number of parallel workers
 N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 200
-# percent of autonomous vehicles
-RL_PENETRATION = [0.00000000001, 0.25, 0.33][EXP_NUM]
-# num_rl term (see ADDITIONAL_ENV_PARAMs)
-#NUM_RL = [5, 13, 17][EXP_NUM]#FIXME why the numbers are different
-NUM_RL = [100, 250, 333][EXP_NUM]
+MERGE_RATE = 250
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
-#additional_net_params["merge_lanes"] = 1
-#additional_net_params["highway_lanes"] = 1
-#additional_net_params["pre_merge_length"] = 500
 
 # RL vehicles constitute 5% of the total number of vehicles
 # Daniel: adding vehicles and flow from osm.passenger.trips.xml
 vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
-    #acceleration_controller=(IDMController, {
-        #"noise": 0.2
+    acceleration_controller=(IDMController, {
+        "noise": 0.2,
         #"fail_safe":"instantaneous",
-    #}),
+    }),
     lane_change_controller=(SimLaneChangeController, {}),
     routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
       # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
-      speed_mode= "right_of_way", #"right_of_way", #"all_checks", #no_collide",
-      #decel=7.5,  # avoid collisions at emergency stops 
+      speed_mode= "right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
+      decel=9,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=5, #7,
-      #min_gap=50,
+      tau=2, #7,
       speed_factor=1,
       speed_dev=0.1,
       fail_safe= "instantaneous",
@@ -100,6 +85,7 @@ vehicles.add(
       lc_speed_gain=1,#1000000,
       #lc_pushy=0, #0.5, #1,
       #lc_assertive=5, #20,
+      lcSpeedGainLookahead=2,
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
       lc_time_to_impatience=1e12
@@ -116,7 +102,7 @@ inflow.add(
     #probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
     departSpeed="max",
-    #departLane="free",
+    departLane="free",
     )
 
 '''
@@ -136,9 +122,9 @@ inflow.add(
     edge="59440544#0", # flow id se2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = (1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = FLOW_RATE,
     departSpeed="max",
-    #departLane="free",
+    departLane="free",
     )
 
 '''
@@ -159,8 +145,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE, #(1 - RL_PENETRATION)*FLOW_RATE,
-    #departSpeed="max",
-    #departLane="free",
+    departSpeed="max",
+    departLane="free",
     )
 
 '''
@@ -180,8 +166,8 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
-    #departSpeed="max",
-    #departLane="free",
+    departSpeed="max",
+    departLane="free",
     )
 
 '''
@@ -197,18 +183,18 @@ inflow.add(
 '''
 
 sumo_params=SumoParams(
-        sim_step=0.5,            # Daniel updated from osm.sumocfg
-        lateral_resolution=0.1, # determines lateral discretization of lanes
+        sim_step=0.2,            # Daniel updated from osm.sumocfg
+        lateral_resolution=0.01, # determines lateral discretization of lanes
         render=True,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
 env_params=EnvParams(
         sims_per_step=1,
-        warmup_steps=800,
+        warmup_steps=2000,
         additional_params={
-            "max_accel": 30,
-            "max_decel": 30,
+            "max_accel": 1.5,
+            "max_decel": 1.5,
             "target_velocity": 20,
             "sort_vehicles":True,
             },
@@ -236,7 +222,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,2000)#,convert_to_csv=True)
+    _ = exp.run(1,5000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:

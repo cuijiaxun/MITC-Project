@@ -94,7 +94,7 @@ class TraCISimulation(KernelSimulation):
                     "--num-clients", str(sim_params.num_clients),
                     # "--print-options", "true", # for debugging
                     "--verbose", "true",
-                    #"--collision.stoptime", "3000", #don't take any action after collision
+                    "--collision.stoptime", "10", #don't take any action after collision
                     "--step-length", str(sim_params.sim_step)
                 ]
 
@@ -145,10 +145,21 @@ class TraCISimulation(KernelSimulation):
                 # check collisions at intersections
                 sumo_call.append("--collision.check-junctions")
                 sumo_call.append("true")
+                
+                # enable stop after collision
+                #sumo_call.append("--collision.stoptime")
+                #sumo_call.append("1")
 
                 # disable collision teleporting
                 sumo_call.append("--collision.action")
                 sumo_call.append("none")
+                #sumo_call.append("remove")
+                #sumo_call.append("warn")
+
+                #set minGap to 0
+                sumo_call.append("--collision.mingap-factor")
+                sumo_call.append("0")
+
                 # start simulation without waiting for a click on "play"
                 #sumo_call.append("--start")
 

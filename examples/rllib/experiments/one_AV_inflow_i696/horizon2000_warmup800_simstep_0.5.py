@@ -69,7 +69,7 @@ HORIZON = 2000 #128#600
 # number of rollouts per training iteration
 N_ROLLOUTS = 20#1#20
 # number of parallel workers
-N_CPUS = 0#1#8#2
+N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -99,10 +99,10 @@ vehicles.add(
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
       # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
-      speed_mode="obey_safe_speed", #"all_checks", #no_collide",
+      speed_mode="right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=1.5, #7,
+      tau=2, #7,
       min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1

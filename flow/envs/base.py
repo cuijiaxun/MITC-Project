@@ -372,9 +372,9 @@ class Env(gym.Env):
             crash = self.k.simulation.check_collision()
 
             # stop collecting new simulation steps if there is a collision
-            if crash:
-                print("Crash!!!!!!")
-                break
+            #if crash:
+            #    print("Crash!!!!!!")
+            #    break
 
             # render a frame
             self.render()
@@ -403,6 +403,8 @@ class Env(gym.Env):
         else:
             reward = self.compute_reward(rl_actions, fail=crash)
         if crash:
+            #from IPython import embed
+            #embed()
             print("crash")
         return next_observation, reward, done, infos
 
