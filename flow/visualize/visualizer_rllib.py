@@ -286,7 +286,7 @@ def visualizer_rllib(args):
     actions = []
     rewards = []
     states = []
-    WARMUP=
+    WARMUP = args.warmup
     for i in range(args.num_rollouts):
         vel = []
         state = env.reset()
@@ -294,12 +294,11 @@ def visualizer_rllib(args):
             ret = {key: [0] for key in rets.keys()}
         else:
             ret = 0
-        for _ in range(env_params.horizon+warmup):
+        for _ in range(env_params.horizon):
             vehicles = env.unwrapped.k.vehicle
             #if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
             #    vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
-            if(_>=warmup):
-                vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
+            vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
             if multiagent:
                 action = {}
                 for agent_id in state.keys():
