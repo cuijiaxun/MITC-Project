@@ -123,10 +123,12 @@ class Experiment:
                     self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
                 ret += reward
                 ret_list.append(reward)
+                '''
                 if(vel[j]<0):
                     print(self.env.k.vehicle.get_speed(self.env.k.vehicle.get_ids()))
                     if(vel[j-1]<0):
                         break
+                '''
                 if done:
                     break
             rets.append(ret)

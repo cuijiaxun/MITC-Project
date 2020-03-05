@@ -94,7 +94,7 @@ class TraCISimulation(KernelSimulation):
                     "--num-clients", str(sim_params.num_clients),
                     # "--print-options", "true", # for debugging
                     "--verbose", "true",
-                    "--collision.stoptime", "10", #don't take any action after collision
+                    #"--collision.stoptime", "100", #don't take any action after collision
                     "--step-length", str(sim_params.sim_step)
                 ]
 
@@ -151,8 +151,8 @@ class TraCISimulation(KernelSimulation):
                 #sumo_call.append("1")
 
                 # disable collision teleporting
-                sumo_call.append("--collision.action")
-                sumo_call.append("none")
+                #sumo_call.append("--collision.action")
+                #sumo_call.append("none")
                 #sumo_call.append("remove")
                 #sumo_call.append("warn")
 
