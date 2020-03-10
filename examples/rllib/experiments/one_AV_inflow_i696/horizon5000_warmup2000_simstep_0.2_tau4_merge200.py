@@ -73,7 +73,7 @@ N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 250
+MERGE_RATE = 200
 # percent of autonomous vehicles
 RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -102,7 +102,7 @@ vehicles.add(
       speed_mode="right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=2, #7,
+      tau=4, #7,
       #min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1
@@ -131,10 +131,10 @@ vehicles.add(
       speed_mode="right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=3, #7,
+      tau=4, #7,
       #min_gap=2.5,
       speed_factor=1,
-      speed_dev=0.1
+      speed_dev=0.1,
     ),
     lane_change_params=SumoLaneChangeParams(
       model="SL2015",
@@ -264,8 +264,8 @@ flow_params = dict(
         sims_per_step=1, #5,
         warmup_steps=2000,
         additional_params={
-            "max_accel": 30,
-            "max_decel": 30,
+            "max_accel": 9,
+            "max_decel": 9,
             "target_velocity": 20,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
         },

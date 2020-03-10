@@ -23,7 +23,7 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.scenarios.merge import ADDITIONAL_NET_PARAMS
 from flow.core.params import VehicleParams, SumoLaneChangeParams, TrafficLightParams
-from flow.controllers import IDMController, RLController, SimLaneChangeController, ContinuousRouter
+from flow.controllers import IDMController, RLController, SimLaneChangeController, ContinuousRouter, SimCarFollowingController
 from flow.core.experiment import Experiment
 from flow.scenarios import i696Scenario
 # TODO hard coded
@@ -42,7 +42,7 @@ N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 150
+MERGE_RATE = 200
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -55,6 +55,7 @@ vehicles.add(
     veh_id="human",
     acceleration_controller=(IDMController, {
         "noise": 0.2,
+        #"T":7,
     }),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
@@ -63,7 +64,7 @@ vehicles.add(
       speed_mode= "right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=1, #7,
+      tau=4, #7,
       speed_factor=1,
       speed_dev=0.1,
       ),
