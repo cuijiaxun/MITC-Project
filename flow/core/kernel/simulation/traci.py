@@ -151,8 +151,8 @@ class TraCISimulation(KernelSimulation):
                 #sumo_call.append("1")
 
                 # disable collision teleporting
-                sumo_call.append("--collision.action")
-                sumo_call.append("none")
+                #sumo_call.append("--collision.action")
+                #sumo_call.append("none")
                 #sumo_call.append("remove")
                 #sumo_call.append("warn")
 
@@ -161,7 +161,7 @@ class TraCISimulation(KernelSimulation):
                 sumo_call.append("0")
 
                 # start simulation without waiting for a click on "play"
-                #sumo_call.append("--start")
+                sumo_call.append("--start")
 
                 logging.info(" Starting SUMO on port " + str(port))
                 logging.debug(" Cfg file: " + str(network.cfg))

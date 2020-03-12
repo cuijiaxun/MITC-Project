@@ -228,7 +228,8 @@ class TraCIVehicle(KernelVehicle):
                 self.__vehicles[veh_id]["headway"] = 1e+3
                 self.__vehicles[veh_id]["follower_headway"] = 1e+3
             else:
-                min_gap = self.minGap[self.get_type(veh_id)]
+                min_gap = self.minGap[self.get_type(veh_id)] #FIXME what role does min_gap play
+                #min_gap = 0
                 self.__vehicles[veh_id]["headway"] = headway[1] + min_gap
                 self.__vehicles[veh_id]["leader"] = headway[0]
                 if headway[0] in self.__vehicles:
@@ -925,6 +926,10 @@ class TraCIVehicle(KernelVehicle):
                 this_vel = self.get_speed(vid)
                 next_vel = max([this_vel + acc[i] * self.sim_step, 0])
                 self.kernel_api.vehicle.slowDown(vid, next_vel, 1e-3)
+                #self.kernel_api.vehicle.setSpeed(vid,next_vel)
+            else:
+                from IPython import embed
+                embed()
 
     def apply_lane_change(self, veh_ids, direction):
         """See parent class."""
