@@ -95,8 +95,8 @@ class BaseController:
 
         # this allows the acceleration behavior of vehicles in a junction be
         # described by sumo instead of an explicit model
-        if env.k.vehicle.get_edge(self.veh_id)[0] == ":":
-            return None
+        #if env.k.vehicle.get_edge(self.veh_id)[0] == ":":
+        #    return None
 
         accel = self.get_accel(env)
 

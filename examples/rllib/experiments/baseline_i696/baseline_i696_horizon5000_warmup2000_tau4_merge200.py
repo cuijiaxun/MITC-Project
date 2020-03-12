@@ -41,8 +41,8 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
-FLOW_RATE = 500
-MERGE_RATE = 150
+FLOW_RATE = 2000
+MERGE_RATE = 200
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -177,7 +177,7 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.2,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.01, # determines lateral discretization of lanes
-        render=True,#True,             # False for training, True for debugging
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,5000)#,convert_to_csv=True)
+    _ = exp.run(100,5000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:
