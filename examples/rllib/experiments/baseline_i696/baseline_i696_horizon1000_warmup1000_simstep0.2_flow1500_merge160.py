@@ -181,7 +181,7 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.2,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.01, # determines lateral discretization of lanes
-        render=True,#True,             # False for training, True for debugging
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,1000)#,convert_to_csv=True)
+    _ = exp.run(30,1000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:

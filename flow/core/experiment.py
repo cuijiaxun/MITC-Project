@@ -111,6 +111,7 @@ class Experiment:
         std_vels = []
         vels_each_veh = []
         outflows = []
+        inflows = []
         for i in range(num_runs):
             vel = np.zeros(num_steps)
             logging.info("Iter #" + str(i))
@@ -138,8 +139,9 @@ class Experiment:
             mean_vels.append(np.mean(vel))
             std_vels.append(np.std(vel))
             outflows.append(self.env.k.vehicle.get_outflow_rate(int(500)))
+            inflows.append(self.env.k.vehicle.get_inflow_rate(int(500)))
             print("Round {0}, return: {1}".format(i, ret))
-            print("vel:{}".format(vel))
+            #print("vel:{}".format(vel))
         info_dict["vel_each_veh"] = vels_each_veh
         info_dict["returns"] = rets
         info_dict["velocities"] = vels
@@ -153,6 +155,11 @@ class Experiment:
             np.mean(rets), np.std(rets)))
         print("Average, std speed: {}, {}".format(
             np.mean(mean_vels), np.std(mean_vels)))
+        print("Average, std outflow:{},{}".format(
+            np.mean(outflows),np.std(outflows)))
+        print("Average, std inflow:{},{}".format(
+            np.mean(inflows),np.std(inflows)))
+
         self.env.terminate()
 
         if convert_to_csv:
