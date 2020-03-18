@@ -41,8 +41,8 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 N_CPUS = 2#1#8#2
 
 # inflow rate at the highway
-FLOW_RATE = 500
-MERGE_RATE = 150
+FLOW_RATE = 2000
+MERGE_RATE = 1000
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -64,7 +64,7 @@ vehicles.add(
       speed_mode= "right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=4, #7,
+      tau=1, #7,
       speed_factor=1,
       speed_dev=0.1,
       ),

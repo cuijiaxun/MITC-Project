@@ -45,7 +45,7 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 # - 2: 33% RL penetration, 17 max controllable vehicles
 
 N_CPUS = 2#1#8#2
-
+#random.seed(13)
 # inflow rate at the highway
 FLOW_RATE = 2000
 MERGE_RATE = 250
@@ -69,7 +69,7 @@ vehicles.add(
       speed_mode= "right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=3, #7,
+      tau=1, #7,
       speed_factor=1,
       speed_dev=0.1
     ),
@@ -189,9 +189,9 @@ env_params=EnvParams(
         sims_per_step=1,
         warmup_steps=2000,
         additional_params={
-            "max_accel": 30,
-            "max_decel": 30,
-            "target_velocity": 20,
+            "max_accel": 9,
+            "max_decel": 9,
+            "target_velocity": 30,
             "sort_vehicles":True,
             },
     )
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,5000)#,convert_to_csv=True)
+    _ = exp.run(30,5000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:
