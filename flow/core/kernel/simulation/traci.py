@@ -151,8 +151,8 @@ class TraCISimulation(KernelSimulation):
                 #sumo_call.append("1")
 
                 # disable collision teleporting
-                #sumo_call.append("--collision.action")
-                #sumo_call.append("none")
+                sumo_call.append("--collision.action")
+                sumo_call.append("none")
                 #sumo_call.append("remove")
                 #sumo_call.append("warn")
 
