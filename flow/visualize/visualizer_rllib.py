@@ -347,11 +347,12 @@ def visualizer_rllib(args):
                     ret[policy_map_fn(actor)][0] += rew
             else:
                 ret += reward
+            
             if multiagent and done['__all__']:
                 break
             if not multiagent and done:
                 break
-
+            
         if multiagent:
             for key in rets.keys():
                 rets[key].append(ret[key])

@@ -17,7 +17,8 @@ from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
       WaveAttenuationPORadius2EnvAvgSpeedNormalized  
 from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.test import TestEnv
-
+from flow.envs.merge_no_headway import MergePOEnv_noheadway
+from flow.envs.merge_noheadway_encourageRLmove import MergePOEnv_noheadway_encourageRLmove
 # deprecated classes whose names have changed
 from flow.envs.bottleneck_env import BottleNeckAccelEnv
 from flow.envs.bottleneck_env import DesiredVelocityEnv
@@ -32,6 +33,8 @@ __all__ = [
     'LaneChangeAccelPOEnv',
     'TrafficLightGridTestEnv',
     'MergePOEnv',
+    'MergePOEnv_noheadway',
+    'MergePOEnv_noheadway_encourageRLmove',
     'BottleneckEnv',
     'BottleneckAccelEnv',
     'WaveAttenuationEnv',
