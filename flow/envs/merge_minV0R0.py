@@ -25,7 +25,7 @@ ADDITIONAL_ENV_PARAMS = {
 }
 
 
-class MergePOEnv_noheadway_encourageRLmove(Env):
+class MergePOEnv_minV0R0(Env):
     """Partially observable merge environment.
 
     This environment is used to train autonomous vehicles to attenuate the
@@ -194,10 +194,22 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
             # reward high system-level velocities
             cost1 = rewards.desired_velocity(self, fail=kwargs["fail"])
 
-            # encourage rl to move
-            cost2 = rewards.rl_forward_progress(self, gain=1)/(30*self.num_rl)
+            # penalize small time headways
+            cost2 = 0
+            t_min = 1  # smallest acceptable time headway
+            for rl_id in self.rl_veh:
+                lead_id = self.k.vehicle.get_leader(rl_id)
+                if lead_id not in ["", None] \
+                        and self.k.vehicle.get_speed(rl_id) > 0:
+                    t_headway = max(
+                        self.k.vehicle.get_headway(rl_id) /
+                        self.k.vehicle.get_speed(rl_id), 0)
+                    cost2 += min((t_headway - t_min) / t_min, 0)
+                # if rl stops, give 0 reward
+                if self.k.vehicle.get_speed(rl_id) <= 5:
+                    return 0
             # weights for cost1, cost2, and cost3, respectively
-            eta1, eta2 = 0.50, 0.50
+            eta1, eta2 = 1.00, 0.10
 
             return max(eta1 * cost1 + eta2 * cost2, 0)
 
@@ -259,7 +271,7 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
 
 
 #def factoryMergePORadiusEnv(obs_radius):
-class MergePORadiusEnv(MergePOEnv_noheadway_encourageRLmove):
+class MergePORadiusEnv(MergePOEnv_minV0R0):
     """Partially observable merge environment.
 
     This environment is similar to WaveAttenuationMergePOEnv, except that

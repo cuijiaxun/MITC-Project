@@ -19,6 +19,11 @@ from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, Me
 from flow.envs.test import TestEnv
 from flow.envs.merge_no_headway import MergePOEnv_noheadway
 from flow.envs.merge_noheadway_encourageRLmove import MergePOEnv_noheadway_encourageRLmove
+from flow.envs.merge_noheadway_encourageRLmove_sumSpeed import MergePOEnv_noheadway_encourageRLmove_sumSpeed
+from flow.envs.merge_noheadway_sumSpeed import MergePOEnv_noheadway_sumSpeed
+from flow.envs.merge_optOutflow import MergePOEnv_optOutflow
+from flow.envs.merge_optInflow import MergePOEnv_optInflow
+from flow.envs.merge_minV0R0 import MergePOEnv_minV0R0
 # deprecated classes whose names have changed
 from flow.envs.bottleneck_env import BottleNeckAccelEnv
 from flow.envs.bottleneck_env import DesiredVelocityEnv
@@ -35,6 +40,11 @@ __all__ = [
     'MergePOEnv',
     'MergePOEnv_noheadway',
     'MergePOEnv_noheadway_encourageRLmove',
+    'MergePOEnv_noheadway_encourageRLmove_sumSpeed',
+    'MergePOEnv_noheadway_sumSpeed',
+    'MergePOEnv_optOutflow',
+    'MergePOEnv_optInflow',
+    'MergePOEnv_minV0R0',
     'BottleneckEnv',
     'BottleneckAccelEnv',
     'WaveAttenuationEnv',

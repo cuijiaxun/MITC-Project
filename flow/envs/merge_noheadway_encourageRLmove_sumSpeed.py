@@ -25,7 +25,7 @@ ADDITIONAL_ENV_PARAMS = {
 }
 
 
-class MergePOEnv_noheadway_encourageRLmove(Env):
+class MergePOEnv_noheadway_encourageRLmove_sumSpeed(Env):
     """Partially observable merge environment.
 
     This environment is used to train autonomous vehicles to attenuate the
@@ -78,7 +78,6 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
 
         # maximum number of controlled vehicles
         self.num_rl = env_params.additional_params["num_rl"]
-
         # queue of rl vehicles waiting to be controlled
         self.rl_queue = collections.deque()
 
@@ -122,7 +121,6 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
         # normalizing constants
         max_speed = self.k.network.max_speed()
         max_length = self.k.network.length()
-
         observation = [0 for _ in range(5 * self.num_rl)]
         for i, rl_id in enumerate(self.rl_veh):
             this_speed = self.k.vehicle.get_speed(rl_id)
@@ -192,10 +190,9 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
                 return 0
 
             # reward high system-level velocities
-            cost1 = rewards.desired_velocity(self, fail=kwargs["fail"])
-
+            cost1 = rewards.sum_velocity(self, fail=kwargs["fail"])/15000 #30(max_speed) * 500(max_veh_on_road)
             # encourage rl to move
-            cost2 = rewards.rl_forward_progress(self, gain=1)/(30*self.num_rl)
+            cost2 = rewards.rl_forward_progress(self, gain=1)/(30*self.num_rl) #30 max_speed * 100(max_num_rl)
             # weights for cost1, cost2, and cost3, respectively
             eta1, eta2 = 0.50, 0.50
 
@@ -259,7 +256,7 @@ class MergePOEnv_noheadway_encourageRLmove(Env):
 
 
 #def factoryMergePORadiusEnv(obs_radius):
-class MergePORadiusEnv(MergePOEnv_noheadway_encourageRLmove):
+class MergePORadiusEnv(MergePOEnv_noheadway_encourageRLmove_sumSpeed):
     """Partially observable merge environment.
 
     This environment is similar to WaveAttenuationMergePOEnv, except that

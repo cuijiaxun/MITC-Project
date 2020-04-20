@@ -87,6 +87,13 @@ def average_velocity(env, fail=False):
 
     return np.mean(vel)
 
+def sum_velocity(env,fail=False):
+    vel = np.array(env.k.vehicle.get_speed(env.k.vehicle.get_ids()))
+    if any(vel<-100) or fail:
+        return 0.
+    if len(vel) == 0:
+        return 0
+    return np.sum(vel)
 
 def rl_forward_progress(env, gain=0.1):
     """Rewared function used to reward the RL vehicles for travelling forward.
@@ -304,3 +311,16 @@ def punish_rl_lane_changes(env, penalty=1):
             total_lane_change_penalty -= penalty
 
     return total_lane_change_penalty
+
+
+def optimize_outflow(env,max_flow = 2000,timespan=100):
+    vehicles = env.k.vehicle
+    outflow = vehicles.get_outflow_rate(timespan)
+
+    return outflow/max_flow
+
+def optimize_inflow(env,max_flow = 2000,timespan=10):
+    vehicles = env.k.vehicle
+    inflow = vehicles.get_inflow_rate(10)
+
+    return inflow/max_flow
