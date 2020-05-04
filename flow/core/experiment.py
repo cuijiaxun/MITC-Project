@@ -147,6 +147,7 @@ class Experiment:
         info_dict["velocities"] = vels
         info_dict["mean_returns"] = mean_rets
         info_dict["per_step_returns"] = ret_lists
+        info_dict["mean_inflows"] = np.mean(inflows)
         info_dict["mean_outflows"] = np.mean(outflows)
         print("vel:{}".format(vel))
         print("Iter spped:{}".format(
@@ -156,9 +157,9 @@ class Experiment:
         print("Average, std speed: {}, {}".format(
             np.mean(mean_vels), np.std(mean_vels)))
         print("Average, std outflow:{},{}".format(
-            np.mean(outflows),np.std(outflows)))
+            np.mean(outflows),np.std(outflows)),outflows)
         print("Average, std inflow:{},{}".format(
-            np.mean(inflows),np.std(inflows)))
+            np.mean(inflows),np.std(inflows)),inflows)
 
         self.env.terminate()
 

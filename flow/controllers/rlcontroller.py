@@ -1,7 +1,7 @@
 """Contains the RLController class."""
 
 from flow.controllers.base_controller import BaseController
-
+from flow.controllers.car_following_models import IDMController
 
 class RLController(BaseController):
     """RL Controller.
@@ -37,3 +37,6 @@ class RLController(BaseController):
             self,
             veh_id,
             car_following_params)
+        self._idm_controller = IDMController(veh_id, car_following_params=car_following_params)
+    def get_accel(self,env):
+        return self._idm_controller.get_accel(env)

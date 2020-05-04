@@ -267,6 +267,22 @@ class MergePOEnv(Env):
         self.follower = []
         return super().reset()
 
+class MergePOEnv_Ignore(MergePOEnv):
+    def _apply_rl_actions(self,rl_actions):
+        if "ignore_edges" not in env_params.additional_params:
+            super()._apply_rl_actions(rl_actions)
+        else:
+            valid_actions = {}
+            if rl_actions:
+                for rl_id,actions in rl_actions.items():
+                    edge = self.k.vehicle.get_edge(rl_id)
+                    if edge in env_params.additional_params['ignore_edges']:
+                        accel = self.k.vehicle.get_acc_controller(rl_id).get_action(self)
+                        if accel is not None:
+                            self.k.vehicle.apply_acceleration(rl_id,accel)
+                    else:
+                        valid_actions[rl_id] = actions
+            super()._apply_rl_actions(valid_actions)
 
 #def factoryMergePORadiusEnv(obs_radius):
 class MergePORadiusEnv(MergePOEnv):

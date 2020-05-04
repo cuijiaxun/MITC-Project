@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(30,1000)#,convert_to_csv=True)
+    _ = exp.run(2,1000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:

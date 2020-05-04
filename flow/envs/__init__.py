@@ -15,7 +15,8 @@ from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
       WaveAttenuationPORadiusEnvAvgSpeedNormalized, \
       WaveAttenuationPORadius1EnvAvgSpeedNormalized, \
       WaveAttenuationPORadius2EnvAvgSpeedNormalized  
-from flow.envs.merge import MergePOEnv, MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
+from flow.envs.merge import MergePOEnv,MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
+from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
 from flow.envs.merge_no_headway import MergePOEnv_noheadway
 from flow.envs.merge_noheadway_encourageRLmove import MergePOEnv_noheadway_encourageRLmove
@@ -23,6 +24,7 @@ from flow.envs.merge_noheadway_encourageRLmove_sumSpeed import MergePOEnv_nohead
 from flow.envs.merge_noheadway_sumSpeed import MergePOEnv_noheadway_sumSpeed
 from flow.envs.merge_optOutflow import MergePOEnv_optOutflow
 from flow.envs.merge_optInflow import MergePOEnv_optInflow
+from flow.envs.merge_InflowScale import MergePOEnv_InflowScale
 from flow.envs.merge_minV0R0 import MergePOEnv_minV0R0
 # deprecated classes whose names have changed
 from flow.envs.bottleneck_env import BottleNeckAccelEnv
@@ -38,12 +40,14 @@ __all__ = [
     'LaneChangeAccelPOEnv',
     'TrafficLightGridTestEnv',
     'MergePOEnv',
+    'MergePOEnv_Ignore',
     'MergePOEnv_noheadway',
     'MergePOEnv_noheadway_encourageRLmove',
     'MergePOEnv_noheadway_encourageRLmove_sumSpeed',
     'MergePOEnv_noheadway_sumSpeed',
     'MergePOEnv_optOutflow',
     'MergePOEnv_optInflow',
+    'MergePOEnv_InflowScale',
     'MergePOEnv_minV0R0',
     'BottleneckEnv',
     'BottleneckAccelEnv',

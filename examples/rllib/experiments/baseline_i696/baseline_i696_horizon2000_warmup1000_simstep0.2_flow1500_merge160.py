@@ -77,7 +77,7 @@ vehicles.add(
       model="SL2015",
       # Define a lane changing mode that will allow lane changes
       # See: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#lane_change_mode_.280xb6.29
-      # and: ~/local/flow_2019_07/flow/core/params.py, see LC_MODES = {"aggressive": 0 /*bug, 0 is no lane-changes*/, "no_lat_collide": 512, "strategic": 1621}, where "strategic" is the default behavior
+      # and: ~/local/flow_2019_07/flow/core/params.py, see LC_MODES = {"aggressive": 0 /*bug, 0 is no lane-changes*/, "no_lat_collide": 512, "strategic": 1621;, where "strategic" is the default behavior
       lane_change_mode=1621,#0b011000000001, # (like default 1621 mode, but no lane changes other than strategic to follow route, # 512, #(collision avoidance and safety gap enforcement) # "strategic", 
       #lc_speed_gain=1000000,
       lc_pushy=0, #0.5, #1,
@@ -97,7 +97,7 @@ inflow.add(
     end=90000,
     #probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed="max",
+    departSpeed=20,
     departLane="free",
     )
 
@@ -119,7 +119,7 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = FLOW_RATE,
-    departSpeed="max",
+    departSpeed=20,
     departLane="free",
     )
 
@@ -141,7 +141,7 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE, #(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed="max",
+    departSpeed=20,
     departLane="free",
     )
 
@@ -162,7 +162,7 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed="max",
+    departSpeed=20,
     departLane="free",
     )
 
@@ -181,7 +181,7 @@ inflow.add(
 sumo_params=SumoParams(
         sim_step=0.2,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.01, # determines lateral discretization of lanes
-        render=False,#True,             # False for training, True for debugging
+        render=True,#True,             # False for training, True for debugging
         restart_instance=True,
     )
 from flow.envs.test import TestEnv
@@ -189,8 +189,8 @@ env_params=EnvParams(
         sims_per_step=1,
         warmup_steps=1000,
         additional_params={
-            "max_accel": 30,
-            "max_decel": 30,
+            "max_accel": 9,
+            "max_decel": 9,
             "target_velocity": 20,
             "sort_vehicles":True,
             },
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(30,2000)#,convert_to_csv=True)
+    _ = exp.run(1,2000)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:
