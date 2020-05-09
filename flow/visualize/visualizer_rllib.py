@@ -296,9 +296,9 @@ def visualizer_rllib(args):
             ret = 0
         for _ in range(env_params.horizon):
             vehicles = env.unwrapped.k.vehicle
-            #if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
-            #    vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
-            vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
+            if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
+                vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
+            #vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
             if multiagent:
                 action = {}
                 for agent_id in state.keys():

@@ -230,8 +230,17 @@ class TraCIVehicle(KernelVehicle):
             else:
                 min_gap = self.minGap[self.get_type(veh_id)] #FIXME what role does min_gap play
                 #min_gap = 0
+                '''
+                if headway[1]>=0:
+                    self.__vehicles[veh_id]["headway"] = headway[1] + min_gap
+                    self.__vehicles[veh_id]["leader"] = headway[0]
+                else:
+                    self.__vehicles[veh_id]["headway"] = 1e+3
+                    self.__vehicles[veh_id]["leader"] = None
+                '''
                 self.__vehicles[veh_id]["headway"] = headway[1] + min_gap
                 self.__vehicles[veh_id]["leader"] = headway[0]
+
                 if headway[0] in self.__vehicles:
                     leader = self.__vehicles[headway[0]]
                     # if veh_id is closer from leader than another follower

@@ -326,7 +326,7 @@ class Env(gym.Env):
                     accel.append(action)
                     if self.k.vehicle.get_edge(veh_id)[0] == ":":
                         if self.k.vehicle.get_speed(veh_id) <=  0.00000001:
-                            print(self.time_counter,veh_id,self.k.vehicle.get_leader(veh_id),action,self.k.vehicle.get_speed(veh_id))
+                            print(self.time_counter,'veh_id:',veh_id,'its leader:',self.k.vehicle.get_leader(veh_id),'headway to leader:',self.k.vehicle.get_headway(veh_id),'action:',action,'speed:',self.k.vehicle.get_speed(veh_id))
 
                 self.k.vehicle.apply_acceleration(
                     self.k.vehicle.get_controlled_ids(), accel)
