@@ -87,20 +87,14 @@ inflow.add(
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
-    vehs_per_hour=160*(1-RL_PENETRATION),
-    departLane="free",
-    departSpeed=7.5)
-inflow.add(
-    veh_type="rl",
-     edge="inflow_merge",
-    vehs_per_hour=160*RL_PENETRATION,
+    vehs_per_hour=160,
     departLane="free",
     departSpeed=7.5)
 
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="Simplemerge_2_AVinflow_depart20_flowparams_allcheck_tau1",
+    exp_tag="Simplemerge_1_AVinflow_flowparams_allcheck_tau1",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
