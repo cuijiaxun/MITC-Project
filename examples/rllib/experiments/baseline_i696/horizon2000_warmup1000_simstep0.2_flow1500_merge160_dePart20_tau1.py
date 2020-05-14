@@ -102,7 +102,7 @@ vehicles.add(
       speed_mode="all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=2, #7,
+      tau=1, #7,
       min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1
@@ -132,7 +132,7 @@ vehicles.add(
       speed_mode="all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
-      tau=2, #7,
+      tau=1, #7,
       min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1,

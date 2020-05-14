@@ -58,14 +58,16 @@ vehicles.add(
         "noise": 0.2
     }),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
+        tau=2,
     ),
     num_vehicles=0)
 vehicles.add(
     veh_id="human2",
     acceleration_controller=(IDMController, {}),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
+        tau=2,
     ),
     num_vehicles=0)
 
@@ -93,7 +95,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="Simplemerge_depart20_allhuman",
+    exp_tag="Simplemerge_depart20_allhuman_tau2_31",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,

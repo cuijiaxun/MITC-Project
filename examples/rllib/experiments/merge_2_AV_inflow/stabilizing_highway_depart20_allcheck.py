@@ -32,7 +32,7 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 2000
 # number of rollouts per training iteration
-N_ROLLOUTS = 1
+N_ROLLOUTS = 20
 # number of parallel workers
 N_CPUS = 2
 
@@ -58,14 +58,14 @@ vehicles.add(
         "noise": 0.2
     }),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
     ),
     num_vehicles=0)
 vehicles.add(
-    veh_id="human2",
-    acceleration_controller=(IDMController, {}),
+    veh_id="rl",
+    acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
     ),
     num_vehicles=0)
 
@@ -79,7 +79,7 @@ inflow.add(
     departLane="free",
     departSpeed=20)
 inflow.add(
-    veh_type="human2",
+    veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
     departLane="free",
@@ -87,13 +87,20 @@ inflow.add(
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
-    vehs_per_hour=160,
+    vehs_per_hour=160*(1-RL_PENETRATION),
+    departLane="free",
+    departSpeed=20)
+inflow.add(
+    veh_type="rl",
+     edge="inflow_merge",
+    vehs_per_hour=160*RL_PENETRATION,
     departLane="free",
     departSpeed=20)
 
+
 flow_params = dict(
     # name of the experiment
-    exp_tag="Simplemerge_depart20_allhuman",
+    exp_tag="Simplemerge_2_AVinflow_depart20_allcheck_tau1",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -184,7 +191,7 @@ def setup_exps():
 if __name__ == "__main__":
     alg_run, gym_name, config = setup_exps()
     ray.init(num_cpus=N_CPUS + 1,
-    object_store_memory=1024*1024*1024)
+        object_store_memory = 2048*1024*1024)
     trials = run_experiments({
         flow_params["exp_tag"]: {
             "run": alg_run,
@@ -192,11 +199,11 @@ if __name__ == "__main__":
             "config": {
                 **config
             },
-            "checkpoint_freq": 1,
+            "checkpoint_freq": 20,
             "checkpoint_at_end": True,
             "max_failures": 999,
             "stop": {
-                "training_iteration": 1,
+                "training_iteration": 200,
             },
         }
     })

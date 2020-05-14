@@ -99,11 +99,11 @@ vehicles.add(
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
       # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
-      speed_mode="obey_safe_speed", #"all_checks", #no_collide",
+      speed_mode="all_checks", #"all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
       tau=2, #7,
-      min_gap=0,
+      min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1
     ),
@@ -129,11 +129,11 @@ vehicles.add(
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
       # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
-      speed_mode="obey_safe_speed", #"all_checks", #no_collide",
+      speed_mode="all_checks", #no_collide",
       decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
       tau=2, #7,
-      min_gap=0,
+      min_gap=2.5,
       speed_factor=1,
       speed_dev=0.1,
     ),
@@ -335,24 +335,26 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-s", "--seeds_file", dest="seeds_file",
                         help="pickle file containing seeds", default=None)
+    parser.add_argument('--resume',help="continue training",type=bool,default=False)
     args = parser.parse_args()
 
     alg_run, gym_name, config = setup_exps(args.seeds_file)
     ray.init(num_cpus=N_CPUS + 1)
     trials = run_experiments({
-        flow_params["exp_tag"]: {
-            "run": alg_run,
-            "env": gym_name,
-            "config": {
-                **config
-            },
-            "checkpoint_freq": 10, #20,
-            "checkpoint_at_end": True,
-            "max_failures": 999,
-            "stop": {
-                "training_iteration": 500,
+            flow_params["exp_tag"]: {
+                "run": alg_run,
+                "env": gym_name,
+                "config": {
+                    **config
+                },
+                "checkpoint_freq": 10, #20,
+                "checkpoint_at_end": True,
+                "max_failures": 999,
+                "stop": {
+                    "training_iteration": 500,
+                },
             },
         },
-    },
-    resume=True,
+        resume=False,
     )
+

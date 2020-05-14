@@ -67,9 +67,9 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 2000 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 1#1#20
+N_ROLLOUTS = 20#1#20
 # number of parallel workers
-N_CPUS = 4#8#2
+N_CPUS = 8#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 1500
@@ -123,8 +123,8 @@ vehicles.add(
     num_vehicles=0)
 
 vehicles.add(
-    veh_id="human2",
-    acceleration_controller=(IDMController, {}),
+    veh_id="rl",
+    acceleration_controller=(RLController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
@@ -161,21 +161,21 @@ inflow.add(
     begin=10,#0,
     end=90000,
     #probability=(1 - RL_PENETRATION), #* FLOW_RATE,
-    vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE * (1 - RL_PENETRATION),
     departSpeed=20,
     departLane="free",
     )
-'''
+
 inflow.add(
     veh_type="rl",
     edge="404969345#0", # flow id sw2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = RL_PENETRATION * FLOW_RATE,
-    depart_speed="max",
+    vehs_per_hour = RL_PENETRATION * MERGE_RATE,
+    depart_speed=20,
     depart_lane="free",
     )
-'''
+
 inflow.add(
     veh_type="human",
     edge="59440544#0", # flow id se2w1 from xml file
@@ -187,7 +187,7 @@ inflow.add(
     )
 
 inflow.add(
-    veh_type="human2",
+    veh_type="rl",
     edge="59440544#0", # flow id se2w1 from xml file
     begin=10,#0,
     end=90000,
@@ -202,45 +202,45 @@ inflow.add(
     edge="124433709", # flow id e2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = MERGE_RATE, #(1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE*(1 - RL_PENETRATION),
     departSpeed=20,
     departLane="free",
     )
-'''
+
 inflow.add(
     veh_type="rl",
     edge="124433709", # flow id e2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
-    depart_speed="max",
+    vehs_per_hour = MERGE_RATE*RL_PENETRATION,
+    depart_speed=20,
     depart_lane="free",
     )
-'''
+
 inflow.add(
     veh_type="human",
     edge="38726647", # flow id n2w1 from xml file
     begin=10,#0,
     end=90000,
-    vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
+    vehs_per_hour = MERGE_RATE*(1 - RL_PENETRATION),
     departSpeed=20,
     departLane="free",
     )
-'''
+
 inflow.add(
     veh_type="rl",
     edge="38726647", # flow id n2w1 from xml file
     begin=10,#0,
     end=90000,
-    probability=RL_PENETRATION, # * 0.8, # * FLOW_RATE,
-    depart_speed="max",
+    vehs_per_hour = MERGE_RATE*RL_PENETRATION,
+    depart_speed=20,
     depart_lane="free",
     )
-'''
+
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="central_i696_IDMJunction_horizon2000_allhuman_depart20",
+    exp_tag="4inflow_central_i696_IDMJunction_horizon2000_depart20",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -270,7 +270,6 @@ flow_params = dict(
             "max_decel": 9,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
-            "ignore_edges":["59440544#0"],
         },
     ),
 
@@ -346,12 +345,12 @@ if __name__ == "__main__":
             "config": {
                 **config
             },
-            "checkpoint_freq": 1, #20,
+            "checkpoint_freq": 10, #20,
             "checkpoint_at_end": True,
             "max_failures": 999,
             "stop": {
-                "training_iteration": 1,
+                "training_iteration": 500,
             },
-        },
+        }
     },
-    )
+    resume=True)

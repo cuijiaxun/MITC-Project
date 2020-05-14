@@ -30,14 +30,14 @@ from flow.controllers import IDMController, RLController
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 2000
+HORIZON = 600
 # number of rollouts per training iteration
 N_ROLLOUTS = 1
 # number of parallel workers
 N_CPUS = 2
 
 # inflow rate at the highway
-FLOW_RATE = 1500
+FLOW_RATE = 2000
 # percent of autonomous vehicles
 RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -58,14 +58,14 @@ vehicles.add(
         "noise": 0.2
     }),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
     ),
     num_vehicles=0)
 vehicles.add(
     veh_id="human2",
     acceleration_controller=(IDMController, {}),
     car_following_params=SumoCarFollowingParams(
-        speed_mode="obey_safe_speed",
+        speed_mode="all_checks",
     ),
     num_vehicles=0)
 
@@ -77,23 +77,23 @@ inflow.add(
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
     departLane="free",
-    departSpeed=20)
+    departSpeed=10)
 inflow.add(
     veh_type="human2",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
     departLane="free",
-    departSpeed=20)
+    departSpeed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=160,
     departLane="free",
-    departSpeed=20)
+    departSpeed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="Simplemerge_depart20_allhuman",
+    exp_tag="Simplemerge_depart20_allhuman_flowparams_allcheck",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -137,7 +137,10 @@ flow_params = dict(
 
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
-    initial=InitialConfig(),
+    initial=InitialConfig(
+         spacing="uniform",
+         perturbation=5.0,
+    ),
 )
 
 
