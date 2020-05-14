@@ -267,6 +267,28 @@ class MergePOEnv(Env):
         self.follower = []
         return super().reset()
 
+class MergePOEnvEdgePrior(MergePOEnv):
+    @property
+    def observation_space(self):
+        return Box(low=float('-inf'), high=float('inf'), shape=(6 * self.num_rl, ), dtype=np.float32)
+
+
+    def get_state(self):
+        state = super().get_state()
+        observation = [0 for _ in range(6*self.num_rl)]
+        for i,rl_id in enumerate(self.rl_veh):
+            edge = self.k.vehicle.get_edge(rl_id)
+            num_vehicles = len(self.k.vehicle.get_ids_by_edge(edge))
+            length = self.k.network.edge_length(edge)
+            vehicle_length = self.k.vehicle.get_length(rl_id)
+            observation[6 * i + 0] = state[5*i+0]
+            observation[6 * i + 1] = state[5*i+1]
+            observation[6 * i + 2] = state[5*i+2]
+            observation[6 * i + 3] = state[5*i+3]
+            observation[6 * i + 4] = state[5*i+4]
+            observation[6 * i + 5] = num_vehicles*vehicle_length/length
+        return observation
+
 class MergePOEnv_Ignore(MergePOEnv):
     def _apply_rl_actions(self,rl_actions):
         if "ignore_edges" not in env_params.additional_params:
