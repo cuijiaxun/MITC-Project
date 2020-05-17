@@ -47,6 +47,13 @@ parser.add_argument(
     type=int,
     default=50,
     help="The number of rollouts to train over.")
+# optional input parameters
+parser.add_argument(
+    '--memory',
+    type=int,
+    default=4,
+    help="memory in GiB")
+
 
 # optional input parameters
 parser.add_argument(
@@ -80,7 +87,8 @@ if __name__ == "__main__":
     create_env, env_name = make_create_env(params=flow_params, version=0, seeds_file=args.seeds_file)
 
     # initialize a ray instance
-    ray.init()
+    ray.init(
+    object_store_memory=args.memory*1024*1024*1024)
 
     alg_run = "PPO"
 

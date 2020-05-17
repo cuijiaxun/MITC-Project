@@ -8,7 +8,7 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnv
+from flow.envs import MergePOEnvEdgePrior
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -74,10 +74,10 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_0",
+    exp_tag="merge_0_EdgePrior",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnv,
+    env_name=MergePOEnvEdgePrior,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
