@@ -35,7 +35,7 @@ HORIZON = 750
 # number of rollouts per training iteration
 N_ROLLOUTS = 1
 # number of parallel workers
-N_CPUS = 1
+N_CPUS = 0
 
 # inflow rate at the highway
 FLOW_RATE = 2000

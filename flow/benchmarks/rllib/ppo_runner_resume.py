@@ -65,6 +65,12 @@ parser.add_argument(
 parser.add_argument("-s", "--seeds_file", dest="seeds_file",
                     help="pickle file containing seeds", default=None)
 
+# restore from which checkpoint
+parser.add_argument(
+    '--restore',
+    type=str,
+    help="restore from which checkpoint?",
+    )
 
 if __name__ == "__main__":
     benchmark_name = 'grid0'
@@ -135,7 +141,7 @@ if __name__ == "__main__":
         "stop": {
             "training_iteration": 500
         },
-        "num_samples": 3,
+        #"num_samples": 3,
 
     }
 
@@ -144,4 +150,5 @@ if __name__ == "__main__":
 
     trials = run_experiments({
         flow_params["exp_tag"]: exp_tag
-    })
+    },
+    resume=True)
