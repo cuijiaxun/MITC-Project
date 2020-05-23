@@ -87,8 +87,7 @@ if __name__ == "__main__":
     create_env, env_name = make_create_env(params=flow_params, version=0, seeds_file=args.seeds_file)
 
     # initialize a ray instance
-    ray.init(
-    object_store_memory=args.memory*1024*1024*1024)
+    ray.init(object_store_memory=args.memory*1024*1024*1024)
 
     alg_run = "PPO"
 
@@ -135,7 +134,7 @@ if __name__ == "__main__":
         "stop": {
             "training_iteration": 500
         },
-        "num_samples": 3,
+        "num_samples": 2,
 
     }
 

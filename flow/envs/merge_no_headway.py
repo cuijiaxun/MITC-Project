@@ -209,7 +209,7 @@ class MergePOEnv_noheadway(Env):
             # weights for cost1, cost2, and cost3, respectively
             eta1, eta2 = 1.00, 0.0
 
-            return max(eta1 * cost1 + eta2 * cost2, 0)
+            return max(eta1 * cost1, 0)
 
     def additional_command(self):
         """See parent class.

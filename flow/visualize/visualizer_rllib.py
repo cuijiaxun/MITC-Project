@@ -358,9 +358,9 @@ def visualizer_rllib(args):
                 rets[key].append(ret[key])
         else:
             rets.append(ret)
-        outflow = vehicles.get_outflow_rate(500)
+        outflow = vehicles.get_outflow_rate(300)
         final_outflows.append(outflow)
-        inflow = vehicles.get_inflow_rate(500)
+        inflow = vehicles.get_inflow_rate(300)
         final_inflows.append(inflow)
         if np.all(np.array(final_inflows) > 1e-5):
             throughput_efficiency = [x / y for x, y in
