@@ -138,8 +138,8 @@ class Experiment:
             ret_lists.append(ret_list)
             mean_vels.append(np.mean(vel))
             std_vels.append(np.std(vel))
-            outflows.append(self.env.k.vehicle.get_outflow_rate(int(500)))
-            inflows.append(self.env.k.vehicle.get_inflow_rate(int(500)))
+            outflows.append(self.env.k.vehicle.get_outflow_rate(int(300)))
+            inflows.append(self.env.k.vehicle.get_inflow_rate(int(300)))
             print("Round {0}, return: {1}".format(i, ret))
             #print("vel:{}".format(vel))
         info_dict["vel_each_veh"] = vels_each_veh
