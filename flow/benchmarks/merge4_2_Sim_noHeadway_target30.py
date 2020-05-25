@@ -22,9 +22,9 @@ HORIZON = 750
 # inflow rate at the highway
 FLOW_RATE = 2000
 # percent of autonomous vehicles
-RL_PENETRATION = 0.25
+RL_PENETRATION = 0.33
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
-NUM_RL = 13
+NUM_RL = 20
 
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -74,7 +74,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_1_Sim_noHeadway_target30",
+    exp_tag="merge_4_2_Sim_noHeadway_target30_numRL20",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv_noheadway,
