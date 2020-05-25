@@ -18,7 +18,7 @@ from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
 from flow.envs.merge import MergePOEnv,MergePOEnvEdgePrior,MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
-from flow.envs.merge_no_headway import MergePOEnv_noheadway
+from flow.envs.merge_no_headway import MergePOEnv_noheadway, MergePOEnvEdgePrior_noheadway
 from flow.envs.merge_noheadway_encourageRLmove import MergePOEnv_noheadway_encourageRLmove
 from flow.envs.merge_noheadway_encourageRLmove_sumSpeed import MergePOEnv_noheadway_encourageRLmove_sumSpeed
 from flow.envs.merge_noheadway_sumSpeed import MergePOEnv_noheadway_sumSpeed
@@ -41,6 +41,7 @@ __all__ = [
     'TrafficLightGridTestEnv',
     'MergePOEnv',
     'MergePOEnvEdgePrior',
+	'MergePOEnvEdgePrior_noheadway',
     'MergePOEnv_Ignore',
     'MergePOEnv_noheadway',
     'MergePOEnv_noheadway_encourageRLmove',
