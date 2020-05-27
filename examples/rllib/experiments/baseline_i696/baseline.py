@@ -48,7 +48,7 @@ N_CPUS = 2#1#8#2
 #random.seed(13)
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 200
+MERGE_RATE = 100
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -66,7 +66,7 @@ vehicles.add(
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
       # Define speed mode that will minimize collisions: https://sumo.dlr.de/wiki/TraCI/Change_Vehicle_State#speed_mode_.280xb3.29
-      speed_mode= "right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
+      speed_mode=9, #"right_of_way",#"right_of_way", #"right_of_way", #"all_checks", #no_collide",
       #decel=7.5,  # avoid collisions at emergency stops 
       # desired time-gap from leader
       #tau=1, #7,
@@ -80,8 +80,8 @@ vehicles.add(
       # and: ~/local/flow_2019_07/flow/core/params.py, see LC_MODES = {"aggressive": 0 /*bug, 0 is no lane-changes*/, "no_lat_collide": 512, "strategic": 1621}, where "strategic" is the default behavior
       lane_change_mode=1621,#0b011000000001, # (like default 1621 mode, but no lane changes other than strategic to follow route, # 512, #(collision avoidance and safety gap enforcement) # "strategic", 
       #lc_speed_gain=1000000,
-      lc_pushy=0, #0.5, #1,
-      lc_assertive=5, #20,
+      #lc_pushy=0.5, #0.5, #1,
+      #lc_assertive=5, #20,
       # the following two replace default values which are not read well by xml parser
       lc_impatience=1e-8,
       lc_time_to_impatience=1e12
@@ -187,7 +187,7 @@ sumo_params=SumoParams(
 from flow.envs.test import TestEnv
 env_params=EnvParams(
         sims_per_step=2,
-        warmup_steps=200,
+        warmup_steps=500,
         additional_params={
             "max_accel": 9,
             "max_decel": 9,
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,400)#,convert_to_csv=True)
+    _ = exp.run(1,500)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:
