@@ -46,7 +46,6 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"), 'Documents', 'MITC', 'flo
 ###########################
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
-            #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
             "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
@@ -69,9 +68,9 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 800 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 20#1#20
+N_ROLLOUTS = 1#1#20
 # number of parallel workers
-N_CPUS = 4#8#2
+N_CPUS = 1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -126,7 +125,7 @@ vehicles.add(
 
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(SimCarFollowingController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
@@ -246,7 +245,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="1merge_i696_horizon2000_SM9_inflow2000_merge100_depart20_noheadway_EvenShorter",
+    exp_tag="1merge_ALLHUMAN_i696_horizon2000_SM9_inflow2000_merge100_depart20_noheadway_EvenShorter",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -272,8 +271,8 @@ flow_params = dict(
         sims_per_step=2, #5,
         warmup_steps=400,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 9,
+            "max_decel": 9,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
             "ignore_edges":["59440544#0"],
@@ -304,7 +303,7 @@ flow_params = dict(
     ),
 )
 
-'''
+
 def setup_exps(seeds_file=None):
 
     alg_run = "PPO"
@@ -335,8 +334,8 @@ def setup_exps(seeds_file=None):
     register_env(gym_name, create_env)
     return alg_run, gym_name, config
 
-'''
-'''
+
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
@@ -364,4 +363,4 @@ if __name__ == "__main__":
         },
         resume=False,
     )
-'''
+
