@@ -92,10 +92,11 @@ ENV/
 .vscode
 
 # Don't add xml/csv/png
-*.xml
-!*.net.xml
+#*.xml
+#!*.net.xml
 *.csv
 *.png
+*.pkl
 .DS_Store
 
 # Custom for learning-traffic
