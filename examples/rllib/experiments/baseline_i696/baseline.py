@@ -50,7 +50,7 @@ N_CPUS = 2#1#8#2
 #random.seed(13)
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 200
+MERGE_RATE = 100
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
