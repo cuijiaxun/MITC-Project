@@ -34,8 +34,10 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"),'Documents/MITC/flow/scena
 ##########################
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
-            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+            #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
             #"rou" : [os.path.join(scenarios_dir,'i696','i696.rou.i696_onelane_cropped.xml')],
+            #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_shorter.xml')],
+            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
             
@@ -48,7 +50,7 @@ N_CPUS = 2#1#8#2
 #random.seed(13)
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 100
+MERGE_RATE = 200
 
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -89,7 +91,7 @@ vehicles.add(
     num_vehicles=0)
 
 inflow = InFlows()
-
+'''
 inflow.add(
     veh_type="human",
     edge="404969345#0", # flow id sw2w1 from xml file
@@ -101,6 +103,7 @@ inflow.add(
     departLane="free",
     )
 
+'''
 '''
 inflow.add(
     veh_type="rl",
@@ -156,6 +159,7 @@ inflow.add(
     depart_lane="free",
     )
 '''
+'''
 inflow.add(
     veh_type="human",
     edge="38726647", # flow id n2w1 from xml file
@@ -166,6 +170,7 @@ inflow.add(
     departLane="free",
     )
 
+'''
 '''
 inflow.add(
     veh_type="rl",
@@ -187,7 +192,7 @@ sumo_params=SumoParams(
 from flow.envs.test import TestEnv
 env_params=EnvParams(
         sims_per_step=2,
-        warmup_steps=500,
+        warmup_steps=200,
         additional_params={
             "max_accel": 9,
             "max_decel": 9,
@@ -218,7 +223,7 @@ if __name__ == "__main__":
     #env = AccelEnv(env_params,sumo_params,scenario)
     env = TestEnv(env_params,sumo_params,scenario)
     exp = Experiment(env)
-    _ = exp.run(1,500)#,convert_to_csv=True)
+    _ = exp.run(1,400)#,convert_to_csv=True)
     #from IPython import embed
     #embed()
     with open("info.pkl","wb") as f:
