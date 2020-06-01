@@ -387,32 +387,32 @@ def visualizer_rllib(args):
                 np.mean(rew), np.std(rew), agent_id))
     else:
         print(rets)
-        print('Average, std: {}, {}'.format(
+        print('Average, std: {:.2f}, {:.5f}'.format(
             np.mean(rets), np.std(rets)))
 
     print("\nSpeed, mean (m/s):")
     print(mean_speed)
-    print('Average, std: {}, {}'.format(np.mean(mean_speed), np.std(
+    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(mean_speed), np.std(
         mean_speed)))
     print("\nSpeed, std (m/s):")
     print(std_speed)
-    print('Average, std: {}, {}'.format(np.mean(std_speed), np.std(
+    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(std_speed), np.std(
         std_speed)))
 
     # Compute arrival rate of vehicles in the last 500 sec of the run
     print("\nOutflows (veh/hr):")
     print(final_outflows)
-    print('Average, std: {}, {}'.format(np.mean(final_outflows),
+    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(final_outflows),
                                         np.std(final_outflows)))
     # Compute departure rate of vehicles in the last 500 sec of the run
     print("Inflows (veh/hr):")
     print(final_inflows)
-    print('Average, std: {}, {}'.format(np.mean(final_inflows),
+    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(final_inflows),
                                         np.std(final_inflows)))
     # Compute throughput efficiency in the last 500 sec of the
     print("Throughput efficiency (veh/hr):")
     print(throughput_efficiency)
-    print('Average, std: {}, {}'.format(np.mean(throughput_efficiency),
+    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(throughput_efficiency),
                                         np.std(throughput_efficiency)))
 
     if SUMMARY_PLOTS:
