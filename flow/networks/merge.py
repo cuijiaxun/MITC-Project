@@ -21,6 +21,8 @@ ADDITIONAL_NET_PARAMS = {
     "highway_lanes": 1,
     # max speed limit of the network
     "speed_limit": 30,
+    # angle between highway and merge
+    "angle" : pi/4,
 }
 
 
@@ -79,7 +81,7 @@ class MergeNetwork(Network):
 
     def specify_nodes(self, net_params):
         """See parent class."""
-        angle = pi / 4
+        angle = net_params.additional_params["angle"]
         merge = net_params.additional_params["merge_length"]
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]

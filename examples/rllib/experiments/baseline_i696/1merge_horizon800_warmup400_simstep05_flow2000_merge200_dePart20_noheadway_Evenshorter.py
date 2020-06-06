@@ -66,7 +66,7 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 800 #128#600
+HORIZON = 750 #128#600
 # number of rollouts per training iteration
 N_ROLLOUTS = 1#1#20
 # number of parallel workers
@@ -245,7 +245,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="1merge_ALLHUMAN_i696_horizon2000_SM9_inflow2000_merge200_depart20_noheadway_EvenShorter",
+    exp_tag="1merge_ALLHUMAN_i696_horizon750_SM9_inflow2000_merge200_depart20_noheadway_EvenShorter",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -269,7 +269,7 @@ flow_params = dict(
     env=EnvParams(
         horizon=HORIZON,
         sims_per_step=2, #5,
-        warmup_steps=400,
+        warmup_steps=0,
         additional_params={
             "max_accel": 9,
             "max_decel": 9,

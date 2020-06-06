@@ -46,7 +46,7 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"), 'Documents', 'MITC', 'flo
 ###########################
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
-            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
 #
@@ -66,11 +66,11 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 800 #128#600
+HORIZON = 750 #128#600
 # number of rollouts per training iteration
 N_ROLLOUTS = 20#1#20
 # number of parallel workers
-N_CPUS = 4#8#2
+N_CPUS = 10#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -156,6 +156,7 @@ vehicles.add(
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
 inflow = InFlows()
+'''
 inflow.add(
     veh_type="human",
     edge="404969345#0", # flow id sw2w1 from xml file
@@ -166,6 +167,7 @@ inflow.add(
     departSpeed=20,
     departLane="free",
     )
+'''
 '''
 inflow.add(
     veh_type="rl",
@@ -218,6 +220,7 @@ inflow.add(
     depart_lane="free",
     )
 '''
+'''
 inflow.add(
     veh_type="human",
     edge="38726647", # flow id n2w1 from xml file
@@ -227,6 +230,7 @@ inflow.add(
     departSpeed=20,
     departLane="free",
     )
+'''
 '''
 inflow.add(
     veh_type="rl",
@@ -265,10 +269,10 @@ flow_params = dict(
     env=EnvParams(
         horizon=HORIZON,
         sims_per_step=2, #5,
-        warmup_steps=400,
+        warmup_steps=0,
         additional_params={
-            "max_accel": 9,
-            "max_decel": 9,
+            "max_accel": 1.5,
+            "max_decel": 1.5,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
             "ignore_edges":["59440544#0"],
@@ -309,10 +313,12 @@ def setup_exps(seeds_file=None):
     config["num_workers"] = N_CPUS
     config["train_batch_size"] = HORIZON * N_ROLLOUTS
     config["gamma"] = 0.999  # discount rate
-    config["model"].update({"fcnet_hiddens": [32, 32, 32]})
+    config["model"].update({"fcnet_hiddens": [100,50,25]})
     config["use_gae"] = True
     config["lambda"] = 0.97
     config["kl_target"] = 0.02
+    step_size = 1e-6
+    config["lr"]=step_size
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
@@ -355,7 +361,7 @@ if __name__ == "__main__":
                 "max_failures": 999,
                 "restore":args.resume,
                 "stop": {
-                    "training_iteration": 1,
+                    "training_iteration": 600,
                 },
             },
         },
