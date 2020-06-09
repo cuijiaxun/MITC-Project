@@ -46,7 +46,7 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 # - 1: 25% RL penetration, 13 max controllable vehicles
 # - 2: 33% RL penetration, 17 max controllable vehicles
 
-N_CPUS = 2#1#8#2
+N_CPUS = 1#1#8#2
 #random.seed(13)
 # inflow rate at the highway
 FLOW_RATE = 2000

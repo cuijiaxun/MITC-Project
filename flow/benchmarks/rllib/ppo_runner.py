@@ -47,6 +47,12 @@ parser.add_argument(
     type=int,
     default=50,
     help="The number of rollouts to train over.")
+parser.add_argument(
+    '--training_iterations',
+    type=int,
+    default=500,
+    help="The number of iterations to train over.")
+
 # optional input parameters
 parser.add_argument(
     '--memory',
@@ -132,7 +138,7 @@ if __name__ == "__main__":
         "checkpoint_freq": 5,
         "max_failures": 999,
         "stop": {
-            "training_iteration": 500
+            "training_iteration": args.training_iterations,
         },
         "num_samples": 1,
 

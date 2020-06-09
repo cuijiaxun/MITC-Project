@@ -32,10 +32,10 @@ NUM_RL = 5
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 additional_net_params["merge_lanes"] = 1
 additional_net_params["highway_lanes"] = 1
-additional_net_params["pre_merge_length"] = 1000
+additional_net_params["pre_merge_length"] = 717.81
 additional_net_params["angle"] = pi/36
-additional_net_params["merge_length"] = 700
-additional_net_params["post_merge_length"]=500
+additional_net_params["merge_length"] = 2044
+additional_net_params["post_merge_length"]=375.56
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(

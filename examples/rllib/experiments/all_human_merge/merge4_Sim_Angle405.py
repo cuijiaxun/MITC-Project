@@ -8,8 +8,6 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-
-from flow.envs import MergePOEnv
 import json
 
 import ray
@@ -21,12 +19,10 @@ from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
 from flow.envs import MergePOEnv
-from copy import deepcopy
 from flow.networks import MergeNetwork
+from copy import deepcopy
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
-from flow.networks import MergeNetwork
-from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -35,6 +31,10 @@ from flow.controllers import SimCarFollowingController, RLController,IDMControll
 from numpy import pi
 # time horizon of a single rollout
 HORIZON = 750
+# number of rollouts per training iteration
+N_ROLLOUTS = 1
+# number of parallel workers
+N_CPUS = 1
 # inflow rate at the highway
 FLOW_RATE = 2000
 MERGE_RATE = 200
@@ -48,10 +48,10 @@ NUM_RL = 5
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 additional_net_params["merge_lanes"] = 1
 additional_net_params["highway_lanes"] = 1
-additional_net_params["pre_merge_length"] = 1000
+additional_net_params["pre_merge_length"] = 717.81
 additional_net_params["angle"] = pi/36
-additional_net_params["merge_length"] = 700
-additional_net_params["post_merge_length"]=500
+additional_net_params["merge_length"] = 2044
+additional_net_params["post_merge_length"]=375.56
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(
@@ -155,10 +155,10 @@ def setup_exps():
 
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
-    config["num_workers"] = 1
-    config["train_batch_size"] = HORIZON
+    config["num_workers"] = N_CPUS
+    config["train_batch_size"] = HORIZON * N_ROLLOUTS
     config["gamma"] = 0.999  # discount rate
-    config["model"].update({"fcnet_hiddens": [2, 2, 2]})
+    config["model"].update({"fcnet_hiddens": [32, 32, 32]})
     config["use_gae"] = True
     config["lambda"] = 0.97
     config["kl_target"] = 0.02
@@ -181,8 +181,8 @@ def setup_exps():
 
 if __name__ == "__main__":
     alg_run, gym_name, config = setup_exps()
-    ray.init(num_cpus= 2,
-        object_store_memory = 2048*1024*1024)
+    ray.init(num_cpus=N_CPUS + 1,
+    object_store_memory=1024*1024*1024)
     trials = run_experiments({
         flow_params["exp_tag"]: {
             "run": alg_run,
