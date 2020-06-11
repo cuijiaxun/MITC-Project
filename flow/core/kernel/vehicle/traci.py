@@ -499,7 +499,7 @@ class TraCIVehicle(KernelVehicle):
     def get_num_arrived(self):
         """See parent class."""
         if len(self._num_arrived) > 0:
-            return self._num_arrived[-1]
+            return sum(self._num_arrived)
         else:
             return 0
 

@@ -79,7 +79,7 @@ def generateHtmlplots(actions, rewards, states):
             ),
             opacity=0.8
         )
-    )
+    ) 
     data = [trace1]
     layout = go.Layout(
       margin=dict(
@@ -286,15 +286,18 @@ def visualizer_rllib(args):
     actions = []
     rewards = []
     states = []
+    times = []
     WARMUP = args.warmup
     for i in range(args.num_rollouts):
         vel = []
+        time_to_exit = 0
         state = env.reset()
         if multiagent:
             ret = {key: [0] for key in rets.keys()}
         else:
             ret = 0
         for _ in range(env_params.horizon):
+            time_to_exit += 1;
             vehicles = env.unwrapped.k.vehicle
             if np.mean(vehicles.get_speed(vehicles.get_ids()))>0:
                 vel.append(np.mean(vehicles.get_speed(vehicles.get_ids())))
@@ -352,6 +355,9 @@ def visualizer_rllib(args):
                 break
             if not multiagent and done:
                 break
+            if args.use_delay>0:
+                if vehicles.get_num_arrived()>=args.use_delay :
+                    break
             
         if multiagent:
             for key in rets.keys():
@@ -362,6 +368,7 @@ def visualizer_rllib(args):
         final_outflows.append(outflow)
         inflow = vehicles.get_inflow_rate(300)
         final_inflows.append(inflow)
+        times.append(time_to_exit)
         if np.all(np.array(final_inflows) > 1e-5):
             throughput_efficiency = [x / y for x, y in
                                      zip(final_outflows, final_inflows)]
@@ -414,7 +421,12 @@ def visualizer_rllib(args):
     print(throughput_efficiency)
     print('Average, std: {:.2f}, {:.5f}'.format(np.mean(throughput_efficiency),
                                         np.std(throughput_efficiency)))
+    print("Time Delay")
+    print(times)
+    print("Time for certain number of vehicles to exit {:.2f},{:.5f}".format((np.mean(times)),np.std(times)))
 
+    if args.output:
+        np.savetxt(args.output, [mean_speed, std_speed,final_inflows, final_outflows,times])
     if SUMMARY_PLOTS:
       generateHtmlplots(actions, rewards, states)
 
@@ -457,7 +469,7 @@ def visualizer_rllib(args):
         os_cmd += " -pix_fmt yuv420p " + dirs[-1] + ".mp4"
         os_cmd += "&& cp " + dirs[-1] + ".mp4 " + save_dir + "/"
         os.system(os_cmd)
-
+    
 
 def create_parser():
     """Create the parser to capture CLI arguments."""
@@ -515,9 +527,9 @@ def create_parser():
         '--warmup',
         type=int,
         default=800,)
+    parser.add_argument('-o','--output',type=str,help='output file')
+    parser.add_argument('--use_delay',type=int,help='weather use time delay or not')
     return parser
-
-
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
