@@ -266,7 +266,14 @@ class MergePOEnv(Env):
         self.leader = []
         self.follower = []
         return super().reset()
+class MergePOEnvPunishDelay(MergePOEnv):
 
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.k.vehicle.get_num_arrived()>=100:
+            return 100
+        return -1
+
+ 
 class MergePOEnvEdgePrior(MergePOEnv):
     @property
     def observation_space(self):

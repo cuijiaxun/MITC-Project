@@ -122,6 +122,7 @@ class Env(gym.Env):
             if the render mode is not set to a valid value
         """
         self.env_params = env_params
+        self.time_with_no_vehicles = 0
         if scenario is not None:
             deprecated_attribute(self, "scenario", "network")
         self.network = scenario if scenario is not None else network
@@ -393,11 +394,16 @@ class Env(gym.Env):
 
         # collect observation new state associated with action
         next_observation = np.copy(states)
-
+        
+        if(len(self.k.vehicle.get_ids())) == 0:
+            self.time_with_no_vehicles +=1
+        else:
+            self.time_with_no_vehicles = 0
+        
         # test if the environment should terminate due to a collision or the
         # time horizon being met
         done = (self.time_counter >= self.env_params.warmup_steps +
-                self.env_params.horizon) #  or crash
+                self.env_params.horizon) or self.time_with_no_vehicles > 20#  or crash
 
         # compute the info for each agent
         infos = {}
@@ -432,7 +438,7 @@ class Env(gym.Env):
         """
         # reset the time counter
         self.time_counter = 0
-
+        self.time_with_no_vehicles = 0
         # warn about not using restart_instance when using inflows
         if len(self.net_params.inflows.get()) > 0 and \
                 not self.sim_params.restart_instance:

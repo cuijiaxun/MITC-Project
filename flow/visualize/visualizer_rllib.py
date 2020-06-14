@@ -528,7 +528,7 @@ def create_parser():
         type=int,
         default=800,)
     parser.add_argument('-o','--output',type=str,help='output file')
-    parser.add_argument('--use_delay',type=int,help='weather use time delay or not')
+    parser.add_argument('--use_delay',type=int,default=-1,help='weather use time delay or not')
     return parser
 if __name__ == '__main__':
     parser = create_parser()
