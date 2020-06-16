@@ -69,9 +69,9 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 1500 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 1#1#20
+N_ROLLOUTS = 20#1#20
 # number of parallel workers
-N_CPUS = 1#8#2
+N_CPUS = 4#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -126,7 +126,7 @@ vehicles.add(
 
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(RLController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
@@ -245,7 +245,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="3merge_i696_ALLHUMAN_horizon1500_wamrup0_SM9_inflow2000_merge200_depart10_noheadway",
+    exp_tag="3merge_i696_horizon1500_wamrup0_SM9_inflow2000_merge200_depart10_noheadway",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -273,8 +273,7 @@ flow_params = dict(
         additional_params={
             "max_accel": 1.5,
             "max_decel": 1.5,
-            
-"target_velocity": 30,
+            "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
             "ignore_edges":["59440544#0"],
         },
@@ -303,8 +302,7 @@ flow_params = dict(
       scenario_road_data["edges_distribution"]
     ),
 )
-
-
+'''
 def setup_exps(seeds_file=None):
 
     alg_run = "PPO"
@@ -354,14 +352,14 @@ if __name__ == "__main__":
                 "config": {
                     **config
                 },
-                "checkpoint_freq": 1, #20,
+                "checkpoint_freq": 5, #20,
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {
-                    "training_iteration": 1,
+                    "training_iteration": 1000,
                 },
             },
         },
         resume=False,
     )
-
+'''

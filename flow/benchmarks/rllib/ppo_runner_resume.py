@@ -136,10 +136,11 @@ if __name__ == "__main__":
         "config": {
             **config
         },
+        "restore":args.restore,
         "checkpoint_freq": 5,
         "max_failures": 999,
         "stop": {
-            "training_iteration": 500
+            "training_iteration": 1000
         },
         #"num_samples": 3,
 
@@ -151,4 +152,4 @@ if __name__ == "__main__":
     trials = run_experiments({
         flow_params["exp_tag"]: exp_tag
     },
-    resume=True)
+    )
