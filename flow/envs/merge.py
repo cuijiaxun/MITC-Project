@@ -22,6 +22,8 @@ ADDITIONAL_ENV_PARAMS = {
     "target_velocity": 25,
     # maximum number of controllable vehicles in the network
     "num_rl": 5,
+    # maximum number of vehicles arrived
+    #"max_num_vehicles":-1,
 }
 
 
@@ -266,14 +268,52 @@ class MergePOEnv(Env):
         self.leader = []
         self.follower = []
         return super().reset()
+
+class MergePOEnvSparseRewardDelay(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if 'max_num_vehicles' in self.env_params.additional_params.keys():
+            max_num_vehicles = self.env_params.additional_params['max_num_vehicles']
+            if max_num_vehicles > 0:
+                if self.k.vehicle.get_num_arrived() >= max_num_vehicles:
+                    return 100
+        return -1
+
 class MergePOEnvPunishDelay(MergePOEnv):
 
     def compute_reward(self, rl_actions, **kwargs):
-        if self.k.vehicle.get_num_arrived()>=100:
-            return 100
         return -1
 
- 
+class MergePOEnvGuidedPunishDelay(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            # return a reward of 0 if a collision occurred
+            if kwargs["fail"]:
+                return 0
+
+            # reward high system-level velocities
+            cost1 = rewards.desired_velocity(self, fail=kwargs["fail"])
+
+            # penalize small time headways
+            cost2 = 0
+            t_min = 1  # smallest acceptable time headway
+            for rl_id in self.rl_veh:
+                lead_id = self.k.vehicle.get_leader(rl_id)
+                if lead_id not in ["", None] \
+                        and self.k.vehicle.get_speed(rl_id) > 0:
+                    t_headway = max(
+                        self.k.vehicle.get_headway(rl_id) /
+                        self.k.vehicle.get_speed(rl_id), 0)
+                    cost2 += min((t_headway - t_min) / t_min, 0)
+
+            # weights for cost1, cost2, and cost3, respectively
+            eta1, eta2 = 1.00, 0.00
+
+            return max(eta1 * cost1 + eta2 * cost2, 0) - 1
+  
+
+
 class MergePOEnvEdgePrior(MergePOEnv):
     @property
     def observation_space(self):

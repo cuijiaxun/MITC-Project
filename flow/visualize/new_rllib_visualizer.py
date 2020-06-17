@@ -22,18 +22,20 @@ import time
 import pprint
 import matplotlib.pyplot as plt
 import ray
+import copy
+from ray.tune.utils import merge_dicts
 try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
-from ray.tune.registry import register_env
+from ray.tune.registry import register_env,get_trainable_cls
 
 from flow.core.util import emission_to_csv
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
-
+from ray.rllib.agents.callbacks import DefaultCallbacks
 
 EXAMPLE_USAGE = """
 example usage:
@@ -96,6 +98,14 @@ def generateHtmlplots(actions, rewards, states):
     )
     plot(go.Figure(data=data, layout=layout), filename='speed-dist-2-action')
 
+class MyCallbacks(DefaultCallbacks):
+    def on_episode_start(self, worker, base_env, policies, episode, **kwargs):
+        # save env state when an episode starts
+        env = base_env.get_unwrapped()[0]
+        state = env.get_state()
+        episode.user_data["initial_state"] = state
+
+
 def visualizer_rllib(args):
     """Visualizer for RLlib experiments.
 
@@ -117,6 +127,7 @@ def visualizer_rllib(args):
     else:
         multiagent = False
 
+    config['callbacks'] = MyCallbacks
     # Run on only one cpu for rendering purposes
     config['num_workers'] = 0
 
@@ -137,10 +148,15 @@ def visualizer_rllib(args):
                   + 'differs from the one stored in params.json '
                   + '\'{}\''.format(config_run))
             sys.exit(1)
+    
+    # Merge with `evaluation_config`.
+    evaluation_config = copy.deepcopy(config.get("evaluation_config", {}))
+    config = merge_dicts(config, evaluation_config) 
+    
     if args.run:
-        agent_cls = get_agent_class(args.run)
+        agent_cls = get_trainable_cls(args.run)
     elif config_run:
-        agent_cls = get_agent_class(config_run)
+        agent_cls = get_trainable_cls(config_run)
     else:
         print('visualizer_rllib.py: error: could not find flow parameter '
               '\'run\' in params.json, '

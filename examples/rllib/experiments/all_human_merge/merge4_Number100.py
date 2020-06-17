@@ -75,21 +75,21 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    number = int(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER),
+    number = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    number = int(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
+    number = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=MERGE_RATE,
-    number = int(MERGE_RATE/(FLOW_RATE+MERGE_RATE)*VEHICLE_NUMBER),
+    number = round(MERGE_RATE/(FLOW_RATE+MERGE_RATE)*VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=7.5)
 
@@ -121,8 +121,9 @@ flow_params = dict(
         additional_params={
             "max_accel": 1.5,
             "max_decel": 1.5,
-            "target_velocity": 20,
+            "target_velocity": 30,
             "num_rl": NUM_RL,
+            "max_num_vehicles":VEHICLE_NUMBER,
         },
     ),
 

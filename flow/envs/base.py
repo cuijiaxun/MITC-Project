@@ -119,7 +119,56 @@ class Env(gym.Env):
         Raises
         ------
         flow.utils.exceptions.FatalFlowError
-            if the render mode is not set to a valid value
+            if the render mode is not set to a valid valuefor _ in range(self.env_params.sims_per_step):
+            self.time_counter += 1
+            self.step_counter += 1
+
+            # perform acceleration actions for controlled human-driven vehicles
+            if len(self.k.vehicle.get_controlled_ids()) > 0:
+                accel = []
+                for veh_id in self.k.vehicle.get_controlled_ids():
+                    action = self.k.vehicle.get_acc_controller(
+                        veh_id).get_action(self)
+                    accel.append(action)
+                    if self.k.vehicle.get_edge(veh_id)[0] == ":":
+                        if self.k.vehicle.get_speed(veh_id) <=  0.00000001:
+                            print(self.time_counter,'veh_id:',veh_id,'its leader:',self.k.vehicle.get_leader(veh_id),'headway to leader:',self.k.vehicle.get_headway(veh_id),'action:',action,'speed:',self.k.vehicle.get_speed(veh_id))
+                            #if self.k.vehicle.get_leader(self.k.vehicle.get_leader(veh_id))==veh_id:
+                            #    break
+
+                self.k.vehicle.apply_acceleration(
+                    self.k.vehicle.get_controlled_ids(), accel)
+
+            # perform lane change actions for controlled human-driven vehicles
+            if len(self.k.vehicle.get_controlled_lc_ids()) > 0:
+                direction = []
+                for veh_id in self.k.vehicle.get_controlled_lc_ids():
+                    target_lane = self.k.vehicle.get_lane_changing_controller(
+                        veh_id).get_action(self)
+                    direction.append(target_lane)
+                self.k.vehicle.apply_lane_change(
+                    self.k.vehicle.get_controlled_lc_ids(),
+                    direction=direction)
+
+            # perform (optionally) routing actions for all vehicles in the
+            # network, including RL and SUMO-controlled vehicles
+            routing_ids = []
+            routing_actions = []
+            for veh_id in self.k.vehicle.get_ids():
+                if self.k.vehicle.get_routing_controller(veh_id) \
+                        is not None:
+                    routing_ids.append(veh_id)
+                    route_contr = self.k.vehicle.get_routing_controller(
+                        veh_id)
+                    routing_actions.append(route_contr.choose_route(self))
+
+            self.k.vehicle.choose_routes(routing_ids, routing_actions)
+
+            self.apply_rl_actions(rl_actions)
+
+            #self.additional_command()
+
+            # advance the simulation in the simulator by one step
         """
         self.env_params = env_params
         self.time_with_no_vehicles = 0
@@ -395,15 +444,25 @@ class Env(gym.Env):
         # collect observation new state associated with action
         next_observation = np.copy(states)
         
-        if(len(self.k.vehicle.get_ids())) == 0:
-            self.time_with_no_vehicles +=1
-        else:
-            self.time_with_no_vehicles = 0
+        done = False
+        # exit if there are 20 steps without vehicles 
+        #if(len(self.k.vehicle.get_ids())) == 0:
+        #    self.time_with_no_vehicles +=1
+        #else:
+        #    self.time_with_no_vehicles = 0
+        #done = self.time_with_no_vehicles > 20
         
+        #check if enough number of vehicles has exited the network
+        if('max_num_vehicles' in self.env_params.additional_params):
+            max_num_vehicles = self.env_params.additional_params['max_num_vehicles']
+            #print("max_num_vehicles specified")
+            if(max_num_vehicles > 0):
+                done = self.k.vehicle.get_num_arrived() >= max_num_vehicles
+                #print("num of vehicle exited: ", self.k.vehicle.get_num_arrived(),"/",max_num_vehicles)
         # test if the environment should terminate due to a collision or the
         # time horizon being met
         done = (self.time_counter >= self.env_params.warmup_steps +
-                self.env_params.horizon) or self.time_with_no_vehicles > 20#  or crash
+                self.env_params.horizon) or done #  or crash
 
         # compute the info for each agent
         infos = {}
@@ -414,10 +473,8 @@ class Env(gym.Env):
             reward = self.compute_reward(rl_clipped, fail=crash)
         else:
             reward = self.compute_reward(rl_actions, fail=crash)
-        if crash:
-            #from IPython import embed
-            #embed()
-            print("crash")
+        
+
         return next_observation, reward, done, infos
 
     def reset(self):
