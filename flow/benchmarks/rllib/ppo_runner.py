@@ -68,8 +68,20 @@ parser.add_argument(
     default=2,
     help="The number of cpus to use.")
 
+parser.add_argument(
+    '--num_gpus',
+    type=int,
+    default=0,
+    help="The number of gpus to use.")
+
 parser.add_argument("-s", "--seeds_file", dest="seeds_file",
                     help="pickle file containing seeds", default=None)
+
+parser.add_argument(
+        '--lr',
+        type=float,
+        default=5e-4,
+        help="learning rate")
 
 
 if __name__ == "__main__":
@@ -101,6 +113,7 @@ if __name__ == "__main__":
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
     config["num_workers"] = min(num_cpus, num_rollouts)
+    config["num_gpus"] = args.num_gpus
     config["train_batch_size"] = horizon * num_rollouts
     config["use_gae"] = True
     config["horizon"] = horizon
@@ -112,7 +125,7 @@ if __name__ == "__main__":
     elif benchmark_name == "grid1":
         gae_lambda = 0.3
     config["lambda"] = gae_lambda
-    config["lr"] = step_size
+    config["lr"] = args.lr
     config["vf_clip_param"] = 1e6
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug

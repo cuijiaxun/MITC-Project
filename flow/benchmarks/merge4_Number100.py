@@ -104,7 +104,7 @@ flow_params = dict(
         additional_params={
             "max_accel": 1.5,
             "max_decel": 1.5,
-            "target_velocity": 20,
+            "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,
         },
