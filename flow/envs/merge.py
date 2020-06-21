@@ -275,8 +275,12 @@ class MergePOEnvSparseRewardDelay(MergePOEnv):
             max_num_vehicles = self.env_params.additional_params['max_num_vehicles']
             if max_num_vehicles > 0:
                 if self.k.vehicle.get_num_arrived() >= max_num_vehicles:
-                    return 100
-        return -1
+                    return - self.time_counter
+        
+        if self.time_counter >= self.env_params.warmup_steps + self.env_params.horizon :
+            return - self.time_counter
+
+        return 0
 
 class MergePOEnvPunishDelay(MergePOEnv):
 

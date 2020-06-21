@@ -18,7 +18,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnv
+from flow.envs import MergePOEnvPunishDelay
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.utils.registry import make_create_env
@@ -31,7 +31,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 750
+HORIZON = 2000
 # number of rollouts per training iteration
 N_ROLLOUTS = 1
 # number of parallel workers
@@ -59,7 +59,7 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=5)
+    num_vehicles=0)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(SimCarFollowingController, {}),
@@ -85,6 +85,8 @@ inflow.add(
     number = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=10)
+
+
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
@@ -93,12 +95,13 @@ inflow.add(
     depart_lane="free",
     depart_speed=7.5)
 
+
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_ALLHUMAN_Sim_Number100",
+    exp_tag="merge_4_ALLHUMAN_Sim_Number100_PunishDelay",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnv,
+    env_name=MergePOEnvPunishDelay,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -119,8 +122,8 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.5,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,

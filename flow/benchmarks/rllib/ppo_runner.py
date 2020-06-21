@@ -114,7 +114,8 @@ if __name__ == "__main__":
     config = agent_cls._default_config.copy()
     config["num_workers"] = min(num_cpus, num_rollouts)
     config["num_gpus"] = args.num_gpus
-    config["train_batch_size"] = horizon * num_rollouts
+    config["train_batch_size"] = int(horizon * num_rollouts)/2
+    config["sgd_minibatch_size"] = 1024
     config["use_gae"] = True
     config["horizon"] = horizon
     gae_lambda = 0.97
@@ -124,13 +125,23 @@ if __name__ == "__main__":
         step_size = 5e-5
     elif benchmark_name == "grid1":
         gae_lambda = 0.3
+    config["gamma"] = 0.999
     config["lambda"] = gae_lambda
     config["lr"] = args.lr
+    '''
+    config["lr_schedule"] = [
+            [0, args.lr],
+            [1000000,args.lr/1.5],
+            [4000000,args.lr/10]]
+    '''
     config["vf_clip_param"] = 1e6
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["model"]["fcnet_hiddens"] = [100, 50, 25]
     config["observation_filter"] = "NoFilter"
+    #config["entropy_coeff"] = 0.01
+    #config["kl_coeff"] = 0.5
+    #config["kl_target"] = 0.02
     #config["seed"] = 123 # seed for PPO?
 
     # save the flow params for replay
@@ -148,12 +159,12 @@ if __name__ == "__main__":
         "config": {
             **config
         },
-        "checkpoint_freq": 5,
+        "checkpoint_freq": 25,
         "max_failures": 999,
         "stop": {
             "training_iteration": args.training_iterations,
         },
-        "num_samples": 1,
+        "num_samples": 2,
 
     }
 

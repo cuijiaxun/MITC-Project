@@ -62,6 +62,14 @@ parser.add_argument(
     default=2,
     help="The number of cpus to use.")
 
+parser.add_argument(
+    '--num_gpus',
+    type=int,
+    default=0,
+    help="The number of gpus to use.")
+
+
+
 parser.add_argument("-s", "--seeds_file", dest="seeds_file",
                     help="pickle file containing seeds", default=None)
 
@@ -71,6 +79,11 @@ parser.add_argument(
     type=str,
     help="restore from which checkpoint?",
     )
+parser.add_argument(
+        '--lr',
+        type=float,
+        default=5e-4,
+        help="learning rate")
 
 if __name__ == "__main__":
     benchmark_name = 'grid0'
@@ -152,4 +165,5 @@ if __name__ == "__main__":
     trials = run_experiments({
         flow_params["exp_tag"]: exp_tag
     },
+    resume = True,
     )

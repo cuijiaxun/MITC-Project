@@ -8,7 +8,7 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnvSparseRewardDelay
+from flow.envs import MergePOEnvGuidedPunishDelay
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 2000
+HORIZON = 6000
 # inflow rate at the highway
 FLOW_RATE = 2000
 MERGE_RATE = 200
@@ -78,10 +78,10 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_SparseRewardDelay_Number100",
+    exp_tag="merge_4_Sim_Guided_PunishDelay_Number100_accelTrial_noheadway",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvSparseRewardDelay,
+    env_name=MergePOEnvGuidedPunishDelay,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -93,17 +93,17 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=False,
+        render=True,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=1,
+        sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.5,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,

@@ -78,7 +78,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_SparseRewardDelay_Number100",
+    exp_tag="merge_4_Sim_SparseRewardDelay_Number100_accelTrial",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnvSparseRewardDelay,
@@ -99,11 +99,11 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=1,
+        sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.5,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,
