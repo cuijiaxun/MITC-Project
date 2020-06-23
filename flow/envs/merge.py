@@ -269,6 +269,17 @@ class MergePOEnv(Env):
         self.follower = []
         return super().reset()
 
+class MergePOEnvMinDelay(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        reward = rewards.min_delay(self)
+        return reward
+
+class MergePOEnvAvgVel(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        reward = rewards.average_velocity(self)
+        return reward
+
+
 class MergePOEnvSparseRewardDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         if 'max_num_vehicles' in self.env_params.additional_params.keys():
