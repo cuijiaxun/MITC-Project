@@ -294,9 +294,22 @@ class MergePOEnvSparseRewardDelay(MergePOEnv):
         return 0
 
 class MergePOEnvPunishDelay(MergePOEnv):
-
     def compute_reward(self, rl_actions, **kwargs):
         return -1
+
+class MergePOEnvIncludePotential(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if 'max_num_vehicles' in self.env_params.additional_params.keys():
+            max_num_vehicles = self.env_params.additional_params['max_num_vehicles']
+            if max_num_vehicles > 0:
+                num_arrived = self.k.vehicle.get_num_arrived()
+                num_remain = max_num_vehicles - num_arrived
+                vel = self.k.vehicle.get_speed(self.k.vehicle.get_ids())
+                vel_sum = np.sum(vel)
+                reward = vel_sum/(num_remain+1e-6)
+        else:
+            reward = rewards.average_velocity(self)
+        return reward
 
 class MergePOEnvGuidedPunishDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
