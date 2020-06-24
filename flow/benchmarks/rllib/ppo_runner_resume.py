@@ -165,5 +165,5 @@ if __name__ == "__main__":
     trials = run_experiments({
         flow_params["exp_tag"]: exp_tag
     },
-    resume = True,
+    #resume = True,
     )

@@ -277,7 +277,7 @@ class MergePOEnvMinDelay(MergePOEnv):
 class MergePOEnvAvgVel(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         reward = rewards.average_velocity(self)
-        return reward
+        return reward/30
 
 
 class MergePOEnvSparseRewardDelay(MergePOEnv):
