@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 6000
+HORIZON = 2000
 # inflow rate at the highway
 FLOW_RATE = 2000
 MERGE_RATE = 200

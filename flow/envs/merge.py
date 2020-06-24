@@ -56,7 +56,7 @@ class MergePOEnv(Env):
         autonomous vehicle $i$. In order to ensure safety, these actions are
         bounded by failsafes provided by the simulator at every time step.
 
-        In order to account for variability in the number of autonomous
+        In order to account for variability in the number of autonomself.k.vehicle.get_speed(self.k.vehicle.get_ids())ous
         vehicles, if n_AV < "num_rl" the additional actions provided by the
         agent are not assigned to any vehicle. Moreover, if n_AV > "num_rl",
         the additional vehicles are not provided with actions from the learning
@@ -295,7 +295,7 @@ class MergePOEnvSparseRewardDelay(MergePOEnv):
 
 class MergePOEnvPunishDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
-        return -1
+        return -0.1
 
 class MergePOEnvIncludePotential(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
@@ -305,8 +305,8 @@ class MergePOEnvIncludePotential(MergePOEnv):
                 num_arrived = self.k.vehicle.get_num_arrived()
                 num_remain = max_num_vehicles - num_arrived
                 vel = self.k.vehicle.get_speed(self.k.vehicle.get_ids())
-                vel_sum = np.sum(vel)
-                reward = vel_sum/(num_remain+1e-6)
+                vel_sum = np.sum(vel)# + num_remain * 30
+                reward = vel_sum/(num_remain + 1e-6)
         else:
             reward = rewards.average_velocity(self)
         return reward

@@ -128,12 +128,12 @@ if __name__ == "__main__":
     config["gamma"] = 0.999
     config["lambda"] = gae_lambda
     config["lr"] = args.lr
-    '''
+    
     config["lr_schedule"] = [
             [0, args.lr],
             [1000000,args.lr/1.5],
-            [4000000,args.lr/10]]
-    '''
+            [4000000,args.lr/5]]
+    
     config["vf_clip_param"] = 1e6
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         "stop": {
             "training_iteration": args.training_iterations,
         },
-        "num_samples": 1,
+        "num_samples": 2,
 
     }
 
