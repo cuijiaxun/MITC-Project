@@ -16,7 +16,7 @@ from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
       WaveAttenuationPORadius1EnvAvgSpeedNormalized, \
       WaveAttenuationPORadius2EnvAvgSpeedNormalized  
 from flow.envs.merge import MergePOEnv,MergePOEnvEdgePrior,MergePOEnvPunishDelay,MergePOEnvGuidedPunishDelay,MergePOEnvSparseRewardDelay,\
-                            MergePOEnvMinDelay, MergePOEnvAvgVel, MergePOEnvIncludePotential,\
+                            MergePOEnvMinDelay, MergePOEnvAvgVel, MergePOEnvIncludePotential, MergePOEnvScaleInflow,\
                             MergePORadius2Env, MergePORadius4Env, MergePORadius7Env
 from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
@@ -43,6 +43,7 @@ __all__ = [
     'TrafficLightGridTestEnv',
     'MergePOEnv',
     'MergePOEnvEdgePrior',
+    'MergePOEnvScaleInflow',
     'MergePOEnvEdgePrior_noheadway',
     'MergePOEnvGuidedPunishDelay',
     'MergePOEnvSparseRewardDelay',

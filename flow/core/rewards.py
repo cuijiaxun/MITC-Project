@@ -313,7 +313,7 @@ def punish_rl_lane_changes(env, penalty=1):
     return total_lane_change_penalty
 
 
-def optimize_outflow(env,max_flow = 2000,timespan=100):
+def optimize_outflow(env,max_flow = 2000,timespan=10):
     vehicles = env.k.vehicle
     outflow = vehicles.get_outflow_rate(timespan)
 
@@ -321,6 +321,6 @@ def optimize_outflow(env,max_flow = 2000,timespan=100):
 
 def optimize_inflow(env,max_flow = 2000,timespan=10):
     vehicles = env.k.vehicle
-    inflow = vehicles.get_inflow_rate(10)
+    inflow = vehicles.get_inflow_rate(timespan)
 
     return inflow/max_flow

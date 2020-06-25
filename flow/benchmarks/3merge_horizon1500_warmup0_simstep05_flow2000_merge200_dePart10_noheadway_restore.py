@@ -245,7 +245,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="3merge_i696_horizon1500_wamrup0_SM9_inflow2000_merge200_depart10_noheadway",
+    exp_tag="3merge_i696_horizon1500_wamrup0_SM9_inflow2000_merge200_depart10_noheadway_transfer",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,

@@ -269,6 +269,37 @@ class MergePOEnv(Env):
         self.follower = []
         return super().reset()
 
+
+class MergePOEnvScaleInflow(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            # return a reward of 0 if a collision occurred
+            if kwargs["fail"]:
+                return 0
+
+            # reward high system-level velocities
+            cost1 = rewards.desired_velocity(self, fail=kwargs["fail"])
+
+            # penalize small time headways
+            cost2 = 0
+            t_min = 1  # smallest acceptable time headway
+            for rl_id in self.rl_veh:
+                lead_id = self.k.vehicle.get_leader(rl_id)
+                if lead_id not in ["", None] \
+                        and self.k.vehicle.get_speed(rl_id) > 0:
+                    t_headway = max(
+                        self.k.vehicle.get_headway(rl_id) /
+                        self.k.vehicle.get_speed(rl_id), 0)
+                    cost2 += min((t_headway - t_min) / t_min, 0)
+            InflowScale = rewards.optimize_inflow(self, max_flow=2200,timespan=500)
+            # weights for cost1, cost2, and cost3, respectively
+            eta1, eta2 = 1.00, 0.00
+            reward = max(eta1 * cost1 + eta2 * cost2, 0) * InflowScale
+            return reward
+
 class MergePOEnvMinDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         reward = rewards.min_delay(self)
