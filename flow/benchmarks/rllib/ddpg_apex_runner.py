@@ -147,12 +147,12 @@ if __name__ == "__main__":
         "config": {
             **config
         },
-        "checkpoint_freq": 5,
+        "checkpoint_freq": 25,
         "max_failures": 999,
         "stop": {
             "training_iteration": args.training_iterations,
         },
-        "num_samples": 1,
+        "num_samples": 2,
 
     }
 

@@ -114,8 +114,8 @@ if __name__ == "__main__":
     config = agent_cls._default_config.copy()
     config["num_workers"] = min(num_cpus, num_rollouts)
     config["num_gpus"] = args.num_gpus
-    config["train_batch_size"] = int(horizon * num_rollouts)/2
-    config["sgd_minibatch_size"] = 1024
+    config["train_batch_size"] = int(horizon * num_rollouts)
+    #config["sgd_minibatch_size"] = 1024
     config["use_gae"] = True
     config["horizon"] = horizon
     gae_lambda = 0.97

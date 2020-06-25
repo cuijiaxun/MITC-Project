@@ -446,11 +446,11 @@ class Env(gym.Env):
         
         done = False
         # exit if there are 20 steps without vehicles 
-        #if(len(self.k.vehicle.get_ids())) == 0:
-        #    self.time_with_no_vehicles +=1
-        #else:
-        #    self.time_with_no_vehicles = 0
-        #done = self.time_with_no_vehicles > 20
+        if(len(self.k.vehicle.get_ids())) == 0:
+            self.time_with_no_vehicles +=1
+        else:
+            self.time_with_no_vehicles = 0
+        done = self.time_with_no_vehicles >= 20
         
         #check if enough number of vehicles has exited the network
         if('max_num_vehicles' in self.env_params.additional_params):

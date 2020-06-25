@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 2000
+HORIZON = 6000
 # inflow rate at the highway
 FLOW_RATE = 2000
 MERGE_RATE = 200
@@ -26,7 +26,7 @@ MERGE_RATE = 200
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
 NUM_RL = 5
-VEHICLE_NUMBER = 100
+VEHICLE_NUMBER = 300
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
@@ -51,6 +51,12 @@ vehicles.add(
     ),
     num_vehicles=0)
 
+num_veh_main_human = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER)
+num_veh_main_RL = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER)
+num_veh_merge_human = VEHICLE_NUMBER - num_veh_main_human - num_veh_main_RL 
+#num_veh_main_human = round((1-RL_PENETRATION)*VEHICLE_NUMBER)
+#num_veh_main_RL = VEHICLE_NUMBER - num_veh_main_human
+
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
 inflow = InFlows()
@@ -58,27 +64,27 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    number = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER),
+    number = num_veh_main_human, 
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    number = round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
+    number = num_veh_main_RL, 
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=MERGE_RATE,
-    number = round(MERGE_RATE/(FLOW_RATE+MERGE_RATE)*VEHICLE_NUMBER),
+    number = num_veh_merge_human,
     depart_lane="free",
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Guided_PunishDelay_Number100_accelTrial_noheadway",
+    exp_tag="merge_4_Sim_Guided_PunishDelay_Number300_accelTrial_noheadway",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnvGuidedPunishDelay,
@@ -106,7 +112,7 @@ flow_params = dict(
             "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
-            "max_num_vehicles":VEHICLE_NUMBER,
+            #"max_num_vehicles":VEHICLE_NUMBER,
         },
     ),
 
