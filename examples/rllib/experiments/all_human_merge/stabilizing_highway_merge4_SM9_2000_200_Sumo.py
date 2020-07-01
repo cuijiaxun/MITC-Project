@@ -64,7 +64,7 @@ vehicles.add(
     num_vehicles=5)
 vehicles.add(
     veh_id="human2",
-    acceleration_controller=(IDMController, {}),
+    acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
@@ -95,7 +95,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="Simplemerge_allhuman_flowparams_SM9_2000_200_tau1_sumo",
+    exp_tag="merge_4_HUMAN",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
