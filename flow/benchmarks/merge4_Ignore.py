@@ -8,36 +8,19 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-import json
-
-import ray
-try:
-    from ray.rllib.agents.agent import get_agent_class
-except ImportError:
-    from ray.rllib.agents.registry import get_agent_class
-from ray.tune import run_experiments
-from ray.tune.registry import register_env
-
 from flow.envs import MergePOEnv
 from flow.networks import MergeNetwork
 from copy import deepcopy
-from flow.utils.registry import make_create_env
-from flow.utils.rllib import FlowParamsEncoder
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
 from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
-from numpy import pi
+
 # time horizon of a single rollout
 HORIZON = 750
-# number of rollouts per training iteration
-N_ROLLOUTS = 1
-# number of parallel workers
-N_CPUS = 1
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 200
 # percent of autonomous vehicles
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -48,10 +31,8 @@ NUM_RL = 5
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 additional_net_params["merge_lanes"] = 1
 additional_net_params["highway_lanes"] = 1
-additional_net_params["pre_merge_length"] = 717.81
-additional_net_params["angle"] = pi/36
-additional_net_params["merge_length"] = 2044
-additional_net_params["post_merge_length"]=375.56
+additional_net_params["pre_merge_length"] = 500
+
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(
@@ -63,7 +44,7 @@ vehicles.add(
     num_vehicles=5)
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
@@ -87,13 +68,13 @@ inflow.add(
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
-    vehs_per_hour=MERGE_RATE,
+    vehs_per_hour=200,
     depart_lane="free",
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Angle405_ALLHUMAN",
+    exp_tag="merge_4_Sim",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -108,7 +89,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=True,
+        render=False,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
@@ -139,62 +120,3 @@ flow_params = dict(
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),
 )
-def setup_exps():
-    """Return the relevant components of an RLlib experiment.
-
-    Returns
-    -------
-    str
-        name of the training algorithm
-    str
-        name of the gym environment to be trained
-    dict
-        training configuration parameters
-    """
-    alg_run = "PPO"
-
-    agent_cls = get_agent_class(alg_run)
-    config = agent_cls._default_config.copy()
-    config["num_workers"] = N_CPUS
-    config["train_batch_size"] = HORIZON * N_ROLLOUTS
-    config["gamma"] = 0.999  # discount rate
-    config["model"].update({"fcnet_hiddens": [32, 32, 32]})
-    config["use_gae"] = True
-    config["lambda"] = 0.97
-    config["kl_target"] = 0.02
-    config["num_sgd_iter"] = 10
-    config['clip_actions'] = False  # FIXME(ev) temporary ray bug
-    config["horizon"] = HORIZON
-
-    # save the flow params for replay
-    flow_json = json.dumps(
-        flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
-    config['env_config']['flow_params'] = flow_json
-    config['env_config']['run'] = alg_run
-
-    create_env, gym_name = make_create_env(params=flow_params, version=0)
-
-    # Register as rllib env
-    register_env(gym_name, create_env)
-    return alg_run, gym_name, config
-
-
-if __name__ == "__main__":
-    alg_run, gym_name, config = setup_exps()
-    ray.init(num_cpus=N_CPUS + 1,
-    object_store_memory=1024*1024*1024)
-    trials = run_experiments({
-        flow_params["exp_tag"]: {
-            "run": alg_run,
-            "env": gym_name,
-            "config": {
-                **config
-            },
-            "checkpoint_freq": 1,
-            "checkpoint_at_end": True,
-            "max_failures": 999,
-            "stop": {
-                "training_iteration": 1,
-            },
-        }
-    })

@@ -50,8 +50,9 @@ additional_net_params["merge_lanes"] = 1
 additional_net_params["highway_lanes"] = 1
 additional_net_params["pre_merge_length"] = 717.81
 additional_net_params["angle"] = pi/36
-additional_net_params["merge_length"] = 2044
-additional_net_params["post_merge_length"]=375.56
+additional_net_params["merge_length"] = 1000
+additional_net_params["post_merge_length"] = 375.56
+additional_net_params["INFLOW_EDGE_LEN"] = 1000
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(
@@ -93,7 +94,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Angle405_ALLHUMAN",
+    exp_tag="merge_4_Ignore_Angle405_ALLHUMAN",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -121,6 +122,7 @@ flow_params = dict(
             "max_decel": 1.5,
             "target_velocity": 20,
             "num_rl": NUM_RL,
+            "ignore_edges":["inflow_highway"],
         },
     ),
 

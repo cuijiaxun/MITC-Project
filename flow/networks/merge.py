@@ -85,10 +85,14 @@ class MergeNetwork(Network):
             angle = net_params.additional_params["angle"]
         else:
             angle = pi/4
+        
+        if "INFLOW_EDGE_LEN" in net_params.additional_params.keys():
+            INFLOW_EDGE_LEN = net_params.additional_params["INFLOW_EDGE_LEN"]
+
         merge = net_params.additional_params["merge_length"]
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
-
+        
         nodes = [
             {
                 "id": "inflow_highway",
@@ -130,6 +134,8 @@ class MergeNetwork(Network):
         merge = net_params.additional_params["merge_length"]
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
+        if "INFLOW_EDGE_LEN" in net_params.additional_params.keys():
+            INFLOW_EDGE_LEN = net_params.additional_params["INFLOW_EDGE_LEN"]
 
         edges = [{
             "id": "inflow_highway",
@@ -199,6 +205,8 @@ class MergeNetwork(Network):
         """See parent class."""
         premerge = self.net_params.additional_params["pre_merge_length"]
         postmerge = self.net_params.additional_params["post_merge_length"]
+        if "INFLOW_EDGE_LEN" in self.net_params.additional_params.keys():
+            INFLOW_EDGE_LEN = self.net_params.additional_params["INFLOW_EDGE_LEN"]
 
         edgestarts = [("inflow_highway", 0), ("left", INFLOW_EDGE_LEN + 0.1),
                       ("center", INFLOW_EDGE_LEN + premerge + 22.6),
@@ -213,6 +221,8 @@ class MergeNetwork(Network):
         """See parent class."""
         premerge = self.net_params.additional_params["pre_merge_length"]
         postmerge = self.net_params.additional_params["post_merge_length"]
+        if "INFLOW_EDGE_LEN" in self.net_params.additional_params.keys():
+            INFLOW_EDGE_LEN = self.net_params.additional_params["INFLOW_EDGE_LEN"]
 
         internal_edgestarts = [
             (":left", INFLOW_EDGE_LEN), (":center",

@@ -294,11 +294,77 @@ class MergePOEnvScaleInflow(MergePOEnv):
                         self.k.vehicle.get_headway(rl_id) /
                         self.k.vehicle.get_speed(rl_id), 0)
                     cost2 += min((t_headway - t_min) / t_min, 0)
-            InflowScale = rewards.optimize_inflow(self, max_flow=2200,timespan=500)
+            if "max_inflow" in self.env_params.additional_params.keys():
+                #print("max_inflow specified ")
+                max_inflow = self.env_params.additional_params["max_inflow"]
+            else:
+                max_inflow = 2200
+            InflowScale = rewards.optimize_inflow(self, max_flow=max_inflow,timespan=500)
             # weights for cost1, cost2, and cost3, respectively
             eta1, eta2 = 1.00, 0.00
             reward = max(eta1 * cost1 + eta2 * cost2, 0) * InflowScale
             return reward
+
+class MergePOEnvScaleInflowIgnore(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        """See class definition."""
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            # return a reward of 0 if a collision occurred
+            if kwargs["fail"]:
+                return 0
+
+            # reward high system-level velocities
+            cost1 = rewards.desired_velocity(self, fail=kwargs["fail"])
+
+            # penalize small time headways
+            cost2 = 0
+            t_min = 1  # smallest acceptable time headway
+            for rl_id in self.rl_veh:
+                lead_id = self.k.vehicle.get_leader(rl_id)
+                if lead_id not in ["", None] \
+                        and self.k.vehicle.get_speed(rl_id) > 0:
+                    t_headway = max(
+                        self.k.vehicle.get_headway(rl_id) /
+                        self.k.vehicle.get_speed(rl_id), 0)
+                    cost2 += min((t_headway - t_min) / t_min, 0)
+            if "max_inflow" in self.env_params.additional_params.keys():
+                #print("max_inflow specified ")
+                max_inflow = self.env_params.additional_params["max_inflow"]
+            else:
+                max_inflow = 2200
+            InflowScale = rewards.optimize_inflow(self, max_flow=max_inflow,timespan=500)
+            # weights for cost1, cost2, and cost3, respectively
+            eta1, eta2 = 1.00, 0.00
+            reward = max(eta1 * cost1 + eta2 * cost2, 0) * InflowScale
+            return reward
+
+    def additional_command(self):
+            if 'ignore_edges' not in self.env_params.additional_params:
+                super().additional_command()
+            else:
+                rl_ids = self.k.vehicle.get_rl_ids()
+                # add rl vehicles that just entered the network into the rl queue
+                for veh_id in rl_ids:
+                    edge = self.k.vehicle.get_edge(veh_id) 
+                    if (veh_id not in list(self.rl_queue)+self.rl_veh)\
+                            and (edge not in self.env_params.additional_params['ignore_edges']):
+                        self.rl_queue.append(veh_id)
+                # remove rl vehicles that exited the network 
+                for veh_id in list(self.rl_queue):
+                    if veh_id not in rl_ids:
+                        self.rl_queue.remove(veh_id)
+                for veh_id in self.rl_veh:
+                    if veh_id not in rl_ids:
+                        self.rl_veh.remove(veh_id)
+                # fil up rl_veh until they are enough controlled vehicles
+                while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
+                    rl_id = self.rl_queue.popleft()
+                    self.rl_veh.append(rl_id)
+                # specify observed vehicles
+                for veh_id in self.leader + self.follower:
+                    self.k.vehicle.set_observed(veh_id)
 
 class MergePOEnvMinDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
@@ -395,22 +461,6 @@ class MergePOEnvEdgePrior(MergePOEnv):
             observation[6 * i + 5] = num_vehicles*vehicle_length/length
         return observation
 
-class MergePOEnv_Ignore(MergePOEnv):
-    def _apply_rl_actions(self,rl_actions):
-        if "ignore_edges" not in env_params.additional_params:
-            super()._apply_rl_actions(rl_actions)
-        else:
-            valid_actions = {}
-            if rl_actions:
-                for rl_id,actions in rl_actions.items():
-                    edge = self.k.vehicle.get_edge(rl_id)
-                    if edge in env_params.additional_params['ignore_edges']:
-                        accel = self.k.vehicle.get_acc_controller(rl_id).get_action(self)
-                        if accel is not None:
-                            self.k.vehicle.apply_acceleration(rl_id,accel)
-                    else:
-                        valid_actions[rl_id] = actions
-            super()._apply_rl_actions(valid_actions)
 
 #def factoryMergePORadiusEnv(obs_radius):
 class MergePORadiusEnv(MergePOEnv):
