@@ -18,7 +18,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnv
+from flow.envs import MergePOEnvScaleInflowIgnore
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.utils.registry import make_create_env
@@ -48,7 +48,7 @@ NUM_RL = 5
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 additional_net_params["merge_lanes"] = 1
 additional_net_params["highway_lanes"] = 1
-additional_net_params["pre_merge_length"] = 717.81
+additional_net_params["pre_merge_length"] = 1000
 additional_net_params["angle"] = pi/36
 additional_net_params["merge_length"] = 1000
 additional_net_params["post_merge_length"] = 375.56
@@ -94,10 +94,10 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Ignore_Angle405_ALLHUMAN",
+    exp_tag="merge_4_ALLHUMAN_IgnoreScaleInflow_Angle405",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnv,
+    env_name=MergePOEnvScaleInflowIgnore,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -109,7 +109,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=True,
+        render=False,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
@@ -141,6 +141,7 @@ flow_params = dict(
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),
 )
+
 def setup_exps():
     """Return the relevant components of an RLlib experiment.
 
@@ -200,3 +201,5 @@ if __name__ == "__main__":
             },
         }
     })
+
+

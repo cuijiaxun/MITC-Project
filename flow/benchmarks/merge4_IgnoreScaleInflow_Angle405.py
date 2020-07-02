@@ -18,7 +18,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvIgnore
+from flow.envs import MergePOEnvScaleInflowIgnore
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.utils.registry import make_create_env
@@ -94,10 +94,10 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Ignore_Angle405",
+    exp_tag="merge_4_IgnoreScaleInflow_Angle405",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvIgnore,
+    env_name=MergePOEnvScaleInflowIgnore,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
