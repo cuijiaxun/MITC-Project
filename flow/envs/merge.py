@@ -332,6 +332,14 @@ class MergePOEnvIgnore(MergePOEnv):
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
 
+class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            reward = rewards.average_velocity(self)
+            return reward/30
+
 class MergePOEnvScaleInflowIgnore(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""

@@ -18,7 +18,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvScaleInflowIgnore
+from flow.envs import MergePOEnvIgnoreAvgVel
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.utils.registry import make_create_env
@@ -41,7 +41,7 @@ MERGE_RATE = 200
 # percent of autonomous vehicles
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
-NUM_RL = 5
+NUM_RL = 10
 
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -61,10 +61,10 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=0)
+    num_vehicles=5)
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
@@ -77,7 +77,6 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    number = 100,
     depart_lane="free",
     depart_speed=10)
 inflow.add(
@@ -85,22 +84,20 @@ inflow.add(
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
     depart_lane="free",
-    number = 10,
     depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=MERGE_RATE,
     depart_lane="free",
-    number = 11,
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_ALLHUMAN_IgnoreScaleInflow_Angle405",
+    exp_tag="merge_4_Ignore_AvgVel_Angle405_RL10",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvScaleInflowIgnore,
+    env_name=MergePOEnvIgnoreAvgVel,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -112,7 +109,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=True,
+        render=False,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
@@ -125,8 +122,7 @@ flow_params = dict(
             "max_decel": 1.5,
             "target_velocity": 20,
             "num_rl": NUM_RL,
-            #"ignore_edges":["inflow_highway"],
-            "max_num_vehicles" : 121,
+            "ignore_edges":["inflow_highway"],
         },
     ),
 
@@ -145,7 +141,7 @@ flow_params = dict(
     # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(),
 )
-
+'''
 def setup_exps():
     """Return the relevant components of an RLlib experiment.
 
@@ -206,4 +202,4 @@ if __name__ == "__main__":
         }
     })
 
-
+'''
