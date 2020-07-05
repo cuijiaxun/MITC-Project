@@ -18,7 +18,7 @@ from flow.envs.ring.wave_attenuation import WaveAttenuationEnv, \
 from flow.envs.merge import MergePOEnv,MergePOEnvEdgePrior,MergePOEnvPunishDelay,MergePOEnvGuidedPunishDelay,MergePOEnvSparseRewardDelay,\
                             MergePOEnvMinDelay, MergePOEnvAvgVel, MergePOEnvIncludePotential, MergePOEnvScaleInflow,MergePOEnvScaleInflowIgnore,\
                             MergePORadius2Env, MergePORadius4Env, MergePORadius7Env,MergePOEnvIgnore,\
-                            MergePOEnvIgnoreAvgVel
+                            MergePOEnvIgnoreAvgVel,MergePOEnvIgnoreAvgVelDistance,MergePOEnvIgnoreAvgVelDistanceMergeInfo
 from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
 from flow.envs.merge_no_headway import MergePOEnv_noheadway, MergePOEnvEdgePrior_noheadway
@@ -46,6 +46,8 @@ __all__ = [
     'MergePOEnvEdgePrior',
     'MergePOEnvIgnore',
     'MergePOEnvIgnoreAvgVel',
+    'MergePOEnvIgnoreAvgVelDistance',
+    'MergePOEnvIgnoreAvgVelDistanceMergeInfo',
     'MergePOEnvScaleInflow',
     'MergePOEnvScaleInflowIgnore',
     'MergePOEnvEdgePrior_noheadway',

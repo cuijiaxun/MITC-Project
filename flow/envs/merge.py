@@ -269,7 +269,6 @@ class MergePOEnv(Env):
         self.follower = []
         return super().reset()
 
-
 class MergePOEnvScaleInflow(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
@@ -340,6 +339,71 @@ class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
             reward = rewards.average_velocity(self)
             return reward/30
 
+class MergePOEnvIgnoreAvgVelDistance(MergePOEnvIgnoreAvgVel):
+    @property
+    def observation_space(self):
+        return Box(low=float('-inf'), high=float('inf'), shape=(6 * self.num_rl, ), dtype=np.float32)
+
+
+    def get_state(self):
+        state = super().get_state()
+        observation = [0 for _ in range(6*self.num_rl)]
+        for i,rl_id in enumerate(self.rl_veh):
+            veh_pos = self.k.vehicle.get_position(rl_id)
+            veh_x = self.k.vehicle.get_x_by_id(rl_id)
+            center = self.network.specify_nodes(self.network.net_params)[2]
+            center_x = center['x']+1000
+            distance = (center_x - veh_x)/2000
+            #print(rl_id,veh_pos,veh_x,center_x,distance)
+            edge = self.k.vehicle.get_edge(rl_id)
+            num_vehicles = len(self.k.vehicle.get_ids_by_edge(edge))
+            length = self.k.network.edge_length(edge)
+            vehicle_length = self.k.vehicle.get_length(rl_id)
+            observation[6 * i + 0] = state[5*i+0]
+            observation[6 * i + 1] = state[5*i+1]
+            observation[6 * i + 2] = state[5*i+2]
+            observation[6 * i + 3] = state[5*i+3]
+            observation[6 * i + 4] = state[5*i+4]
+            observation[6 * i + 5] = distance
+        return observation
+
+class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
+    @property
+    def observation_space(self):
+        return Box(low=float('-inf'), high=float('inf'), shape=(7 * self.num_rl, ), dtype=np.float32)
+
+
+    def get_state(self):
+        state = super().get_state()
+        observation = [0 for _ in range(7*self.num_rl)]
+        merge_vehs = self.k.vehicle.get_ids_by_edge("bottom")
+        merge_dists = [self.k.vehicle.get_position(veh) for veh in merge_vehs]
+        merge_distance = 1
+        if len(merge_dists)>0:
+            merge_distance = 0.5-max(merge_dists)/2000
+        print(merge_vehs, merge_dists)
+        print(merge_distance)
+        
+        for i,rl_id in enumerate(self.rl_veh):
+            veh_pos = self.k.vehicle.get_position(rl_id)
+            veh_x = self.k.vehicle.get_x_by_id(rl_id)
+            center = self.network.specify_nodes(self.network.net_params)[2]
+            center_x = center['x']+1000
+            distance = (center_x - veh_x)/2000
+            #print(rl_id,veh_pos,veh_x,center_x,distance)
+            edge = self.k.vehicle.get_edge(rl_id)
+            num_vehicles = len(self.k.vehicle.get_ids_by_edge(edge))
+            length = self.k.network.edge_length(edge)
+            vehicle_length = self.k.vehicle.get_length(rl_id)
+            observation[7 * i + 0] = state[5*i+0]
+            observation[7 * i + 1] = state[5*i+1]
+            observation[7 * i + 2] = state[5*i+2]
+            observation[7 * i + 3] = state[5*i+3]
+            observation[7 * i + 4] = state[5*i+4]
+            observation[7 * i + 5] = distance
+            observation[7 * i + 6] = merge_distance
+        return observation
+    
 class MergePOEnvScaleInflowIgnore(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
