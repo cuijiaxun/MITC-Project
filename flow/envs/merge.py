@@ -381,8 +381,8 @@ class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
         merge_distance = 1
         if len(merge_dists)>0:
             merge_distance = 0.5-max(merge_dists)/2000
-        print(merge_vehs, merge_dists)
-        print(merge_distance)
+        #print(merge_vehs, merge_dists)
+        #print(merge_distance)
         
         for i,rl_id in enumerate(self.rl_veh):
             veh_pos = self.k.vehicle.get_position(rl_id)
