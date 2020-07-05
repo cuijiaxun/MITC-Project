@@ -370,7 +370,7 @@ class MergePOEnvIgnoreAvgVelDistance(MergePOEnvIgnoreAvgVel):
 class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
     @property
     def observation_space(self):
-        return Box(low=float('-inf'), high=float('inf'), shape=(7 * self.num_rl, ), dtype=np.float32)
+        return Box(low=-1, high=1, shape=(7 * self.num_rl, ), dtype=np.float32)
 
 
     def get_state(self):
@@ -400,8 +400,8 @@ class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
             observation[7 * i + 2] = state[5*i+2]
             observation[7 * i + 3] = state[5*i+3]
             observation[7 * i + 4] = state[5*i+4]
-            observation[7 * i + 5] = distance
-            observation[7 * i + 6] = merge_distance
+            observation[7 * i + 5] = np.clip(distance,-1,1)
+            observation[7 * i + 6] = np.clip(merge_distance,-1,1)
         return observation
     
 class MergePOEnvScaleInflowIgnore(MergePOEnv):
