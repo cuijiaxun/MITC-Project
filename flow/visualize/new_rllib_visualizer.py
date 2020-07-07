@@ -132,7 +132,8 @@ def visualizer_rllib(args):
     config['num_workers'] = 0
 
     flow_params = get_flow_params(config)
-
+    flow_params['env'].additional_params["use_seeds"]=args.use_seeds
+    print(args.use_seeds)
     # hack for old pkl files
     # TODO(ev) remove eventually
     sim_params = flow_params['sim']
@@ -544,6 +545,7 @@ def create_parser():
         default=800,)
     parser.add_argument('-o','--output',type=str,help='output file')
     parser.add_argument('--use_delay',type=int,default=-1,help='weather use time delay or not')
+    parser.add_argument("-s","--use_seeds",dest = "use_seeds",help="name of pickle file containing seeds", default=None)
     return parser
 if __name__ == '__main__':
     parser = create_parser()
