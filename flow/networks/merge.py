@@ -86,9 +86,9 @@ class MergeNetwork(Network):
         else:
             angle = pi/4
         
+        inflow_edge_len = INFLOW_EDGE_LEN
         if "INFLOW_EDGE_LEN" in net_params.additional_params.keys():
-            INFLOW_EDGE_LEN = net_params.additional_params["INFLOW_EDGE_LEN"]
-
+            inflow_edge_len = net_params.additional_params["INFLOW_EDGE_LEN"]
         merge = net_params.additional_params["merge_length"]
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
@@ -96,7 +96,7 @@ class MergeNetwork(Network):
         nodes = [
             {
                 "id": "inflow_highway",
-                "x": -INFLOW_EDGE_LEN,
+                "x": -inflow_edge_len,
                 "y": 0
             },
             {
@@ -117,8 +117,8 @@ class MergeNetwork(Network):
             },
             {
                 "id": "inflow_merge",
-                "x": premerge - (merge + INFLOW_EDGE_LEN) * cos(angle),
-                "y": -(merge + INFLOW_EDGE_LEN) * sin(angle)
+                "x": premerge - (merge + inflow_edge_len) * cos(angle),
+                "y": -(merge + inflow_edge_len) * sin(angle)
             },
             {
                 "id": "bottom",
@@ -134,15 +134,16 @@ class MergeNetwork(Network):
         merge = net_params.additional_params["merge_length"]
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
+        inflow_edge_len = INFLOW_EDGE_LEN
         if "INFLOW_EDGE_LEN" in net_params.additional_params.keys():
-            INFLOW_EDGE_LEN = net_params.additional_params["INFLOW_EDGE_LEN"]
+            inflow_edge_len = net_params.additional_params["INFLOW_EDGE_LEN"]
 
         edges = [{
             "id": "inflow_highway",
             "type": "highwayType",
             "from": "inflow_highway",
             "to": "left",
-            "length": INFLOW_EDGE_LEN
+            "length": inflow_edge_len
         }, {
             "id": "left",
             "type": "highwayType",
@@ -154,7 +155,7 @@ class MergeNetwork(Network):
             "type": "mergeType",
             "from": "inflow_merge",
             "to": "bottom",
-            "length": INFLOW_EDGE_LEN
+            "length": inflow_edge_len
         }, {
             "id": "bottom",
             "type": "mergeType",
@@ -205,15 +206,16 @@ class MergeNetwork(Network):
         """See parent class."""
         premerge = self.net_params.additional_params["pre_merge_length"]
         postmerge = self.net_params.additional_params["post_merge_length"]
+        inflow_edge_len = INFLOW_EDGE_LEN
         if "INFLOW_EDGE_LEN" in self.net_params.additional_params.keys():
-            INFLOW_EDGE_LEN = self.net_params.additional_params["INFLOW_EDGE_LEN"]
+            inflow_edge_len = self.net_params.additional_params["INFLOW_EDGE_LEN"]
 
-        edgestarts = [("inflow_highway", 0), ("left", INFLOW_EDGE_LEN + 0.1),
-                      ("center", INFLOW_EDGE_LEN + premerge + 22.6),
+        edgestarts = [("inflow_highway", 0), ("left", inflow_edge_len + 0.1),
+                      ("center", inflow_edge_len + premerge + 22.6),
                       ("inflow_merge",
-                       INFLOW_EDGE_LEN + premerge + postmerge + 22.6),
+                       inflow_edge_len + premerge + postmerge + 22.6),
                       ("bottom",
-                       2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.7)]
+                       2 * inflow_edge_len + premerge + postmerge + 22.7)]
 
         return edgestarts
 
@@ -221,13 +223,15 @@ class MergeNetwork(Network):
         """See parent class."""
         premerge = self.net_params.additional_params["pre_merge_length"]
         postmerge = self.net_params.additional_params["post_merge_length"]
+        inflow_edge_len = INFLOW_EDGE_LEN
         if "INFLOW_EDGE_LEN" in self.net_params.additional_params.keys():
-            INFLOW_EDGE_LEN = self.net_params.additional_params["INFLOW_EDGE_LEN"]
+            inflow_edge_len = self.net_params.additional_params["INFLOW_EDGE_LEN"]
+
 
         internal_edgestarts = [
-            (":left", INFLOW_EDGE_LEN), (":center",
-                                         INFLOW_EDGE_LEN + premerge + 0.1),
-            (":bottom", 2 * INFLOW_EDGE_LEN + premerge + postmerge + 22.6)
+            (":left", inflow_edge_len), (":center",
+                                         inflow_edge_len + premerge + 0.1),
+            (":bottom", 2 * inflow_edge_len + premerge + postmerge + 22.6)
         ]
 
         return internal_edgestarts

@@ -502,6 +502,12 @@ class TraCIVehicle(KernelVehicle):
             return sum(self._num_arrived)
         else:
             return 0
+    
+    def get_num_departed(self):
+        if len(self._num_departed) > 0:
+            return sum(self._num_departed)
+        else:
+            return 0
 
     def get_arrived_ids(self):
         """See parent class."""

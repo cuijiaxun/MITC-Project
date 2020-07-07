@@ -304,6 +304,34 @@ class MergePOEnvScaleInflow(MergePOEnv):
             reward = max(eta1 * cost1 + eta2 * cost2, 0) * InflowScale
             return reward
 
+class MergePOEnvDeparted(MergePOEnv):
+    def additional_command(self):
+            if 'max_num_vehicles' not in self.env_params.additional_params:
+                super().additional_command()
+            else:
+                rl_ids = self.k.vehicle.get_rl_ids()
+                # add rl vehicles that just entered the network into the rl queue
+                if self.k.vehicle.get_num_departed() >= self.env_params.additional_params["max_num_vehicles"]:
+                    for veh_id in rl_ids:
+                        edge = self.k.vehicle.get_edge(veh_id) 
+                        if veh_id not in list(self.rl_queue)+self.rl_veh:
+                            self.rl_queue.append(veh_id)
+                # remove rl vehicles that exited the network 
+                for veh_id in list(self.rl_queue):
+                    if veh_id not in rl_ids:
+                        self.rl_queue.remove(veh_id)
+                for veh_id in self.rl_veh:
+                    if veh_id not in rl_ids:
+                        self.rl_veh.remove(veh_id)
+                # fil up rl_veh until they are enough controlled vehicles
+                while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
+                    rl_id = self.rl_queue.popleft()
+                    self.rl_veh.append(rl_id)
+                # specify observed vehicles
+                for veh_id in self.leader + self.follower:
+                    self.k.vehicle.set_observed(veh_id)
+
+
 class MergePOEnvIgnore(MergePOEnv):
     def additional_command(self):
             if 'ignore_edges' not in self.env_params.additional_params:

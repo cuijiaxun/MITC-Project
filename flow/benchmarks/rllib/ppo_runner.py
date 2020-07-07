@@ -118,8 +118,8 @@ if __name__ == "__main__":
     #config["sgd_minibatch_size"] = 1024
     config["use_gae"] = True
     config["horizon"] = horizon
-    gae_lambda = 0.97
-    step_size = 5e-4
+    gae_lambda = 0.95
+    step_size = 5.0e-4
     if benchmark_name == "grid0":
         gae_lambda = 0.5
         step_size = 5e-5
@@ -139,9 +139,11 @@ if __name__ == "__main__":
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["model"]["fcnet_hiddens"] = [256,256]
     config["observation_filter"] = "NoFilter"
-    #config["entropy_coeff"] = 0.01
-    #config["kl_coeff"] = 0.5
-    #config["kl_target"] = 0.02
+    config["entropy_coeff"] = 0.01
+    config["kl_coeff"] = 0.0
+    config["kl_target"] = 0.01
+    config["vf_loss_coeff"] = 0.5
+    config["vf_share_layers"] = True
     #config["seed"] = 123 # seed for PPO?
 
     # save the flow params for replay
