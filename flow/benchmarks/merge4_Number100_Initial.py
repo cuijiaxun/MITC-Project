@@ -8,7 +8,7 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnvDeparted
+from flow.envs import MergePOEnv
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -26,7 +26,7 @@ MERGE_RATE = 300
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
 NUM_RL = 10
-MAIN_HUMAN = 180
+MAIN_HUMAN = 50
 MAIN_RL = 20
 MERGE_HUMAN = 20
 VEHICLE_NUMBER = MAIN_HUMAN+MAIN_RL+MERGE_HUMAN
@@ -48,14 +48,14 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=0)
+    num_vehicles=MAIN_HUMAN+MERGE_HUMAN)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=0)
+    num_vehicles=MAIN_RL)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
 # from the highway portion as well
@@ -64,30 +64,30 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    number = MAIN_HUMAN,#round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER),
+    number = 0,#MAIN_HUMAN,#round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*(1-RL_PENETRATION) * VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    number = MAIN_RL, #round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
+    number = 0,#MAIN_RL, #round(FLOW_RATE/(FLOW_RATE+MERGE_RATE)*RL_PENETRATION * VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=MERGE_RATE,
-    number = MERGE_HUMAN,#round(MERGE_RATE/(FLOW_RATE+MERGE_RATE)*VEHICLE_NUMBER),
+    number = 0,#MERGE_HUMAN,#round(MERGE_RATE/(FLOW_RATE+MERGE_RATE)*VEHICLE_NUMBER),
     depart_lane="free",
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Number100_Departed_Angel405_RL10",
+    exp_tag="merge_4_Sim_Number100_Initial_Angel405_RL10",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvDeparted,
+    env_name=MergePOEnv,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -99,7 +99,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=False,
+        render=True,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
@@ -129,5 +129,14 @@ flow_params = dict(
 
     # parameters specifying the positioning of vehicles upon initialization/
     # reset (see flow.core.params.InitialConfig)
-    initial=InitialConfig(),
+    initial=InitialConfig()
+    
+    #initial=InitialConfig(
+    #    edges_distribution={
+    #        "inflow_highway":MAIN_HUMAN/5+MAIN_RL/5,
+    #        "left":MAIN_HUMAN*4/5+MAIN_RL*4/5,
+    #        "inflow_merge":MERGE_HUMAN/5,
+    #        "bottom":MERGE_HUMAN*4/5,
+    #        }),
+
 )

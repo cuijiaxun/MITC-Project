@@ -37,7 +37,7 @@ N_ROLLOUTS = 1
 N_CPUS = 1
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 300
+MERGE_RATE = 200
 # percent of autonomous vehicles
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -57,7 +57,7 @@ additional_net_params["INFLOW_EDGE_LEN"] = 1000
 vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(IDMController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
@@ -94,7 +94,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment'MergePOEnvIgnoreAvgVel',
-    exp_tag="merge_4_Ignore_AvgVel_Distance_MergeInfo_Angle405_RL10",
+    exp_tag="merge_4_IDM_Ignore_AvgVel_Distance_MergeInfo_Angle405_RL10",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnvIgnoreAvgVelDistanceMergeInfo,
@@ -109,7 +109,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=False,
+        render=True,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)

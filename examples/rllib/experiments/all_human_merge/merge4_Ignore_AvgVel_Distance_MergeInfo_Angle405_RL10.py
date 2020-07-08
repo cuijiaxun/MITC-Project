@@ -37,7 +37,7 @@ N_ROLLOUTS = 1
 N_CPUS = 1
 # inflow rate at the highway
 FLOW_RATE = 2000
-MERGE_RATE = 200
+MERGE_RATE = 300
 # percent of autonomous vehicles
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
@@ -61,7 +61,7 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=5)
+    num_vehicles=0)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(SimCarFollowingController, {}),
