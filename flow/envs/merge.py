@@ -331,6 +331,14 @@ class MergePOEnvDeparted(MergePOEnv):
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
 
+class MergePOEnvAvgVel(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            reward = rewards.average_velocity(self)
+            return reward/30
+
 
 class MergePOEnvIgnore(MergePOEnv):
     def additional_command(self):
@@ -366,6 +374,17 @@ class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
         else:
             reward = rewards.average_velocity(self)
             return reward/30
+
+class MergePOEnvAvgVelEnExit(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            if len(self.k.vehicle.get_ids()) == 0:
+                return 1.0
+            reward = rewards.average_velocity(self)
+            return reward/30
+
 
 class MergePOEnvIgnoreAvgVelDistance(MergePOEnvIgnoreAvgVel):
     @property
@@ -497,12 +516,12 @@ class MergePOEnvMinDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         reward = rewards.min_delay(self)
         return reward
-
+'''
 class MergePOEnvAvgVel(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         reward = rewards.average_velocity(self)
         return reward/30
-
+'''
 
 class MergePOEnvSparseRewardDelay(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):

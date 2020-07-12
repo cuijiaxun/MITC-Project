@@ -8,7 +8,7 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnv
+from flow.envs import MergePOEnvAvgVel
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -85,10 +85,10 @@ inflow.add(
 '''
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Number100_Initial_Angel405_RL10",
+    exp_tag="merge_4_Sim_Number100_Initial_Angel405_AvgVel_RL10",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnv,
+    env_name=MergePOEnvAvgVel,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -113,7 +113,7 @@ flow_params = dict(
             "max_decel": 1.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
-            "max_num_vehicles":VEHICLE_NUMBER,
+            #"max_num_vehicles":VEHICLE_NUMBER,
             "main_rl":MAIN_RL,
             "main_human":MAIN_HUMAN,
             "merge_human":MERGE_HUMAN,

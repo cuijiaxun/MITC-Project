@@ -3,9 +3,9 @@
 import logging
 import random
 import numpy as np
-from copy import deepcopy
+from copy import deepcopy,copy
 from flow.utils.exceptions import FatalFlowError
-
+from flow.core.params import InitialConfig
 # length of vehicles in the network, in meters
 VEHICLE_LENGTH = 5
 
@@ -246,7 +246,6 @@ class BaseKernelNetwork(object):
         else:
             raise FatalFlowError('"spacing" argument in initial_config does '
                                  'not contain a valid option')
-
         return startpositions, startlanes
 
     def gen_even_start_pos(self, initial_config, num_vehicles):
@@ -282,16 +281,20 @@ class BaseKernelNetwork(object):
                                                     num_vehicles_e)
 
             # add starting positions and lanes
-            edges_distribution = deepcopy(initial_config.edges_distribution)
+            #edges_distribution = deepcopy(initial_config.edges_distribution)
+            edges_distribution = initial_config.edges_distribution
             startpositions, startlanes = [], []
             for key in edges_distribution:
+                new_initial_config = InitialConfig()
+                # modify the start point of first vehicle on this lane 
+                new_initial_config.x0 = dict(self.total_edgestarts)[key]
                 # set the edge distribution to only include the next edge
-                initial_config.edges_distribution = [key]
+                new_initial_config.edges_distribution = [key]
                 # set the number of vehicles that this edge can carry
                 num_vehicles = edges_distribution[key]
                 # recursively collect the next starting positions and lanes
                 pos, lane = self.gen_even_start_pos(
-                    initial_config, num_vehicles)
+                    new_initial_config, num_vehicles)
                 startpositions.extend(pos)
                 startlanes.extend(lane)
             return startpositions, startlanes
@@ -299,7 +302,6 @@ class BaseKernelNetwork(object):
         (x0, min_gap, bunching, lanes_distr, available_length,
          available_edges, initial_config) = \
             self._get_start_pos_util(initial_config, num_vehicles)
-
         # return an empty list of starting positions and lanes if there are no
         # vehicles to be placed
         if num_vehicles == 0:
@@ -314,16 +316,13 @@ class BaseKernelNetwork(object):
         lanes = [self.num_lanes(edge) for edge in self.get_edge_list()]
         if any(lanes[0] != lanes[i] for i in range(1, len(lanes))):
             flag = True
-
         x = x0
         car_count = 0
         startpositions, startlanes = [], []
-
         # generate uniform starting positions
         while car_count < num_vehicles:
             # collect the position and lane number of each new vehicle
             pos = self.get_edge(x)
-
             # ensures that vehicles are not placed in an internal junction
             while pos[0] in dict(self.internal_edgestarts).keys():
                 # find the location of the internal edge in total_edgestarts,
@@ -341,7 +340,7 @@ class BaseKernelNetwork(object):
 
                 x = next_edge_pos[1]
                 pos = (next_edge_pos[0], 0)
-
+            
             # ensures that you are in an acceptable edge
             while pos[0] not in available_edges:
                 x = (x + self.edge_length(pos[0])) % self.non_internal_length()
@@ -356,7 +355,7 @@ class BaseKernelNetwork(object):
                 x += VEHICLE_LENGTH
                 increment -= (VEHICLE_LENGTH * self.num_lanes(pos0)) / \
                              (num_vehicles - car_count)
-
+            
             # place vehicles side-by-side in all available lanes on this edge
             for lane in range(min([self.num_lanes(pos[0]), lanes_distr])):
                 car_count += 1
@@ -365,18 +364,19 @@ class BaseKernelNetwork(object):
 
                 if car_count == num_vehicles:
                     break
-
+            
             x = (x + increment + VEHICLE_LENGTH + min_gap) % self.non_internal_length()
 
         # add a perturbation to each vehicle, while not letting the vehicle
         # leave its current edge
+        
         if initial_config.perturbation > 0:
             for i in range(num_vehicles):
                 perturb = np.random.normal(0, initial_config.perturbation)
                 edge, pos = startpositions[i]
                 pos = max(0, min(self.edge_length(edge), pos + perturb))
                 startpositions[i] = (edge, pos)
-
+        
         return startpositions, startlanes
 
     def gen_random_start_pos(self, initial_config, num_vehicles):

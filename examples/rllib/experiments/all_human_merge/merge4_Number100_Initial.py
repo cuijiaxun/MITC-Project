@@ -9,6 +9,22 @@ is 10%.
 - **Horizon**: 750 steps
 """
 from flow.envs import MergePOEnv
+import json
+
+import ray
+try:
+    from ray.rllib.agents.agent import get_agent_class
+except ImportError:
+    from ray.rllib.agents.registry import get_agent_class
+from ray.tune import run_experiments
+from ray.tune.registry import register_env
+
+from flow.envs import MergePOEnvPunishDelay
+from flow.networks import MergeNetwork
+from copy import deepcopy
+from flow.utils.registry import make_create_env
+from flow.utils.rllib import FlowParamsEncoder
+
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -19,6 +35,10 @@ from flow.controllers import SimCarFollowingController, RLController,IDMControll
 from numpy import pi
 # time horizon of a single rollout
 HORIZON = 2000
+# number of rollouts per training iteration
+N_ROLLOUTS = 1
+# number of parallel workers
+N_CPUS = 1
 # inflow rate at the highway
 FLOW_RATE = 3000
 MERGE_RATE = 300
@@ -51,7 +71,7 @@ vehicles.add(
     num_vehicles=MAIN_HUMAN+MERGE_HUMAN)
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
@@ -85,7 +105,7 @@ inflow.add(
 '''
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Number100_Initial_Angel405_RL10",
+    exp_tag="merge_4_ALLHUMAN_Sim_Number100_Initial_Angel405_RL10",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -147,3 +167,61 @@ flow_params = dict(
         ),
 
 )
+def setup_exps():
+    """Return the relevant components of an RLlib experiment.
+
+    Returns
+    -------
+    str
+        name of the training algorithm
+    str
+        name of the gym environment to be trained
+    dict
+        training configuration parameters
+    """
+    alg_run = "PPO"
+
+    agent_cls = get_agent_class(alg_run)
+    config = agent_cls._default_config.copy()
+    config["num_workers"] = N_CPUS
+    config["train_batch_size"] = HORIZON * N_ROLLOUTS
+    config["gamma"] = 0.999  # discount rate
+    config["model"].update({"fcnet_hiddens": [32, 32, 32]})
+    config["use_gae"] = True
+    config["lambda"] = 0.97
+    config["kl_target"] = 0.02
+    config["num_sgd_iter"] = 10
+    config['clip_actions'] = False  # FIXME(ev) temporary ray bug
+    config["horizon"] = HORIZON
+
+    # save the flow params for replay
+    flow_json = json.dumps(
+        flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
+    config['env_config']['flow_params'] = flow_json
+    config['env_config']['run'] = alg_run
+
+    create_env, gym_name = make_create_env(params=flow_params, version=0)
+
+    # Register as rllib env
+    register_env(gym_name, create_env)
+    return alg_run, gym_name, config
+
+if __name__ == "__main__":
+    alg_run, gym_name, config = setup_exps()
+    ray.init(num_cpus=N_CPUS + 1,
+    object_store_memory=1024*1024*1024)
+    trials = run_experiments({
+        flow_params["exp_tag"]: {
+            "run": alg_run,
+            "env": gym_name,
+            "config": {
+                **config
+            },
+            "checkpoint_freq": 1,
+            "checkpoint_at_end": True,
+            "max_failures": 999,
+            "stop": {
+                "training_iteration": 1,
+            },
+        }
+    })
