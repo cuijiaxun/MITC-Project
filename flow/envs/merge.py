@@ -115,6 +115,69 @@ class MergePOEnv(Env):
             if rl_id not in self.k.vehicle.get_rl_ids():
                 continue
             self.k.vehicle.apply_acceleration(rl_id, rl_actions[i])
+    
+    def setup_initial_state(self):
+        """Store information on the initial state of vehicles in the network.
+
+        This information is to be used upon reset. This method also adds this
+        information to the self.vehicles class and starts a subscription with
+        sumo to collect state information each step.
+        """
+        # determine whether to shuffle the vehicles
+        if self.initial_config.shuffle:
+            random.shuffle(self.initial_ids)
+        # generate starting position for vehicles in the network
+        start_pos, start_lanes = self.k.network.generate_starting_positions(
+            initial_config=self.initial_config,
+            num_vehicles=len(self.initial_ids))
+        # save the initial state. This is used in the _reset function
+        #print(self.initial_ids)
+        if isinstance(self.initial_config.edges_distribution,dict):
+            additional_params = self.env_params.additional_params
+            main_human = additional_params['main_human']
+            main_rl = additional_params['main_rl']
+            merge_human = additional_params['merge_human']
+            penetration_rate = main_rl /(main_rl+main_human)
+            gap = int(1/penetration_rate) - 1
+            count_human = 0
+            #print("pene_rate",penetration_rate)
+            human_ids,rl_ids =[],[]
+            for i,veh_id in enumerate(self.initial_ids):
+                if self.k.vehicle.get_type(veh_id) == 'human':
+                    human_ids.append(veh_id)
+                if self.k.vehicle.get_type(veh_id) == 'rl':
+                    rl_ids.append(veh_id)
+
+            for i in range(len(start_pos)):
+                if start_pos[i][0] in ['inflow_highway','left']:
+                    if count_human == gap and len(rl_ids)>0:
+                        count_human = 0
+                        veh_id = rl_ids.pop(0)
+                    else:
+                        count_human+=1
+                        veh_id = human_ids.pop(0)
+                elif start_pos[i][0] in ['inflow_merge','bottom']:
+                    veh_id = human_ids.pop(0)
+                else:
+                    continue
+                type_id = self.k.vehicle.get_type(veh_id)
+                pos = start_pos[i][1]
+                lane = start_lanes[i]
+                speed = self.k.vehicle.get_initial_speed(veh_id)
+                edge = start_pos[i][0]
+
+                self.initial_state[veh_id] = (type_id, edge, lane, pos, speed)
+            #print(self.initial_state)
+
+        else:
+            for i, veh_id in enumerate(self.initial_ids):
+                type_id = self.k.vehicle.get_type(veh_id)
+                pos = start_pos[i][1]
+                lane = start_lanes[i]
+                speed = self.k.vehicle.get_initial_speed(veh_id)
+                edge = start_pos[i][0]
+
+                self.initial_state[veh_id] = (type_id, edge, lane, pos, speed)
 
     def get_state(self, rl_id=None, **kwargs):
         """See class definition."""
@@ -229,7 +292,7 @@ class MergePOEnv(Env):
         rl_ids = self.k.vehicle.get_rl_ids()
         #print("rl_ids " + str(rl_ids))
         # add rl vehicles that just entered the network into the rl queue
-        #print("rl_queue before " + str(self.rl_queue))
+        #print("rl_queue before " + str(self.rl_qu 
         for veh_id in rl_ids:
             if veh_id not in list(self.rl_queue) + self.rl_veh:
                 self.rl_queue.append(veh_id)
