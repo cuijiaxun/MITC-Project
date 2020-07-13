@@ -88,7 +88,7 @@ flow_params = dict(
     exp_tag="merge_4_Sim_Number100_Initial_Angel405_PunishDelay_RL10",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvGuidedPunishDelay,
+    env_name=MergePOEnvPunishDelay,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
