@@ -113,7 +113,7 @@ flow_params = dict(
             "max_decel": 1.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
-            #"max_num_vehicles":VEHICLE_NUMBER,
+            "max_num_vehicles":VEHICLE_NUMBER,
             "main_rl":MAIN_RL,
             "main_human":MAIN_HUMAN,
             "merge_human":MERGE_HUMAN,
