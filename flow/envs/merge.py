@@ -165,7 +165,7 @@ class MergePOEnv(Env):
                 lane = start_lanes[i]
                 speed = self.k.vehicle.get_initial_speed(veh_id)
                 edge = start_pos[i][0]
-
+                print(veh_id,speed)
                 self.initial_state[veh_id] = (type_id, edge, lane, pos, speed)
             #print(self.initial_state)
 

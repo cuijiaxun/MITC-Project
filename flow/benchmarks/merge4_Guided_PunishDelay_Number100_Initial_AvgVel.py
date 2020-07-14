@@ -109,8 +109,8 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,
