@@ -9,8 +9,10 @@ import numpy as np
 import random
 import pickle
 import datetime
+import pickle
 from flow.renderer.pyglet_renderer import PygletRenderer as Renderer
 from flow.utils.flow_warnings import deprecated_attribute
+
 import gym
 from gym.spaces import Box
 from gym.spaces import Tuple
@@ -120,59 +122,10 @@ class Env(gym.Env):
         Raises
         ------
         flow.utils.exceptions.FatalFlowError
-            if the render mode is not set to a valid valuefor _ in range(self.env_params.sims_per_step):
-            self.time_counter += 1
-            self.step_counter += 1
-
-            # perform acceleration actions for controlled human-driven vehicles
-            if len(self.k.vehicle.get_controlled_ids()) > 0:
-                accel = []
-                for veh_id in self.k.vehicle.get_controlled_ids():
-                    action = self.k.vehicle.get_acc_controller(
-                        veh_id).get_action(self)
-                    accel.append(action)
-                    if self.k.vehicle.get_edge(veh_id)[0] == ":":
-                        if self.k.vehicle.get_speed(veh_id) <=  0.00000001:
-                            print(self.time_counter,'veh_id:',veh_id,'its leader:',self.k.vehicle.get_leader(veh_id),'headway to leader:',self.k.vehicle.get_headway(veh_id),'action:',action,'speed:',self.k.vehicle.get_speed(veh_id))
-                            #if self.k.vehicle.get_leader(self.k.vehicle.get_leader(veh_id))==veh_id:
-                            #    break
-
-                self.k.vehicle.apply_acceleration(
-                    self.k.vehicle.get_controlled_ids(), accel)
-
-            # perform lane change actions for controlled human-driven vehicles
-            if len(self.k.vehicle.get_controlled_lc_ids()) > 0:
-                direction = []
-                for veh_id in self.k.vehicle.get_controlled_lc_ids():
-                    target_lane = self.k.vehicle.get_lane_changing_controller(
-                        veh_id).get_action(self)
-                    direction.append(target_lane)
-                self.k.vehicle.apply_lane_change(
-                    self.k.vehicle.get_controlled_lc_ids(),
-                    direction=direction)
-
-            # perform (optionally) routing actions for all vehicles in the
-            # network, including RL and SUMO-controlled vehicles
-            routing_ids = []
-            routing_actions = []
-            for veh_id in self.k.vehicle.get_ids():
-                if self.k.vehicle.get_routing_controller(veh_id) \
-                        is not None:
-                    routing_ids.append(veh_id)
-                    route_contr = self.k.vehicle.get_routing_controller(
-                        veh_id)
-                    routing_actions.append(route_contr.choose_route(self))
-
-            self.k.vehicle.choose_routes(routing_ids, routing_actions)
-
-            self.apply_rl_actions(rl_actions)
-
-            #self.additional_command()
-
-            # advance the simulation in the simulator by one step
+            if the render mode is not set to a valid value
         """
+        self.process_seeds_file = None
         self.env_params = env_params
-        self.time_with_no_vehicles = 0
         if scenario is not None:
             deprecated_attribute(self, "scenario", "network")
         self.network = scenario if scenario is not None else network
@@ -318,60 +271,13 @@ class Env(gym.Env):
         # determine whether to shuffle the vehicles
         if self.initial_config.shuffle:
             random.shuffle(self.initial_ids)
+
         # generate starting position for vehicles in the network
         start_pos, start_lanes = self.k.network.generate_starting_positions(
             initial_config=self.initial_config,
             num_vehicles=len(self.initial_ids))
+
         # save the initial state. This is used in the _reset function
-        #print(self.initial_ids)
-        '''
-        if isinstance(self.initial_config.edges_distribution,dict):
-            additional_params = self.env_params.additional_params
-            main_human = additional_params['main_human']
-            main_rl = additional_params['main_rl']
-            merge_human = additional_params['merge_human']
-            penetration_rate = main_rl /(main_rl+main_human)
-            gap = int(1/penetration_rate) - 1
-            count_human = 0
-            #print("pene_rate",penetration_rate)
-            human_ids,rl_ids =[],[]
-            for i,veh_id in enumerate(self.initial_ids):
-                if self.k.vehicle.get_type(veh_id) == 'human':
-                    human_ids.append(veh_id)
-                if self.k.vehicle.get_type(veh_id) == 'rl':
-                    rl_ids.append(veh_id)
-
-            for i in range(len(start_pos)):
-                if start_pos[i][0] in ['inflow_highway','left']:
-                    if count_human == gap and len(rl_ids)>0:
-                        count_human = 0
-                        veh_id = rl_ids.pop(0)
-                    else:
-                        count_human+=1
-                        veh_id = human_ids.pop(0)
-                elif start_pos[i][0] in ['inflow_merge','bottom']:
-                    veh_id = human_ids.pop(0)
-                else:
-                    continue
-                type_id = self.k.vehicle.get_type(veh_id)
-                pos = start_pos[i][1]
-                lane = start_lanes[i]
-                speed = self.k.vehicle.get_initial_speed(veh_id)
-                edge = start_pos[i][0]
-
-                self.initial_state[veh_id] = (type_id, edge, lane, pos, speed)
-            #print(self.initial_state)
-
-        else:
-            for i, veh_id in enumerate(self.initial_ids):
-                type_id = self.k.vehicle.get_type(veh_id)
-                pos = start_pos[i][1]
-                lane = start_lanes[i]
-                speed = self.k.vehicle.get_initial_speed(veh_id)
-                edge = start_pos[i][0]
-
-                self.initial_state[veh_id] = (type_id, edge, lane, pos, speed)
-        '''
         for i, veh_id in enumerate(self.initial_ids):
             type_id = self.k.vehicle.get_type(veh_id)
             pos = start_pos[i][1]
@@ -422,12 +328,6 @@ class Env(gym.Env):
                     action = self.k.vehicle.get_acc_controller(
                         veh_id).get_action(self)
                     accel.append(action)
-                    if self.k.vehicle.get_edge(veh_id)[0] == ":":
-                        if self.k.vehicle.get_speed(veh_id) <=  0.00000001:
-                            print(self.time_counter,'veh_id:',veh_id,'its leader:',self.k.vehicle.get_leader(veh_id),'headway to leader:',self.k.vehicle.get_headway(veh_id),'action:',action,'speed:',self.k.vehicle.get_speed(veh_id))
-                            #if self.k.vehicle.get_leader(self.k.vehicle.get_leader(veh_id))==veh_id:
-                            #    break
-
                 self.k.vehicle.apply_acceleration(
                     self.k.vehicle.get_controlled_ids(), accel)
 
@@ -467,18 +367,17 @@ class Env(gym.Env):
             self.k.update(reset=False)
             #print ("ANOTHER ADDITIONAL COMMAND")
             self.additional_command()
-    
+
             # update the colors of vehicles
             if self.sim_params.render:
                 self.k.vehicle.update_vehicle_colors()
-            
+
             # crash encodes whether the simulator experienced a collision
             crash = self.k.simulation.check_collision()
 
             # stop collecting new simulation steps if there is a collision
-            #if crash:
-            #    print("Crash!!!!!!")
-            #    break
+            if crash:
+                break
 
             # render a frame
             self.render()
@@ -491,26 +390,12 @@ class Env(gym.Env):
 
         # collect observation new state associated with action
         next_observation = np.copy(states)
-        
-        done = False
-        # exit if there are 20 steps without vehicles 
-        #if(len(self.k.vehicle.get_ids())) == 0:
-        #    self.time_with_no_vehicles +=1
-        #else:
-        #    self.time_with_no_vehicles = 0
-        #done = self.time_with_no_vehicles >= 20
-        
-        #check if enough number of vehicles has exited the network
-        if('max_num_vehicles' in self.env_params.additional_params):
-            max_num_vehicles = self.env_params.additional_params['max_num_vehicles']
-            #print("max_num_vehicles specified")
-            if(max_num_vehicles > 0):
-                done = self.k.vehicle.get_num_arrived() >= max_num_vehicles
-                #print("num of vehicle exited: ", self.k.vehicle.get_num_arrived(),"/",max_num_vehicles)
+
+        sigma=0.1,
         # test if the environment should terminate due to a collision or the
         # time horizon being met
-        done = (self.time_counter >= self.env_params.warmup_steps +
-                self.env_params.horizon) or done #  or crash
+        #done = (self.time_counter >= self.env_params.warmup_steps + self.env_params.horizon)  # or crash
+        done = crash
 
         # compute the info for each agent
         infos = {}
@@ -521,7 +406,6 @@ class Env(gym.Env):
             reward = self.compute_reward(rl_clipped, fail=crash)
         else:
             reward = self.compute_reward(rl_actions, fail=crash)
-        
 
         return next_observation, reward, done, infos
 
@@ -604,7 +488,7 @@ class Env(gym.Env):
 
         # reset the time counter
         self.time_counter = 0
-        self.time_with_no_vehicles = 0
+
         # warn about not using restart_instance when using inflows
         if len(self.net_params.inflows.get()) > 0 and \
                 not self.sim_params.restart_instance:

@@ -47,6 +47,7 @@ vehicles.add(
     acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
+        sigma=0,
     ),
     num_vehicles=MAIN_HUMAN+MERGE_HUMAN)
 vehicles.add(
@@ -54,6 +55,7 @@ vehicles.add(
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
+        sigma=0,
     ),
     num_vehicles=MAIN_RL)
 
@@ -109,14 +111,15 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 2.6,
-            "max_decel": 4.5,
+            "max_accel": 9,
+            "max_decel": 9,
             "target_velocity": 30,
             "num_rl": NUM_RL,
             "max_num_vehicles":VEHICLE_NUMBER,
             "main_rl":MAIN_RL,
             "main_human":MAIN_HUMAN,
             "merge_human":MERGE_HUMAN,
+            "use_seeds":"/home/cuijiaxun/flow_2020_07_14_19_32_55.589614/seeds.pkl",
         },
     ),
 

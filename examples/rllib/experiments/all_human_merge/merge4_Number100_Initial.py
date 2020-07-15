@@ -67,6 +67,7 @@ vehicles.add(
     acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
+        sigma=0,
     ),
     num_vehicles=MAIN_HUMAN+MERGE_HUMAN)
 vehicles.add(
@@ -74,6 +75,7 @@ vehicles.add(
     acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
+        sigma=0,
     ),
     num_vehicles=MAIN_RL)
 
