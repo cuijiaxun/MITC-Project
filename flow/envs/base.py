@@ -544,8 +544,10 @@ class Env(gym.Env):
 
         # FIXED SEEDS: always setting same random seeds for each run and see whether the agent learns quicker
         # Random seeds recording and optionally loading
-        use_seeds = self.env_params.additional_params["use_seeds"]
-        if use_seeds: 
+        use_seeds=None
+        if "use_seeds" in self.env_params.additional_params.keys():
+            use_seeds = self.env_params.additional_params["use_seeds"]
+        if use_seeds is not None: 
           if use_seeds == "per_process":
             # FIXED SEEDS: always same random seeds for each rollout worker run and see whether the agent learns quicker
             if self.process_seeds_file: # i.e. iteration > 1 -- keep loading the file from iteration 1 for each simulation

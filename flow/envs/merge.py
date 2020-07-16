@@ -402,6 +402,24 @@ class MergePOEnvAvgVel(MergePOEnv):
             reward = rewards.average_velocity(self)
             return reward/30
 
+class MergePOEnvNegativeAvgVel(MergePOEnv):
+     def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            reward = rewards.average_velocity(self)
+            return reward/30-1
+   
+class MergePOEnvNegativeEstimateAvgVel(MergePOEnv):
+     def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            instant_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+            instant_speed = instant_speed + 1e-6
+            instant_speed_inverse = 1.0/instant_speed
+            est_avg_speed =  1.0/(np.mean(instant_speed_inverse))
+            return est_avg_speed/30-1
 
 class MergePOEnvIgnore(MergePOEnv):
     def additional_command(self):

@@ -8,7 +8,7 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnvPunishDelay
+from flow.envs import MergePOEnvNegativeEstimateAvgVel
 from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
@@ -47,7 +47,7 @@ vehicles.add(
     acceleration_controller=(SimCarFollowingController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
-        sigma=0,
+        #sigma=0,
     ),
     num_vehicles=MAIN_HUMAN+MERGE_HUMAN)
 vehicles.add(
@@ -55,7 +55,7 @@ vehicles.add(
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
-        sigma=0,
+        #sigma=0,
     ),
     num_vehicles=MAIN_RL)
 
@@ -87,10 +87,10 @@ inflow.add(
 '''
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Number100_Initial_Angel405_PunishDelay_RL10",
+    exp_tag="merge_4_Sim_Number100_Initial_Angel405_NegativeEstimateAvgVel_RL10",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvPunishDelay,
+    env_name=MergePOEnvNegativeEstimateAvgVel,
 
     # name of the network class the experiment is running on
     network=MergeNetwork,
@@ -119,7 +119,7 @@ flow_params = dict(
             "main_rl":MAIN_RL,
             "main_human":MAIN_HUMAN,
             "merge_human":MERGE_HUMAN,
-            #"use_seeds":"/home/flow/flow_2020_07_14_19_32_55.589614/seeds.pkl",
+            #"use_seeds":"/home/cuijiaxun/flow_2020_07_14_19_32_55.589614/seeds.pkl",
         },
     ),
 
