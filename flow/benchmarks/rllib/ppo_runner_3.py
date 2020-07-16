@@ -139,11 +139,11 @@ if __name__ == "__main__":
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["model"]["fcnet_hiddens"] = [256,256]
     config["observation_filter"] = "NoFilter"
-    config["entropy_coeff"] = 0.0001
-    config["kl_coeff"] = 0.0
-    config["kl_target"] = 0.01
-    #config["vf_loss_coeff"] = 0.5
-    #config["vf_share_layers"] = True
+    #config["entropy_coeff"] = 0.0001
+    #config["kl_coeff"] = 0.0
+    #config["kl_target"] = 0.01
+    config["vf_loss_coeff"] = 0.5
+    config["vf_share_layers"] = True
     config["clip_param"] = 0.2
     #config["seed"] = 123 # seed for PPO?
 

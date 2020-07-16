@@ -117,6 +117,7 @@ flow_params = dict(
             "main_rl":MAIN_RL,
             "main_human":MAIN_HUMAN,
             "merge_human":MERGE_HUMAN,
+            "use_seeds":"/home/flow/flow_2020_07_14_19_32_55.589614/seeds.pkl",
         },
     ),
 
