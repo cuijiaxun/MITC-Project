@@ -416,10 +416,15 @@ class MergePOEnvNegativeEstimateAvgVel(MergePOEnv):
             return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
         else:
             instant_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+            if(len(instant_speed)<1):
+                return 0
             instant_speed = instant_speed + 1e-6
             instant_speed_inverse = 1.0/instant_speed
             est_avg_speed =  1.0/(np.mean(instant_speed_inverse))
-            return est_avg_speed/30-1
+            #print(est_avg_speed)
+            if(est_avg_speed > 0):
+                return est_avg_speed/30-1
+            return 0
 
 class MergePOEnvIgnore(MergePOEnv):
     def additional_command(self):
