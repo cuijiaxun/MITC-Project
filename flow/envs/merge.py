@@ -409,7 +409,18 @@ class MergePOEnvNegativeAvgVel(MergePOEnv):
         else:
             reward = rewards.average_velocity(self)
             return reward/30-1
-   
+
+
+class MergePOEnvArrive(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            if(len(self.k.vehicle._num_arrived)>0):
+                return self.k.vehicle._num_arrived[-1]
+            else:
+                return 0
+  
 class MergePOEnvNegativeEstimateAvgVel(MergePOEnv):
      def compute_reward(self, rl_actions, **kwargs):
         if self.env_params.evaluate:
@@ -500,6 +511,7 @@ class MergePOEnvIgnoreAvgVelDistance(MergePOEnvIgnoreAvgVel):
             observation[6 * i + 5] = distance
         return observation
 
+
 class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
     @property
     def observation_space(self):
@@ -512,21 +524,23 @@ class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
         merge_vehs = self.k.vehicle.get_ids_by_edge("bottom")
         merge_dists = [self.k.vehicle.get_position(veh) for veh in merge_vehs]
         merge_distance = 1
+        len_bottom = self.k.network.edge_length("bottom")
+        position = self.k.network.total_edgestarts_dict["bottom"]
         if len(merge_dists)>0:
-            merge_distance = 0.5-max(merge_dists)/2000
-        #print(merge_vehs, merge_dists)
-        #print(merge_distance)
+            position = max(merge_dists)
+            merge_distance = (len_bottom - position)/len_bottom
         
         for i,rl_id in enumerate(self.rl_veh):
-            veh_pos = self.k.vehicle.get_position(rl_id)
             veh_x = self.k.vehicle.get_x_by_id(rl_id)
-            center = self.network.specify_nodes(self.network.net_params)[2]
-            center_x = center['x']+1000
-            distance = (center_x - veh_x)/2000
-            #print(rl_id,veh_pos,veh_x,center_x,distance)
             edge = self.k.vehicle.get_edge(rl_id)
-            num_vehicles = len(self.k.vehicle.get_ids_by_edge(edge))
             length = self.k.network.edge_length(edge)
+            center_x = self.k.network.total_edgestarts_dict["center"]
+            distance = 1
+            if edge in ["inflow_highway","left","center"]:
+                distance = (veh_x - center_x)/(center_x)
+            else:
+                pass #FIXME implement
+            #print(rl_id,"vehx", veh_x, "dist",distance, "center_x",center_x, "merge_dist",merge_distance,"len_bottom", len_bottom,"merge_position", position)
             vehicle_length = self.k.vehicle.get_length(rl_id)
             observation[7 * i + 0] = state[5*i+0]
             observation[7 * i + 1] = state[5*i+1]
@@ -536,7 +550,36 @@ class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
             observation[7 * i + 5] = np.clip(distance,-1,1)
             observation[7 * i + 6] = np.clip(merge_distance,-1,1)
         return observation
-    
+
+class MergePOEnvDistanceMergeInfo_NegativeEstimateAvgVel(MergePOEnvIgnoreAvgVelDistanceMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            instant_speed = np.array(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+            if(len(instant_speed)<1):
+                return 0
+            instant_speed = instant_speed + 1e-6
+            instant_speed_inverse = 1.0/instant_speed
+            est_avg_speed =  1.0/(np.mean(instant_speed_inverse))
+            #print(est_avg_speed)
+            if(est_avg_speed > 0):
+                return est_avg_speed/30-1
+            return 0
+
+class MergePOEnvDistanceMergeInfo_NegativeAvgVel(MergePOEnvIgnoreAvgVelDistanceMergeInfo):
+     def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            reward = rewards.average_velocity(self)
+            return reward/30-1
+
+class MergePOEnvDistanceMergeInfo_Punish(MergePOEnvIgnoreAvgVelDistanceMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        return -1
+
+
 class MergePOEnvScaleInflowIgnore(MergePOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         """See class definition."""
