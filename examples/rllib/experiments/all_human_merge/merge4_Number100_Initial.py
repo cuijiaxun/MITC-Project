@@ -48,7 +48,7 @@ RL_PENETRATION = 0.1
 NUM_RL = 10
 MAIN_HUMAN = 90
 MAIN_RL = 10
-MERGE_HUMAN = 30
+MERGE_HUMAN = 10
 VEHICLE_NUMBER = MAIN_HUMAN+MAIN_RL+MERGE_HUMAN
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
@@ -120,7 +120,7 @@ flow_params = dict(
     sim=SumoParams(
         restart_instance=True,
         sim_step=0.5,
-        render=False,
+        render=True,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)

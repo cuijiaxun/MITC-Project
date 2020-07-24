@@ -108,7 +108,8 @@ class MergeNetwork(Network):
                 "id": "center",
                 "y": 0,
                 "x": premerge,
-                "radius": 10
+                "radius": 10,
+                "type":"priority" #"zipper"
             },
             {
                 "id": "right",
