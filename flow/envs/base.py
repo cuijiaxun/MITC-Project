@@ -19,7 +19,7 @@ from traci.exceptions import TraCIException
 
 import sumolib
 
-
+from IPython import embed
 from flow.core.util import ensure_dir
 from flow.core.kernel import Kernel
 from flow.utils.exceptions import FatalFlowError
@@ -425,6 +425,10 @@ class Env(gym.Env):
                     if self.k.vehicle.get_edge(veh_id)[0] == ":":
                         if self.k.vehicle.get_speed(veh_id) <=  0.00000001:
                             print(self.time_counter,'veh_id:',veh_id,'its leader:',self.k.vehicle.get_leader(veh_id),'headway to leader:',self.k.vehicle.get_headway(veh_id),'action:',action,'speed:',self.k.vehicle.get_speed(veh_id))
+                            leader_id = self.k.vehicle.get_leader(veh_id)
+                            print("leader edge:", self.k.vehicle.get_edge(leader_id)," self_edge:",self.k.vehicle.get_edge(veh_id))
+                            if self.k.vehicle.get_headway(veh_id)<0:
+                                embed()
                             #if self.k.vehicle.get_leader(self.k.vehicle.get_leader(veh_id))==veh_id:
                             #    break
 

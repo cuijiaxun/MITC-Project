@@ -239,15 +239,20 @@ class TraCIVehicle(KernelVehicle):
                     self.__vehicles[veh_id]["headway"] = 50
                     self.__vehicles[veh_id]["leader"] = None
                 '''
-                self.__vehicles[veh_id]["headway"] = headway[1] + min_gap
-                self.__vehicles[veh_id]["leader"] = headway[0]
-                
+                if headway[1] + min_gap >= 0:
+                    self.__vehicles[veh_id]["headway"] = headway[1] + min_gap
+                    self.__vehicles[veh_id]["leader"] = headway[0]
+                else:
+                    self.__vehicles[veh_id]["leader"] = None
+                    self.__vehicles[veh_id]["headway"] = 1e+3
+ 
                 if headway[0] in self.__vehicles:
                     leader = self.__vehicles[headway[0]]
                     # if veh_id is closer from leader than another follower
                     # (in case followers are in different converging edges)
-                    if ("follower_headway" not in leader or
-                            headway[1] + min_gap < leader["follower_headway"]):
+                    if (("follower_headway" not in leader or
+                            headway[1] + min_gap < leader["follower_headway"]) and
+                            headway[1] + min_gap > 0):
                         leader["follower"] = veh_id
                         leader["follower_headway"] = headway[1] + min_gap
 

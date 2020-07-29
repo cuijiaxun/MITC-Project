@@ -189,6 +189,11 @@ def visualizer_rllib(args):
         sim_params.render = 'drgb'
         sim_params.pxpm = 4
         sim_params.save_render = True
+    
+
+    if args.horizon:
+        config['horizon'] = args.horizon
+        flow_params['env'].horizon = args.horizon
 
     # Create and register a gym+rllib env
     create_env, env_name = make_create_env(params=flow_params, version=0)

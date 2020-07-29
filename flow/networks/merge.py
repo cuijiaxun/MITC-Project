@@ -93,6 +93,7 @@ class MergeNetwork(Network):
         premerge = net_params.additional_params["pre_merge_length"]
         postmerge = net_params.additional_params["post_merge_length"]
         
+        
         nodes = [
             {
                 "id": "inflow_highway",
@@ -119,12 +120,12 @@ class MergeNetwork(Network):
             {
                 "id": "inflow_merge",
                 "x": premerge - (merge + inflow_edge_len) * cos(angle),
-                "y": -(merge + inflow_edge_len) * sin(angle)
+                "y": -(merge + inflow_edge_len) * sin(angle),
             },
             {
                 "id": "bottom",
                 "x": premerge - merge * cos(angle),
-                "y": -merge * sin(angle)
+                "y": -merge * sin(angle),
             },
         ]
 
@@ -138,6 +139,9 @@ class MergeNetwork(Network):
         inflow_edge_len = INFLOW_EDGE_LEN
         if "INFLOW_EDGE_LEN" in net_params.additional_params.keys():
             inflow_edge_len = net_params.additional_params["INFLOW_EDGE_LEN"]
+        merge_speed = net_params.additional_params["speed_limit"]
+        if "merge_speed" in net_params.additional_params.keys():
+            merge_speed = net_params.additional_params["merge_speed"]
 
         edges = [{
             "id": "inflow_highway",
@@ -156,13 +160,17 @@ class MergeNetwork(Network):
             "type": "mergeType",
             "from": "inflow_merge",
             "to": "bottom",
-            "length": inflow_edge_len
+            "length": inflow_edge_len,
+            "speed": merge_speed,
+            "priority":1
         }, {
             "id": "bottom",
             "type": "mergeType",
             "from": "bottom",
             "to": "center",
-            "length": merge
+            "length": merge,
+            "speed": merge_speed,
+            "priority":1
         }, {
             "id": "center",
             "type": "highwayType",
@@ -178,6 +186,9 @@ class MergeNetwork(Network):
         h_lanes = net_params.additional_params["highway_lanes"]
         m_lanes = net_params.additional_params["merge_lanes"]
         speed = net_params.additional_params["speed_limit"]
+        merge_speed = net_params.additional_params["speed_limit"]
+        if "merge_speed" in net_params.additional_params.keys():
+            merge_speed = net_params.additional_params["merge_speed"]
 
         types = [{
             "id": "highwayType",
@@ -186,7 +197,7 @@ class MergeNetwork(Network):
         }, {
             "id": "mergeType",
             "numLanes": m_lanes,
-            "speed": speed
+            "speed": merge_speed,
         }]
 
         return types
@@ -211,12 +222,12 @@ class MergeNetwork(Network):
         if "INFLOW_EDGE_LEN" in self.net_params.additional_params.keys():
             inflow_edge_len = self.net_params.additional_params["INFLOW_EDGE_LEN"]
 
-        edgestarts = [("inflow_highway", 0), ("left", inflow_edge_len + 0.1),
-                      ("center", inflow_edge_len + premerge + 22.6),
+        edgestarts = [("inflow_highway", 0), ("left", inflow_edge_len + 0.1),#0.1
+                      ("center", inflow_edge_len + premerge + 22.6), #22.6
                       ("inflow_merge",
-                       inflow_edge_len + premerge + postmerge + 22.6),
+                       inflow_edge_len + premerge + postmerge + 22.6), #22.6
                       ("bottom",
-                       2 * inflow_edge_len + premerge + postmerge + 22.7)]
+                       2 * inflow_edge_len + premerge + postmerge + 22.7)] #22.7
 
         return edgestarts
 
@@ -231,8 +242,8 @@ class MergeNetwork(Network):
 
         internal_edgestarts = [
             (":left", inflow_edge_len), (":center",
-                                         inflow_edge_len + premerge + 0.1),
-            (":bottom", 2 * inflow_edge_len + premerge + postmerge + 22.6)
+                                         inflow_edge_len + premerge  + 0.1),
+            (":bottom", 2 * inflow_edge_len + premerge + postmerge + 22.6) #22.6
         ]
 
         return internal_edgestarts
