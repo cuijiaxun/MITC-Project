@@ -385,9 +385,9 @@ def visualizer_rllib(args):
                 rets[key].append(ret[key])
         else:
             rets.append(ret)
-        outflow = vehicles.get_outflow_rate(1000)
+        outflow = vehicles.get_outflow_rate(5000)
         final_outflows.append(outflow)
-        inflow = vehicles.get_inflow_rate(1000)
+        inflow = vehicles.get_inflow_rate(5000)
         final_inflows.append(inflow)
         times.append(time_to_exit)
         if np.all(np.array(final_inflows) > 1e-5):
