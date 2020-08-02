@@ -12,7 +12,7 @@ from gym.spaces.box import Box
 
 import numpy as np
 import collections
-
+import random
 ADDITIONAL_ENV_PARAMS = {
     # maximum acceleration for autonomous vehicles, in m/s^2
     "max_accel": 3,
