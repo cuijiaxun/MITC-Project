@@ -8,14 +8,14 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnvIgnoreAvgVelDistanceMergeInfo
-from flow.networks import MergeNetworkZipper
+from flow.envs import MergePOEnvAvgVel
+from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
-from flow.core.params import VehicleParams
-from flow.controllers import SimCarFollowingController, RLController,IDMController
+from flow.core.params import VehicleParams, SumoLaneChangeParams
+from flow.controllers import SimCarFollowingController, RLController,IDMController,SimLaneChangeController
 
 # time horizon of a single rollout
 HORIZON = 1500
@@ -24,30 +24,52 @@ FLOW_RATE = 2000
 # percent of autonomous vehicles
 RL_PENETRATION = 0.1
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
-NUM_RL = 5
+NUM_RL = 20
 
 # We consider a highway network with an upstream merging lane producing
 # shockwaves
 additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
 additional_net_params["merge_lanes"] = 1
-additional_net_params["highway_lanes"] = 1
+additional_net_params["highway_lanes"] = 2
 additional_net_params["pre_merge_length"] = 500
 
 # RL vehicles constitute 5% of the total number of vehicles
 vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(SimCarFollowingController, {
+        }
+    ),
+    lane_change_controller=(SimLaneChangeController,{}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
-    num_vehicles=5)
+    lane_change_params=SumoLaneChangeParams(
+      #model="SL2015",
+      lane_change_mode=1621,
+      #lc_pushy=0,
+      #lc_assertive=5,
+      lc_impatience=1e-8,
+      lc_time_to_impatience=1e12
+    ), 
+    num_vehicles=0)
+
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
+    lane_change_controller=(SimLaneChangeController,{}),
+
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
     ),
+    lane_change_params=SumoLaneChangeParams(
+      #model="SL2015",
+      lane_change_mode=1621,
+      #lc_pushy=0,
+      #lc_assertive=5,
+      lc_impatience=1e-8,
+      lc_time_to_impatience=1e12
+    ), 
     num_vehicles=0)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
@@ -57,30 +79,30 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    depart_lane="free",
+    depart_lane=0,#"first",#"free",
     depart_speed=10)
 inflow.add(
     veh_type="rl",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    depart_lane="free",
+    depart_lane=0,#"free",
     depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
-    vehs_per_hour=300,
-    depart_lane="free",
+    vehs_per_hour=200,
+    depart_lane="first",#"free",
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Zipper_IgnoreAvgVelDistanceMergeInfo_1.5",
+    exp_tag="merge_4_Sim_AvgVel_MultiLane",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvIgnoreAvgVelDistanceMergeInfo,
+    env_name=MergePOEnvAvgVel,
 
     # name of the network class the experiment is running on
-    network=MergeNetworkZipper,
+    network=MergeNetwork,
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -98,8 +120,8 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 9,
+            "max_decel": 9,
             "target_velocity": 30,
             "num_rl": NUM_RL,
         },

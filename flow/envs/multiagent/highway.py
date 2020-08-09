@@ -113,7 +113,7 @@ class MultiAgentHighwayPOEnv(MultiEnv):
                 lead_head = max_length
             else:
                 lead_speed = self.k.vehicle.get_speed(lead_id)
-                lead_head = self.k.vehicle.get_headway(lead_id)
+                lead_head = self.k.vehicle.get_headway(rl_id)
 
             if follower in ["", None]:
                 # in case follower is not visible
@@ -166,7 +166,7 @@ class MultiAgentHighwayPOEnv(MultiEnv):
                     cost2 += min((t_headway - t_min) / t_min, 0)
 
                 # weights for cost1, cost2, and cost3, respectively
-                eta1, eta2 = 1.00, 0.10
+                eta1, eta2 = 1.00, 0.00
 
                 reward = max(eta1 * cost1 + eta2 * cost2, 0)
 
@@ -188,3 +188,157 @@ class MultiAgentHighwayPOEnv(MultiEnv):
             follow_id = self.k.vehicle.get_follower(rl_id)
             if follow_id:
                 self.k.vehicle.set_observed(follow_id)
+
+
+class MultiAgentHighwayPOEnvLocalReward(MultiAgentHighwayPOEnv):
+    def _veh_edge_lane(self, edge, lane):
+        return [veh for veh in self.k.vehicle.get_ids_by_edge(edge) if self.k.vehicle.get_lane(veh) == lane]
+
+    def _veh_edge_lane_backward_pass(self, edge, lane, junctions):
+        veh = []
+        for prev_edge, prev_lane in self.k.network.prev_edge(edge, lane):
+            if prev_edge in junctions:
+                veh += self._veh_edge_lane_backward_pass(prev_edge, prev_lane, junctions)
+            veh += self._veh_edge_lane(prev_edge, prev_lane)
+        return veh
+
+    def _compute_avgspeed_agent(self, rl_id, **kwargs):
+        if kwargs["fail"]:
+            return 0 
+        edge = self.k.vehicle.get_edge(rl_id)
+        lane = self.k.vehicle.get_lane(rl_id)
+        pos = self.k.vehicle.get_position(edge)
+        edge_veh = self.k.vehicle.get_ids_by_edge(edge)
+        junctions = set(self.k.network.get_junction_list())
+        neighbours = []
+        for veh in edge_veh:
+            veh_lane = self.k.vehicle.get_lane(veh)
+            veh_pos = self.k.vehicle.get_position(veh)
+            if veh_lane == lane and veh_pos <= pos:
+                neighbours.append(veh)
+        neighbours += self._veh_edge_lane_backward_pass(edge, lane, junctions)
+        neighbours = np.array(neighbours)
+        if len(neighbours) == 0:
+            return 0
+        vel = np.array(self.k.vehicle.get_speed(neighbours))
+        if any(vel<-100):
+            return 0
+        return np.sum(vel)/len(vel)
+
+    def _compute_avgspeednormalized_agent(self, rl_id, **kwargs):
+        reward = self._compute_avgspeed_agent(rl_id, **kwargs)
+        return reward/self.k.network.speed_limit(self.k.vehicle.get_edge(rl_id))
+
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+        rewards = {}
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = self._compute_avgspeednormalized_agent(rl_id, **kwargs)
+        return rewards
+
+
+class MultiAgentHighwayPOEnvDistanceMergeInfo(MultiAgentHighwayPOEnv):
+    @property
+    def observation_space(self):
+        return Box(low=-1, high=1, shape=(7, ), dtype=np.float32)
+
+    def get_state(self):
+        """See class definition."""
+        obs = {}
+
+        # normalizing constants
+        max_speed = self.k.network.max_speed()
+        max_length = self.k.network.length()
+        merge_vehs = self.k.vehicle.get_ids_by_edge("bottom")
+        merge_dists = [self.k.vehicle.get_position(veh) for veh in merge_vehs]
+        merge_distance = 1
+        len_bottom = self.k.network.edge_length("bottom")
+        position = self.k.network.total_edgestarts_dict["bottom"]
+        if len(merge_dists)>0:
+            position = max(merge_dists)
+            merge_distance = (len_bottom - position)/len_bottom
+
+        for rl_id in self.k.vehicle.get_rl_ids():
+            this_speed = self.k.vehicle.get_speed(rl_id)
+            lead_id = self.k.vehicle.get_leader(rl_id)
+            follower = self.k.vehicle.get_follower(rl_id)
+
+            if lead_id in ["", None]:
+                # in case leader is not visible
+                lead_speed = max_speed
+                lead_head = max_length
+            else:
+                lead_speed = self.k.vehicle.get_speed(lead_id)
+                lead_head = self.k.vehicle.get_headway(rl_id)
+
+            if follower in ["", None]:
+                # in case follower is not visible
+                follow_speed = 0
+                follow_head = max_length
+            else:
+                follow_speed = self.k.vehicle.get_speed(follower)
+                follow_head = self.k.vehicle.get_headway(follower)
+            
+            veh_x = self.k.vehicle.get_x_by_id(rl_id)
+            edge = self.k.vehicle.get_edge(rl_id)
+            length = self.k.network.edge_length(edge)
+            center_x = self.k.network.total_edgestarts_dict["center"]
+            distance = 1
+            if edge in ["inflow_highway","left","center"]:
+                distance = (veh_x - center_x)/(center_x)
+            else:
+                pass #FIXME implement
+
+            observation = np.array([
+                this_speed / max_speed,
+                (lead_speed - this_speed) / max_speed,
+                lead_head / max_length,
+                (this_speed - follow_speed) / max_speed,
+                follow_head / max_length,
+                np.clip(distance,-1,1),
+                np.clip(merge_distance,-1,1),
+
+            ])
+
+            obs.update({rl_id: observation})
+
+        return obs
+
+
+class MultiAgentHighwayPOEnvArriveDistanceMergeInfo(MultiAgentHighwayPOEnvDistanceMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        for rl_id in self.k.vehicle.get_rl_ids():
+
+            if self.env_params.evaluate:
+                reward = self.k.vehicle._num_arrived[-1]
+            elif kwargs['fail']:
+                reward = 0
+            else:
+                if len(self.k.vehicle._num_arrived) > 0:
+                    reward = self.k.vehicle._num_arrived[-1]
+                else:
+                    reward = 0
+            '''
+            cost2 = 0
+            t_max = 5
+            lead_id = self.k.vehicle.get_leader(rl_id)
+            if lead_id not in ["", None] and self.k.vehicle.get_speed(rl_id)>0:
+                t_headway = max(self.k.vehicle.get_headway(rl_id)/self.k.vehicle.get_speed(rl_id),0)
+                cost2 = min((t_max - t_headway)/t_max,0)
+            #FIXME TEST REDUCE TOTAL TIME
+            #Punish Large Headway
+            eta2 = 0.1
+            eta1 = 0.9
+            reward = -0.1 * eta1 + cost2 * eta2
+            '''
+            reward = -0.1
+            rewards[rl_id] = reward
+        return rewards
+                    
+
+

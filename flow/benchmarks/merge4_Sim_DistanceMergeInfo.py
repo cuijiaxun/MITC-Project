@@ -74,7 +74,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_IgnoreAvgVelDistanceMergeInfo",
+    exp_tag="merge_4_Sim_IgnoreAvgVelDistanceMergeInfo_1.5",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnvIgnoreAvgVelDistanceMergeInfo,
@@ -98,8 +98,8 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 9,
-            "max_decel": 9,
+            "max_accel": 1.5,
+            "max_decel": 1.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
         },

@@ -551,6 +551,16 @@ class MergePOEnvIgnoreAvgVelDistanceMergeInfo(MergePOEnvIgnoreAvgVel):
             observation[7 * i + 6] = np.clip(merge_distance,-1,1)
         return observation
 
+class MergePOEnvArriveDistanceMergeInfo(MergePOEnvIgnoreAvgVelDistanceMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        if self.env_params.evaluate:
+            return np.mean(self.k.vehicle.get_speed(self.k.vehicle.get_ids()))
+        else:
+            if(len(self.k.vehicle._num_arrived)>0):
+                return self.k.vehicle._num_arrived[-1]
+            else:
+                return 0
+
 class MergePOEnvDistanceMergeInfo_NegativeEstimateAvgVel(MergePOEnvIgnoreAvgVelDistanceMergeInfo):
     def compute_reward(self, rl_actions, **kwargs):
         if self.env_params.evaluate:

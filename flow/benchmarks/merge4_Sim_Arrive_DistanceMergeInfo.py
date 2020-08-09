@@ -8,8 +8,8 @@ is 10%.
 - **Observation Dimension**: (25, )
 - **Horizon**: 750 steps
 """
-from flow.envs import MergePOEnvIgnoreAvgVelDistanceMergeInfo
-from flow.networks import MergeNetworkZipper
+from flow.envs import MergePOEnvArriveDistanceMergeInfo
+from flow.networks import MergeNetwork
 from copy import deepcopy
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams
@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 1500
+HORIZON = 750
 # inflow rate at the highway
 FLOW_RATE = 2000
 # percent of autonomous vehicles
@@ -68,19 +68,19 @@ inflow.add(
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
-    vehs_per_hour=300,
+    vehs_per_hour=200,
     depart_lane="free",
     depart_speed=7.5)
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_Zipper_IgnoreAvgVelDistanceMergeInfo_1.5",
+    exp_tag="merge_4_Sim_Arrive_DistanceMergeInfo",
 
     # name of the flow environment the experiment is running on
-    env_name=MergePOEnvIgnoreAvgVelDistanceMergeInfo,
+    env_name=MergePOEnvArriveDistanceMergeInfo,
 
     # name of the network class the experiment is running on
-    network=MergeNetworkZipper,
+    network=MergeNetwork,
 
     # simulator that is used by the experiment
     simulator='traci',
@@ -98,8 +98,8 @@ flow_params = dict(
         sims_per_step=2,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
         },

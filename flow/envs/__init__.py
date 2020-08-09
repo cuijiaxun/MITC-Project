@@ -21,7 +21,8 @@ from flow.envs.merge import MergePOEnv,MergePOEnvEdgePrior,MergePOEnvPunishDelay
                             MergePOEnvIgnoreAvgVel,MergePOEnvIgnoreAvgVelDistance,MergePOEnvIgnoreAvgVelDistanceMergeInfo,\
                             MergePOEnvDeparted, MergePOEnvAvgVelEnExit, MergePOEnvNegativeAvgVel, MergePOEnvNegativeEstimateAvgVel,\
                             MergePOEnvArrive, MergePOEnvDistanceMergeInfo_Punish,  MergePOEnvDistanceMergeInfo_NegativeEstimateAvgVel, \
-                            MergePOEnvDistanceMergeInfo_NegativeAvgVel
+                            MergePOEnvDistanceMergeInfo_NegativeAvgVel,\
+                            MergePOEnvArriveDistanceMergeInfo
 from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
 from flow.envs.merge_no_headway import MergePOEnv_noheadway, MergePOEnvEdgePrior_noheadway
@@ -47,6 +48,7 @@ __all__ = [
     'TrafficLightGridTestEnv',
     'MergePOEnv',
     'MergePOEnvArrive',
+    'MergePOEnvArriveDistanceMergeInfo'
     'MergePOEnvEdgePrior',
     'MergePOEnvDeparted',
     'MergePOEnvDistanceMergeInfo_Punish',
