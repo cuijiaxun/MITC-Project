@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvArriveDistanceMergeInfo
+from flow.envs.multiagent import MultiAgentHighwayPOEnvDistanceMergeInfoNegative
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -113,9 +113,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Arrive_DistanceMergeInfo',
+    exp_tag='multiagent_highway_merge4_DistanceMergeInfo_Negative',
 
-    env_name=MultiAgentHighwayPOEnvArriveDistanceMergeInfo,
+    env_name=MultiAgentHighwayPOEnvDistanceMergeInfoNegative,
     network=MergeNetwork,
     simulator='traci',
 

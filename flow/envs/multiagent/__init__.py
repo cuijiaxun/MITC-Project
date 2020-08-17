@@ -6,12 +6,17 @@ from flow.envs.multiagent.ring.wave_attenuation import \
 
 from flow.envs.multiagent.ring.accel import MultiAgentAccelEnv
 from flow.envs.multiagent.traffic_light_grid import MultiTrafficLightGridPOEnv
-from flow.envs.multiagent.highway import MultiAgentHighwayPOEnv, MultiAgentHighwayPOEnvLocalReward, MultiAgentHighwayPOEnvDistanceMergeInfo, MultiAgentHighwayPOEnvArriveDistanceMergeInfo,\
-                                        MultiAgentHighwayPOEnvArrive
+from flow.envs.multiagent.highway import MultiAgentHighwayPOEnv, MultiAgentHighwayPOEnvLocalReward,\
+                        MultiAgentHighwayPOEnvDistanceMergeInfo, MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate,\
+                        MultiAgentHighwayPOEnvDistanceMergeInfoNegative, MultiAgentHighwayPOEnvNegative,\
+                                        MultiAgentHighwayPOEnvCollaborate
 
 __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
            'MultiTrafficLightGridPOEnv', 'MultiAgentHighwayPOEnv',
-           'MultiAgentHighwayPOEnvArrive',
+           'MultiAgentHighwayPOEnvNegative',
            'MultiAgentHighwayPOEnvLocalReward',
+           'MultiAgentHighwayPOEnvCollaborate',
+
            'MultiAgentHighwayPOEnvDistanceMergeInfo',
-           'MultiAgentHighwayPOEnvArriveDistanceMergeInfo']
+           'MultiAgentHighwayPOEnvDistanceMergeInfoNegative',
+           'MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate',]

@@ -1,7 +1,7 @@
 """Environment used to train vehicles to improve traffic on a highway."""
 import numpy as np
 from gym.spaces.box import Box
-from flow.core.rewards import desired_velocity
+from flow.core.rewards import desired_velocity, average_velocity
 from flow.envs.multiagent.base import MultiEnv
 
 
@@ -306,60 +306,55 @@ class MultiAgentHighwayPOEnvDistanceMergeInfo(MultiAgentHighwayPOEnv):
         return obs
 
 
-class MultiAgentHighwayPOEnvArriveDistanceMergeInfo(MultiAgentHighwayPOEnvDistanceMergeInfo):
+class MultiAgentHighwayPOEnvDistanceMergeInfoNegative(MultiAgentHighwayPOEnvDistanceMergeInfo):
     def compute_reward(self, rl_actions, **kwargs):
         if rl_actions is None:
             return {}
 
         rewards = {}
         for rl_id in self.k.vehicle.get_rl_ids():
-
-            if self.env_params.evaluate:
-                reward = self.k.vehicle._num_arrived[-1]
-            elif kwargs['fail']:
-                reward = 0
-            else:
-                if len(self.k.vehicle._num_arrived) > 0:
-                    reward = self.k.vehicle._num_arrived[-1]
-                else:
-                    reward = 0
-            '''
-            cost2 = 0
-            t_max = 5
-            lead_id = self.k.vehicle.get_leader(rl_id)
-            if lead_id not in ["", None] and self.k.vehicle.get_speed(rl_id)>0:
-                t_headway = max(self.k.vehicle.get_headway(rl_id)/self.k.vehicle.get_speed(rl_id),0)
-                cost2 = min((t_max - t_headway)/t_max,0)
-            #FIXME TEST REDUCE TOTAL TIME
-            #Punish Large Headway
-            eta2 = 0.1
-            eta1 = 0.9
-            reward = -0.1 * eta1 + cost2 * eta2
-            '''
             reward = -0.1
             rewards[rl_id] = reward
         return rewards
-                    
-class MultiAgentHighwayPOEnvArrive(MultiAgentHighwayPOEnv):
+
+class MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate(MultiAgentHighwayPOEnvDistanceMergeInfo):
     def compute_reward(self, rl_actions, **kwargs):
         if rl_actions is None:
             return {}
 
         rewards = {}
+        eta1 = 0.5
+        eta2 = 0.5
+        reward1 = -1
+        reward2 = average_velocity(self)/30
+        reward  = reward1 * eta1 + reward2 * eta2
         for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
+                   
+class MultiAgentHighwayPOEnvNegative(MultiAgentHighwayPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
 
-            if self.env_params.evaluate:
-                reward = self.k.vehicle._num_arrived[-1]
-            elif kwargs['fail']:
-                reward = 0
-            else:
-                if len(self.k.vehicle._num_arrived) > 0:
-                    reward = self.k.vehicle._num_arrived[-1]
-                else:
-                    reward = 0
-            
+        rewards = {}
+        for rl_id in self.k.vehicle.get_rl_ids(): 
             reward = -0.1
             rewards[rl_id] = reward
         return rewards
 
+
+class MultiAgentHighwayPOEnvCollaborate(MultiAgentHighwayPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+        rewards = {}
+        eta1 = 0.5
+        eta2 = 0.5
+        reward1 = -1
+        reward2 = average_velocity(self)/30
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
 
