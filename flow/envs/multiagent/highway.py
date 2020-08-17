@@ -340,5 +340,26 @@ class MultiAgentHighwayPOEnvArriveDistanceMergeInfo(MultiAgentHighwayPOEnvDistan
             rewards[rl_id] = reward
         return rewards
                     
+class MultiAgentHighwayPOEnvArrive(MultiAgentHighwayPOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        for rl_id in self.k.vehicle.get_rl_ids():
+
+            if self.env_params.evaluate:
+                reward = self.k.vehicle._num_arrived[-1]
+            elif kwargs['fail']:
+                reward = 0
+            else:
+                if len(self.k.vehicle._num_arrived) > 0:
+                    reward = self.k.vehicle._num_arrived[-1]
+                else:
+                    reward = 0
+            
+            reward = -0.1
+            rewards[rl_id] = reward
+        return rewards
 
 

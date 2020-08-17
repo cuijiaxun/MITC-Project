@@ -17,9 +17,16 @@ try:
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
 from ray.tune import run_experiments
+from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
+from ray import tune
 from ray.tune.registry import register_env
+from ray.tune import run_experiments
 
-from flow.envs import MergePOEnv,MergePOEnv_noheadway, TestEnv,Env
+from flow.controllers import RLController, SimCarFollowingController
+from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
+                             VehicleParams, SumoParams, \
+                             SumoCarFollowingParams, SumoLaneChangeParams
+
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -28,6 +35,11 @@ from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
 from flow.scenarios.merge import ADDITIONAL_NET_PARAMS
 from flow.core.params import VehicleParams, SumoLaneChangeParams
 from flow.controllers import SimCarFollowingController,IDMController, RLController, SimLaneChangeController, ContinuousRouter
+from flow.envs.multiagent import MultiAgentHighwayPOEnvArrive
+from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
+from flow.networks import MergeNetwork
+from flow.networks.merge import ADDITIONAL_NET_PARAMS
+from copy import deepcopy
 
 # TODO hard coded
 #scenarios_dir = os.path.join(os.path.expanduser("~/"), 'local', 'flow_2019_07', 'flow', 'scenarios')
@@ -47,6 +59,7 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"), 'Documents', 'MITC', 'flo
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
             "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+            #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
 #
@@ -68,9 +81,9 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 2000 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 1#1#20
+N_ROLLOUTS = 12#1#20
 # number of parallel workers
-N_CPUS = 1#8#2
+N_CPUS = 12#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -125,7 +138,7 @@ vehicles.add(
 
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(SimCarFollowingController, {}),
+    acceleration_controller=(RLController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
@@ -245,11 +258,11 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="1merge_ALLHUMAN_i696_horizon2000_SM9_inflow2000_merge200_depart20_noheadway",
+    exp_tag="Distributed_1merge_i696_horizon1500_SM9_inflow2000_merge200_depart10_Arrive",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
-    env_name=MergePOEnv_noheadway,
+    env_name=MultiAgentHighwayPOEnvArrive,
     # name of the scenario class the experiment is running on
     network=Network,
 
@@ -268,14 +281,14 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=2, #5,
-        warmup_steps=400,
+        sims_per_step=1, #5,
+        warmup_steps=0,
         additional_params={
-            "max_accel": 9,
-            "max_decel": 9,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
-            "ignore_edges":["59440544#0"],
+            #"ignore_edges":["59440544#0"],
         },
     ),
 
@@ -311,13 +324,15 @@ def setup_exps(seeds_file=None):
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
     config["num_workers"] = N_CPUS
+    config["sgd_minibatch_size"] = int(HORIZON * N_ROLLOUTS / N_CPUS)
     config["train_batch_size"] = HORIZON * N_ROLLOUTS
-    config["gamma"] = 0.999  # discount rate
-    config["model"].update({"fcnet_hiddens": [32, 32, 32]})
+    config["gamma"] = 0.9995  # discount rate
+    config["model"].update({"fcnet_hiddens": [100, 50, 25]})
     config["use_gae"] = True
     config["lambda"] = 0.97
     config["kl_target"] = 0.02
     config["num_sgd_iter"] = 10
+    config["vf_clip_param"] = 1e10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
     config["entropy_coeff"] = 0.001
@@ -328,11 +343,29 @@ def setup_exps(seeds_file=None):
     config['env_config']['flow_params'] = flow_json
     config['env_config']['run'] = alg_run
 
-    create_env, gym_name = make_create_env(params=flow_params, version=0, seeds_file=seeds_file)
+    create_env, env_name = make_create_env(params=flow_params, version=0, seeds_file=seeds_file)
 
     # Register as rllib env
-    register_env(gym_name, create_env)
-    return alg_run, gym_name, config
+    register_env(env_name, create_env)
+    # multiagent configuration
+    temp_env = create_env()
+    policy_graphs = {'av': (PPOTFPolicy,
+                            temp_env.observation_space,
+                            temp_env.action_space,
+                            {})}
+
+    def policy_mapping_fn(_):
+        return 'av'
+
+    config.update({
+        'multiagent': {
+            'policies': policy_graphs,
+            'policy_mapping_fn': tune.function(policy_mapping_fn),
+            'policies_to_train': ['av']
+        }
+    })
+
+    return alg_run, env_name, config
 
 
 
@@ -353,14 +386,12 @@ if __name__ == "__main__":
                 "config": {
                     **config
                 },
-                "checkpoint_freq": 1, #20,
+                "checkpoint_freq": 20, #20,
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {
-                    "training_iteration": 1,
+                    "training_iteration": 500,
                 },
             },
-        },
-        resume=False,
-    )
+        },)
 
