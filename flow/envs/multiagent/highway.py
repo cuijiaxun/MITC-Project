@@ -527,10 +527,10 @@ class MultiAgentHighwayPOEnvCollaborate(MultiAgentHighwayPOEnv):
         if rl_actions is None:
             return {}
         rewards = {}
-        eta1 = 0.5
-        eta2 = 0.5
-        reward1 = -1
-        reward2 = average_velocity(self)/30
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
         for rl_id in self.k.vehicle.get_rl_ids():
             rewards[rl_id] = reward
@@ -616,11 +616,12 @@ class MultiAgentHighwayPOEnvMerge4(MultiAgentHighwayPOEnv):
                 rl_dist = (veh_x - center_x)/(center_x)
             else:
                 pass #FIXME: not yet implemented
-
+            num_veh_ahead = 0 
             for veh_id in self.k.vehicle.get_ids_by_edge(["left","inflow_highway"]):
                 veh_position = self.k.vehicle.get_x_by_id(veh_id)
                 if veh_position > rl_x:
                     veh_vel.append(self.k.vehicle.get_speed(veh_id))
+                    num_veh_ahead += 1
             if len(veh_vel) > 0:
                 veh_vel = np.mean(veh_vel)
             else:

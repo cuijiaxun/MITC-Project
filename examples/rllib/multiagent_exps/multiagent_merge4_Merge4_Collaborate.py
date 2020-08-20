@@ -33,7 +33,7 @@ from copy import deepcopy
 # number of training iterations
 N_TRAINING_ITERATIONS = 500
 # number of rollouts per training iteration
-N_ROLLOUTS = 40
+N_ROLLOUTS = 30 
 # number of steps per rollout
 HORIZON = 2000
 # number of parallel workers
@@ -182,8 +182,13 @@ def setup_exps(flow_params):
     config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
     config['gamma'] = 1  # discount rate
-    config['model'].update({'fcnet_hiddens': [32, 32, 32]})
-    config['lr'] = tune.grid_search([5e-4, 1e-4])
+    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
+    #config['lr'] = tune.grid_search([5e-4, 1e-4])
+    config['lr_schedule'] = [
+            [0, 5e-4],
+            [2000000, 5e-4],
+            [4000000, 5e-5],
+            [8000000, 5e-6]]
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
@@ -244,7 +249,7 @@ if __name__ == '__main__':
         flow_params['exp_tag']: {
             'run': alg_run,
             'env': env_name,
-            'checkpoint_freq': 20,
+            'checkpoint_freq': 5,
             'checkpoint_at_end': True,
             'stop': {
                 'training_iteration': N_TRAINING_ITERATIONS

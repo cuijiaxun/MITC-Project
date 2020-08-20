@@ -9,7 +9,7 @@ try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
-from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray import tune
 from ray.tune.registry import register_env
 from ray.tune import run_experiments
@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvMerge4Collaborate
+from flow.envs.multiagent import MultiAgentHighwayPOEnvCollaborate
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -33,7 +33,7 @@ from copy import deepcopy
 # number of training iterations
 N_TRAINING_ITERATIONS = 500
 # number of rollouts per training iteration
-N_ROLLOUTS = 10
+N_ROLLOUTS = 30 
 # number of steps per rollout
 HORIZON = 2000
 # number of parallel workers
@@ -106,16 +106,16 @@ inflow.add(
     depart_lane="free",
     depart_speed=10)
 inflow.add(
-    veh_type="human",   
+    veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=MERGE_RATE,
     depart_lane="free",
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Merge4_Collaborate_DDPG',
+    exp_tag='multiagent_highway_merge4_Collaborate',
 
-    env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
+    env_name=MultiAgentHighwayPOEnvCollaborate,
     network=MergeNetwork,
     simulator='traci',
 
@@ -174,35 +174,37 @@ def setup_exps(flow_params):
     dict
         training configuration parameters
     """
-    alg_run = 'DDPG'
+    alg_run = 'PPO'
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
-    config['num_gpus'] = 0.5
-    config['horizon'] = HORIZON
     config['num_workers'] = N_CPUS
-    config['train_batch_size'] = 4096#HORIZON * N_ROLLOUTS
-    #config['sgd_minibatch_size'] = 4096
+    config['train_batch_size'] = HORIZON * N_ROLLOUTS
+    config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
-    config['gamma'] = 1.0  # discount rate
-    config['actor_hiddens'] = [32,32,32]
-    config['critic_hiddens'] = [32,32,32]
-    config['n_step'] = 3
-    #config['model'] = {}
-    config['target_network_update_freq'] = 100
-    config['timesteps_per_iteration'] = HORIZON * N_ROLLOUTS
-    config['tau'] = 0.002
-
-    #========Replay Buffer==========
-    config['buffer_size'] = 100000
-    config['prioritized_replay'] = True
-    config['actor_lr'] = 0.001
-    config['critic_lr'] = 0.001
-    config['l2_reg'] = 0.0001
-    config['learning_starts'] = HORIZON * N_ROLLOUTS 
-
-    #=======Evaluation========
-    config['evaluation_interval'] = 20
-    config['evaluation_num_episodes'] = 1
+    config['gamma'] = 1  # discount rate
+    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
+    #config['lr'] = tune.grid_search([5e-4, 1e-4])
+    config['lr_schedule'] = [
+            [0, 5e-4],
+            [2000000, 5e-4],
+            [4000000, 5e-5],
+            [8000000, 5e-6]]
+    config['horizon'] = HORIZON
+    config['clip_actions'] = False
+    config['observation_filter'] = 'NoFilter'
+    config["use_gae"] = True
+    config["lambda"] = 1.0
+    config["shuffle_sequences"] = True
+    config["vf_clip_param"] = 1e8
+    config["num_sgd_iter"] = 10
+    #config["kl_target"] = 0.003
+    config["kl_coeff"] = 0.01
+    config["entropy_coeff"] = 0.001
+    config["clip_param"] = 0.2
+    config["grad_clip"] = None
+    config["use_critic"] = True
+    config["vf_share_layers"] = True
+    config["vf_loss_coeff"] = 0.5
 
 
     # save the flow params for replay
@@ -218,7 +220,7 @@ def setup_exps(flow_params):
 
     # multiagent configuration
     temp_env = create_env()
-    policy_graphs = {'av': (DDPGTFPolicy,
+    policy_graphs = {'av': (PPOTFPolicy,
                             temp_env.observation_space,
                             temp_env.action_space,
                             {})}
@@ -247,7 +249,7 @@ if __name__ == '__main__':
         flow_params['exp_tag']: {
             'run': alg_run,
             'env': env_name,
-            'checkpoint_freq': 20,
+            'checkpoint_freq': 5,
             'checkpoint_at_end': True,
             'stop': {
                 'training_iteration': N_TRAINING_ITERATIONS
