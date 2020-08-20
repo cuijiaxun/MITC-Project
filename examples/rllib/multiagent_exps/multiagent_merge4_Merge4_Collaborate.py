@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvDistanceMergeInfoNegative
+from flow.envs.multiagent import MultiAgentHighwayPOEnvMerge4Collaborate
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -33,7 +33,7 @@ from copy import deepcopy
 # number of training iterations
 N_TRAINING_ITERATIONS = 500
 # number of rollouts per training iteration
-N_ROLLOUTS = 20
+N_ROLLOUTS = 40
 # number of steps per rollout
 HORIZON = 2000
 # number of parallel workers
@@ -113,9 +113,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_DistanceMergeInfo_Negative',
+    exp_tag='multiagent_highway_merge4_Merge4_Collaborate',
 
-    env_name=MultiAgentHighwayPOEnvDistanceMergeInfoNegative,
+    env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
     network=MergeNetwork,
     simulator='traci',
 
@@ -179,17 +179,27 @@ def setup_exps(flow_params):
     config = agent_cls._default_config.copy()
     config['num_workers'] = N_CPUS
     config['train_batch_size'] = HORIZON * N_ROLLOUTS
+    config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
-    config['gamma'] = 0.9995  # discount rate
-    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    config['lr'] = tune.grid_search([1e-4,5e-5])
+    config['gamma'] = 1  # discount rate
+    config['model'].update({'fcnet_hiddens': [32, 32, 32]})
+    config['lr'] = tune.grid_search([5e-4, 1e-4])
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
-    gae_lambda = 0.97
     config["use_gae"] = True
-    config["vf_clip_param"] = 1e10
+    config["lambda"] = 1.0
+    config["shuffle_sequences"] = True
+    config["vf_clip_param"] = 1e8
     config["num_sgd_iter"] = 10
+    #config["kl_target"] = 0.003
+    config["kl_coeff"] = 0.01
+    config["entropy_coeff"] = 0.001
+    config["clip_param"] = 0.2
+    config["grad_clip"] = None
+    config["use_critic"] = True
+    config["vf_share_layers"] = True
+    config["vf_loss_coeff"] = 0.5
 
 
     # save the flow params for replay

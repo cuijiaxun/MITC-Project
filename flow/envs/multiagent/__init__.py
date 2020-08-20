@@ -9,7 +9,11 @@ from flow.envs.multiagent.traffic_light_grid import MultiTrafficLightGridPOEnv
 from flow.envs.multiagent.highway import MultiAgentHighwayPOEnv, MultiAgentHighwayPOEnvLocalReward,\
                         MultiAgentHighwayPOEnvDistanceMergeInfo, MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate,\
                         MultiAgentHighwayPOEnvDistanceMergeInfoNegative, MultiAgentHighwayPOEnvNegative,\
-                                        MultiAgentHighwayPOEnvCollaborate
+                        MultiAgentHighwayPOEnvCollaborate,\
+                        MultiAgentHighwayPOEnvNewStates, MultiAgentHighwayPOEnvNewStatesNegative,\
+                        MultiAgentHighwayPOEnvNewStatesCollaborate, MultiAgentHighwayPOEnvNewStatesZero,\
+                        MultiAgentHighwayPOEnvNewStatesNegativeInflow,MultiAgentHighwayPOEnvMerge4,\
+                        MultiAgentHighwayPOEnvMerge4Negative, MultiAgentHighwayPOEnvMerge4Collaborate
 
 __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
            'MultiTrafficLightGridPOEnv', 'MultiAgentHighwayPOEnv',
@@ -19,4 +23,15 @@ __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
 
            'MultiAgentHighwayPOEnvDistanceMergeInfo',
            'MultiAgentHighwayPOEnvDistanceMergeInfoNegative',
-           'MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate',]
+           'MultiAgentHighwayPOEnvDistanceMergeInfoCollaborate',
+
+           'MultiAgentHighwayPOEnvNewStates',
+           'MultiAgentHighwayPOEnvNewStatesZero',
+           'MultiAgentHighwayPOEnvNewStatesNegative',
+           'MultiAgentHighwayPOEnvNewStatesNegativeInflow',
+           'MultiAgentHighwayPOEnvNewStatesCollaborate',
+
+           'MultiAgentHighwayPOEnvMerge4',
+           'MultiAgentHighwayPOEnvMerge4Negative',
+           'MultiAgentHighwayPOEnvMerge4Collaborate',
+           ]

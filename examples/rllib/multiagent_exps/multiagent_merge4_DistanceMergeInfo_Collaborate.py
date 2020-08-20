@@ -31,7 +31,7 @@ from copy import deepcopy
 # SET UP PARAMETERS FOR THE SIMULATION
 
 # number of training iterations
-N_TRAINING_ITERATIONS = 500
+N_TRAINING_ITERATIONS = 250
 # number of rollouts per training iteration
 N_ROLLOUTS = 20
 # number of steps per rollout
@@ -182,7 +182,7 @@ def setup_exps(flow_params):
     #config['simple_optimizer'] = True
     config['gamma'] = 0.9995  # discount rate
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    config['lr'] = tune.grid_search([5e-5,1e-4])
+    config['lr'] = tune.grid_search([1e-4,5e-5,5e-5])
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'

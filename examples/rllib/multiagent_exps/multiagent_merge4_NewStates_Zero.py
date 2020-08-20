@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvDistanceMergeInfoNegative
+from flow.envs.multiagent import MultiAgentHighwayPOEnvNewStatesZero
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -113,9 +113,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_DistanceMergeInfo_Negative',
+    exp_tag='multiagent_highway_merge4_NewStates_Zero',
 
-    env_name=MultiAgentHighwayPOEnvDistanceMergeInfoNegative,
+    env_name=MultiAgentHighwayPOEnvNewStatesZero,
     network=MergeNetwork,
     simulator='traci',
 
@@ -180,16 +180,21 @@ def setup_exps(flow_params):
     config['num_workers'] = N_CPUS
     config['train_batch_size'] = HORIZON * N_ROLLOUTS
     #config['simple_optimizer'] = True
-    config['gamma'] = 0.9995  # discount rate
+    config['gamma'] = 0.99  # discount rate
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    config['lr'] = tune.grid_search([1e-4,5e-5])
+    config['lr'] = tune.grid_search([5e-4,1e-4,5e-5])
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
     gae_lambda = 0.97
     config["use_gae"] = True
     config["vf_clip_param"] = 1e10
-    config["num_sgd_iter"] = 10
+    config["num_sgd_iter"] = 5
+    config["kl_target"] = 0.01
+    config["kl_coeff"] = 0.0
+    config["entropy_coeff"] = 0.01
+    #config["clip_params"] = 0.2
+    config["grad_clip"] = 0.5
 
 
     # save the flow params for replay

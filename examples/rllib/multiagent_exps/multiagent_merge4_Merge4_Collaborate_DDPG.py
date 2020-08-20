@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvDistanceMergeInfoNegative
+from flow.envs.multiagent import MultiAgentHighwayPOEnvMerge4Collaborate
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -33,7 +33,7 @@ from copy import deepcopy
 # number of training iterations
 N_TRAINING_ITERATIONS = 500
 # number of rollouts per training iteration
-N_ROLLOUTS = 20
+N_ROLLOUTS = 40
 # number of steps per rollout
 HORIZON = 2000
 # number of parallel workers
@@ -113,9 +113,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_DistanceMergeInfo_Negative',
+    exp_tag='multiagent_highway_merge4_Merge4_DDPG',
 
-    env_name=MultiAgentHighwayPOEnvDistanceMergeInfoNegative,
+    env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
     network=MergeNetwork,
     simulator='traci',
 
@@ -174,22 +174,31 @@ def setup_exps(flow_params):
     dict
         training configuration parameters
     """
-    alg_run = 'PPO'
+    alg_run = 'DDPG'
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
-    config['num_workers'] = N_CPUS
-    config['train_batch_size'] = HORIZON * N_ROLLOUTS
-    #config['simple_optimizer'] = True
-    config['gamma'] = 0.9995  # discount rate
-    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    config['lr'] = tune.grid_search([1e-4,5e-5])
     config['horizon'] = HORIZON
-    config['clip_actions'] = False
-    config['observation_filter'] = 'NoFilter'
-    gae_lambda = 0.97
-    config["use_gae"] = True
-    config["vf_clip_param"] = 1e10
-    config["num_sgd_iter"] = 10
+    config['num_workers'] = N_CPUS
+    config['train_batch_size'] = 4096#HORIZON * N_ROLLOUTS
+    #config['sgd_minibatch_size'] = 4096
+    #config['simple_optimizer'] = True
+    config['gamma'] = 1  # discount rate
+    config['actor_hiddens'] = [32,32,32]
+    config['critic_hiddens'] = [32,32,32]
+    config['n_step'] = 3
+    config['target_network_update_freq'] = 5
+    config['tau'] = 0.002
+
+    #========Replay Buffer==========
+    config['buffer_size'] = 100000
+    config['actor_lr'] = 0.001
+    config['critic_lr'] = 0.001
+    config['l2_reg'] = 0.00001
+    config['learning_starts'] = HORIZON * N_ROLLOUTS
+
+    #=======Evaluation========
+    config['evaluation_interval'] = 20
+    config['evaluation_num_episodes'] = 3
 
 
     # save the flow params for replay
