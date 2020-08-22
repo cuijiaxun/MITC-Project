@@ -22,7 +22,7 @@ from flow.envs.merge import MergePOEnv,MergePOEnvEdgePrior,MergePOEnvPunishDelay
                             MergePOEnvDeparted, MergePOEnvAvgVelEnExit, MergePOEnvNegativeAvgVel, MergePOEnvNegativeEstimateAvgVel,\
                             MergePOEnvArrive, MergePOEnvDistanceMergeInfo_Punish,  MergePOEnvDistanceMergeInfo_NegativeEstimateAvgVel, \
                             MergePOEnvDistanceMergeInfo_NegativeAvgVel,\
-                            MergePOEnvArriveDistanceMergeInfo
+                            MergePOEnvArriveDistanceMergeInfo, MergePOEnvWindow
 from flow.envs.merge_Ignore import MergePOEnv_Ignore
 from flow.envs.test import TestEnv
 from flow.envs.merge_no_headway import MergePOEnv_noheadway, MergePOEnvEdgePrior_noheadway
@@ -67,6 +67,7 @@ __all__ = [
     'MergePOEnvGuidedPunishDelay',
     'MergePOEnvSparseRewardDelay',
     'MergePOEnv_Ignore',
+    'MergePOEnvWindow'
     'MergePOEnvPunishDelay',
     'MergePOEnvMinDelay',
     'MergePOEnvAvgVel',

@@ -86,7 +86,9 @@ class MergePOEnv(Env):
 
         # names of the rl vehicles controlled at any step
         self.rl_veh = []
-
+        
+        #record rl vehicle that has exited the window
+        self.exited_rl_veh = []
         # used for visualization: the vehicles behind and after RL vehicles
         # (ie the observed vehicles) will have a different color
         self.leader = []
@@ -449,6 +451,10 @@ class MergePOEnvIgnore(MergePOEnv):
                     if (veh_id not in list(self.rl_queue)+self.rl_veh)\
                             and (edge not in self.env_params.additional_params['ignore_edges']):
                         self.rl_queue.append(veh_id)
+
+                    #elif veh_id in self.rl_veh and edge in self.env_params.additional_params['ignore_edges']:
+                    #    self.rl_veh.remove(veh_id)
+
                 # remove rl vehicles that exited the network 
                 for veh_id in list(self.rl_queue):
                     if veh_id not in rl_ids:
@@ -464,6 +470,37 @@ class MergePOEnvIgnore(MergePOEnv):
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
 
+class MergePOEnvWindow(MergePOEnv):
+    def additional_command(self):
+            if 'ignore_edges' not in self.env_params.additional_params:
+                super().additional_command()
+            else:
+                rl_ids = self.k.vehicle.get_rl_ids()
+                # add rl vehicles that just entered the network into the rl queue
+                for veh_id in rl_ids:
+                    edge = self.k.vehicle.get_edge(veh_id) 
+                    if (veh_id not in list(self.rl_queue)+self.rl_veh+self.exited_rl_veh)\
+                            and (edge not in self.env_params.additional_params['ignore_edges']):
+                        self.rl_queue.append(veh_id)
+
+                    elif veh_id in self.rl_veh and edge in self.env_params.additional_params['ignore_edges']:
+                        self.rl_veh.remove(veh_id)
+                        self.exited_rl_veh.append(veh_id)
+
+                # remove rl vehicles that exited the network 
+                for veh_id in list(self.rl_queue):
+                    if veh_id not in rl_ids:
+                        self.rl_queue.remove(veh_id)
+                for veh_id in self.rl_veh:
+                    if veh_id not in rl_ids:
+                        self.rl_veh.remove(veh_id)
+                # fil up rl_veh until they are enough controlled vehicles
+                while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
+                    rl_id = self.rl_queue.popleft()
+                    self.rl_veh.append(rl_id)
+                # specify observed vehicles
+                for veh_id in self.leader + self.follower:
+                    self.k.vehicle.set_observed(veh_id)
 class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
     def compute_reward(self, rl_actions, **kwargs):
         if self.env_params.evaluate:

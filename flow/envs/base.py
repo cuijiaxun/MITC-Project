@@ -451,6 +451,8 @@ class Env(gym.Env):
             routing_ids = []
             routing_actions = []
             for veh_id in self.k.vehicle.get_ids():
+                #if(self.k.vehicle.get_edge(veh_id)[0]==":"):
+                #    print(self.k.vehicle.get_edge(veh_id))
                 if self.k.vehicle.get_routing_controller(veh_id) \
                         is not None:
                     routing_ids.append(veh_id)

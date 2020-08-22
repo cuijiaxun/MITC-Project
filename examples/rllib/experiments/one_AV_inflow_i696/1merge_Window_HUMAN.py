@@ -19,7 +19,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnv,MergePOEnv_noheadway, TestEnv,Env
+from flow.envs import MergePOEnvWindow,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -46,7 +46,8 @@ scenarios_dir = os.path.join(os.path.expanduser("~/"), 'Documents', 'MITC', 'flo
 ###########################
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
-            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
+            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+            #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
 #
@@ -66,11 +67,11 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 750 #128#600
+HORIZON = 1500 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 20#1#20
+N_ROLLOUTS = 1#1#20
 # number of parallel workers
-N_CPUS = 10#8#2
+N_CPUS = 1#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -79,8 +80,8 @@ MERGE_RATE = 200
 RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
 #NUM_RL = [5, 13, 17][EXP_NUM]
-NUM_RL = [5, 250, 333][EXP_NUM]
-
+#NUM_RL = [30, 250, 333][EXP_NUM]
+NUM_RL = 5
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
@@ -125,7 +126,7 @@ vehicles.add(
 
 vehicles.add(
     veh_id="rl",
-    acceleration_controller=(RLController, {}),
+    acceleration_controller=(SimCarFollowingController, {}),
     lane_change_controller=(SimLaneChangeController, {}),
     #routing_controller=(ContinuousRouter, {}),
     car_following_params=SumoCarFollowingParams(
@@ -164,9 +165,10 @@ inflow.add(
     end=90000,
     #probability=(1 - RL_PENETRATION), #* FLOW_RATE,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed=20,
+    departSpeed=7.5,
     departLane="free",
     )
+
 '''
 '''
 inflow.add(
@@ -185,7 +187,7 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = (1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed=20,
+    departSpeed=10,
     departLane="free",
     )
 
@@ -196,7 +198,7 @@ inflow.add(
     end=90000,
     #probability=RL_PENETRATION, # * 0.8, #* FLOW_RATE,
     vehs_per_hour = RL_PENETRATION*FLOW_RATE,
-    depart_speed=20,
+    depart_speed=10,
     depart_lane="free",
     )
 
@@ -206,7 +208,7 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE, #(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed=20,
+    departSpeed=7.5,
     departLane="free",
     )
 '''
@@ -227,9 +229,10 @@ inflow.add(
     begin=10,#0,
     end=90000,
     vehs_per_hour = MERGE_RATE,#(1 - RL_PENETRATION)*FLOW_RATE,
-    departSpeed=20,
+    departSpeed=7.5,
     departLane="free",
     )
+
 '''
 '''
 inflow.add(
@@ -245,11 +248,11 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="transfer_test",
+    exp_tag="i696_1merge_Window_HUMAN",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
-    env_name=MergePOEnv_noheadway,
+    env_name=MergePOEnvWindow,
     # name of the scenario class the experiment is running on
     network=Network,
 
@@ -261,7 +264,7 @@ flow_params = dict(
         no_step_log=False,       # this disables log writing?
         sim_step=0.5,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.25, # determines lateral discretization of lanes
-        render=False,#True,             # False for training, True for debugging
+        render=True,#True,             # False for training, True for debugging
         restart_instance=True,
     ),
 
@@ -271,11 +274,33 @@ flow_params = dict(
         sims_per_step=2, #5,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
-            "ignore_edges":["59440544#0"],
+            "ignore_edges":[
+                            #before window
+                            "59440544#0",
+                            "59440544#1",
+                            ":4308145956_0",
+                            ":gneJ29_2",
+                            ":62290112_0",
+                            ":gneJ26_0",
+                            "59440544#1-AddedOffRampEdge",
+                            "22723058#0",
+                            "22723058#1",
+                            "491515539",
+                            ":gneJ24_1",
+                            "341040160#0",
+                            ":4308145961_0",
+                            "4308145961",
+
+                            #after window
+                            "422314897#1",
+                            "489256509",
+                            "456874110",
+                            ],
+            #"max_inflow":FLOW_RATE + 3*MERGE_RATE,
         },
     ),
 
@@ -311,19 +336,18 @@ def setup_exps(seeds_file=None):
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
     config["num_workers"] = N_CPUS
-    config["train_batch_size"] = HORIZON * N_ROLLOUTS
+    config["train_batch_size"] = HORIZON 
     config["gamma"] = 0.999  # discount rate
-    config["model"].update({"fcnet_hiddens": [100,50,25]})
+    config["model"].update({"fcnet_hiddens": [100, 50, 25]})
     config["use_gae"] = True
     config["lambda"] = 0.97
     config["kl_target"] = 0.02
-    step_size = 1e-6
-    config["lr"] = 0
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
     config["entropy_coeff"] = 0.001
-
+    
+    config["lr"] = 0.00
     # save the flow params for replay
     flow_json = json.dumps(
         flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
@@ -336,18 +360,18 @@ def setup_exps(seeds_file=None):
     register_env(gym_name, create_env)
     return alg_run, gym_name, config
 
-'''
-'''
+
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
-
-    #parser.add_argument("-s", "--seeds_file", dest="seeds_file",
-    #                    help="pickle file containing seeds", default=None)
-    parser.add_argument('resume',help="continue training",type=str,default=False)
+    parser.add_argument("-s", "--seeds_file", dest="seeds_file",
+                        help="pickle file containing seeds", default=None)
+    parser.add_argument('--resume',help="continue training",type=bool,default=False)
+    parser.add_argument('--restore',type=str, help="restore from which checkpoint?")
     args = parser.parse_args()
 
-    alg_run, gym_name, config = setup_exps()
+    alg_run, gym_name, config = setup_exps(args.seeds_file)
     ray.init(num_cpus=N_CPUS + 1)
     trials = run_experiments({
             flow_params["exp_tag"]: {
@@ -356,10 +380,10 @@ if __name__ == "__main__":
                 "config": {
                     **config
                 },
-                "checkpoint_freq": 1, #20,
+                "restore":args.restore,
+                "checkpoint_freq": 1, 
                 "checkpoint_at_end": True,
                 "max_failures": 999,
-                "restore":args.resume,
                 "stop": {
                     "training_iteration": 1,
                 },
