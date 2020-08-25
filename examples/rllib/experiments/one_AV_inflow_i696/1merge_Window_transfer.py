@@ -81,7 +81,7 @@ RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
 # num_rl term (see ADDITIONAL_ENV_PARAMs)
 #NUM_RL = [5, 13, 17][EXP_NUM]
 #NUM_RL = [30, 250, 333][EXP_NUM]
-NUM_RL = 5
+NUM_RL = 10
 ## We consider a highway network with an upstream merging lane producing
 # shockwaves
 additional_net_params = ADDITIONAL_NET_PARAMS.copy()
