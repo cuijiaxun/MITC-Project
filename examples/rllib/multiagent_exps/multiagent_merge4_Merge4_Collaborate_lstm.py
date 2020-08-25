@@ -33,7 +33,7 @@ from copy import deepcopy
 # number of training iterations
 N_TRAINING_ITERATIONS = 500
 # number of rollouts per training iteration
-N_ROLLOUTS = 30 
+N_ROLLOUTS = 10 
 # number of steps per rollout
 HORIZON = 2000
 # number of parallel workers
@@ -57,12 +57,7 @@ additional_net_params["pre_merge_length"] = 500
 
 # SET UP PARAMETERS FOR THE ENVIRONMENT
 
-additional_env_params = ADDITIONAL_ENV_PARAMS.copy()
-additional_env_params.update({
-    'max_accel': 1,
-    'max_decel': 1,
-    'target_velocity': 30
-})
+
 
 
 # CREATE VEHICLE TYPES AND INFLOWS
@@ -113,7 +108,7 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Merge4_Collaborate',
+    exp_tag='multiagent_highway_merge4_Merge4_Collaborate_lstm',
 
     env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
     network=MergeNetwork,
@@ -182,8 +177,15 @@ def setup_exps(flow_params):
     config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
     config['gamma'] = 1  # discount rate
-    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    #config['lr'] = tune.grid_search([5e-4, 1e-4])
+    config['model'].update({
+        'fcnet_hiddens': [100, 50],
+        'fcnet_activation':'tanh',
+        'vf_share_layers':'false',
+        'use_lstm':'true',
+        'max_seq_len':20,
+        'lstm_cell_size':100,
+        })
+    config['lr'] = 5e-5 #tune.grid_search([5e-4, 1e-4])
     config['lr_schedule'] = [
             [0, 5e-4],
             [2000000, 5e-4],
@@ -195,15 +197,22 @@ def setup_exps(flow_params):
     config["use_gae"] = True
     config["lambda"] = 1.0
     config["shuffle_sequences"] = True
-    config["vf_clip_param"] = 1e8
+    config["vf_clip_param"] = 1000000
     config["num_sgd_iter"] = 10
-    #config["kl_target"] = 0.003
+    config["kl_target"] = 0.02
     config["kl_coeff"] = 0.01
-    config["entropy_coeff"] = 0.001
+    config["entropy_coeff"] = 0.00001
+    config["entropy_coeff_schedule"]=[
+            [0, 0.01],
+            [2000000,0.001],
+            [6000000,0.00001],
+            [8000000,-0.001],
+
+            ]
     config["clip_param"] = 0.2
-    config["grad_clip"] = None
+    config["grad_clip"] = 0.5
     config["use_critic"] = True
-    config["vf_share_layers"] = True
+    config["vf_share_layers"] = False
     config["vf_loss_coeff"] = 0.5
 
 
@@ -249,7 +258,7 @@ if __name__ == '__main__':
         flow_params['exp_tag']: {
             'run': alg_run,
             'env': env_name,
-            'checkpoint_freq': 5,
+            'checkpoint_freq': 10,
             'checkpoint_at_end': True,
             'stop': {
                 'training_iteration': N_TRAINING_ITERATIONS

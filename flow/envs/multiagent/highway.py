@@ -122,7 +122,7 @@ class MultiAgentHighwayPOEnv(MultiEnv):
             else:
                 follow_speed = self.k.vehicle.get_speed(follower)
                 follow_head = self.k.vehicle.get_headway(follower)
-
+            
             observation = np.array([
                 this_speed / max_speed,
                 (lead_speed - this_speed) / max_speed,
@@ -130,6 +130,15 @@ class MultiAgentHighwayPOEnv(MultiEnv):
                 (this_speed - follow_speed) / max_speed,
                 follow_head / max_length
             ])
+            '''
+            observation = np.array([
+                this_speed / max_speed,
+                lead_speed / max_speed,
+                lead_head / max_length,
+                follow_speed / max_speed,
+                follow_head / max_length
+            ])
+            '''
 
             obs.update({rl_id: observation})
 

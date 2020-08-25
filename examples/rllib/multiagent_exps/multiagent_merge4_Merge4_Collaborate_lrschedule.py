@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvCollaborate
+from flow.envs.multiagent import MultiAgentHighwayPOEnvMerge4Collaborate
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -109,9 +109,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Collaborate',
+    exp_tag='multiagent_highway_merge4_Merge4_Collaborate_lr_schedule_newobs',
 
-    env_name=MultiAgentHighwayPOEnvCollaborate,
+    env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
     network=MergeNetwork,
     simulator='traci',
 

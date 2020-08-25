@@ -188,7 +188,9 @@ class MergePOEnv(Env):
 
         # normalizing constants
         max_speed = self.k.network.max_speed()
-        max_length = self.k.network.length()
+        max_length = 947.68
+        #max_length = self.k.network.length()
+        #print(max_length)
 
         observation = [0 for _ in range(5 * self.num_rl)]
         for i, rl_id in enumerate(self.rl_veh):
@@ -330,6 +332,7 @@ class MergePOEnv(Env):
         # initializing like in constructor
         self.rl_queue = collections.deque()
         self.rl_veh = []
+        self.exited_rl_veh = []
         self.leader = []
         self.follower = []
         return super().reset()
@@ -501,6 +504,7 @@ class MergePOEnvWindow(MergePOEnv):
                 # specify observed vehicles
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
+
 class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
     def compute_reward(self, rl_actions, **kwargs):
         if self.env_params.evaluate:
