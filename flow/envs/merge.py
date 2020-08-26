@@ -485,7 +485,7 @@ class MergePOEnvWindow(MergePOEnv):
         #print(current_rl_vehs)
         #print(interested_vehs)
         if len(interested_vehs) >0:
-            return np.mean(self.k.vehicle.get_speed(interested_vehs))
+            return np.mean(self.k.vehicle.get_speed(interested_vehs))/30.0
         else:
             return 0
 
