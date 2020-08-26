@@ -264,7 +264,7 @@ flow_params = dict(
         no_step_log=False,       # this disables log writing?
         sim_step=0.5,            # Daniel updated from osm.sumocfg
         lateral_resolution=0.25, # determines lateral discretization of lanes
-        render=True,#True,             # False for training, True for debugging
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
     ),
 
@@ -347,7 +347,7 @@ def setup_exps(seeds_file=None):
     config["horizon"] = HORIZON
     config["entropy_coeff"] = 0.001
     
-    config["lr"] = 0.00
+    config["lr"] = 1e-5
     # save the flow params for replay
     flow_json = json.dumps(
         flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
@@ -381,11 +381,11 @@ if __name__ == "__main__":
                     **config
                 },
                 "restore":args.restore,
-                "checkpoint_freq": 1, 
+                "checkpoint_freq": 5, 
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {
-                    "training_iteration": 1,
+                    "training_iteration": 1000,
                 },
             },
         },

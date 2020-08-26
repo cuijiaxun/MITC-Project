@@ -474,6 +474,21 @@ class MergePOEnvIgnore(MergePOEnv):
                     self.k.vehicle.set_observed(veh_id)
 
 class MergePOEnvWindow(MergePOEnv):
+    def compute_reward(self, rl_actions, **kwargs):
+        current_rl_vehs = self.rl_veh
+        edges = []
+        for veh_id in current_rl_vehs:
+            edge = self.k.vehicle.get_edge(veh_id)
+            if edge not in edges:
+                edges.append(edge)
+        interested_vehs = self.k.vehicle.get_ids_by_edge(edges)
+        #print(current_rl_vehs)
+        #print(interested_vehs)
+        if len(interested_vehs) >0:
+            return np.mean(self.k.vehicle.get_speed(interested_vehs))
+        else:
+            return 0
+
     def additional_command(self):
             if 'ignore_edges' not in self.env_params.additional_params:
                 super().additional_command()
