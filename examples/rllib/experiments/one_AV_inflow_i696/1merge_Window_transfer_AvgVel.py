@@ -67,7 +67,7 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 1500 #128#600
+HORIZON = 2000 #128#600
 # number of rollouts per training iteration
 N_ROLLOUTS = 15#1#20
 # number of parallel workers
@@ -336,19 +336,26 @@ def setup_exps(seeds_file=None):
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
     config["num_workers"] = N_CPUS
-    config["train_batch_size"] = HORIZON*N_ROLLOUTS
-    config["sgd_minibatch_size"]= HORIZON
-    config["gamma"] = 0.999  # discount rate
+    config["train_batch_size"] = HORIZON * N_ROLLOUTS
+    config["sgd_minibatch_size"]= 4096
+    config["num_gpus"] = args.num_gpus
+    config["gamma"] = 0.998  # discount rate
     config["model"].update({"fcnet_hiddens": [100, 50, 25]})
+    config['lr_schedule'] = [
+            [0, 1e-4],
+            [2000000,5e-5]
+            ]
     config["use_gae"] = True
-    config["lambda"] = 0.97
+    config["lambda"] = 0.95
     config["kl_target"] = 0.02
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
-    config["entropy_coeff"] = 0.001
-    
+    config["grad_clip"] = 0.5
+    config["entropy_coeff"] = 0.0001
     config["lr"] = 1e-5
+    config["vf_share_layers"] = True
+    config["vf_loss_coeff"] = 0.5
     # save the flow params for replay
     flow_json = json.dumps(
         flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
@@ -370,6 +377,12 @@ if __name__ == "__main__":
                         help="pickle file containing seeds", default=None)
     parser.add_argument('--resume',help="continue training",type=bool,default=False)
     parser.add_argument('--restore',type=str, help="restore from which checkpoint?")
+    parser.add_argument(
+        '--num_gpus',
+        type=int,
+        default=0,
+        help="The number of gpus to use.")
+
     args = parser.parse_args()
 
     alg_run, gym_name, config = setup_exps(args.seeds_file)
@@ -382,7 +395,7 @@ if __name__ == "__main__":
                     **config
                 },
                 "restore":args.restore,
-                "checkpoint_freq": 5, 
+                "checkpoint_freq": 1, 
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {

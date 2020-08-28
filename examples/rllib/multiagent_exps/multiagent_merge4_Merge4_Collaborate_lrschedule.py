@@ -109,7 +109,7 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Merge4_Collaborate_lr_schedule_newobs',
+    exp_tag='multiagent_highway_merge4_Merge4_Collaborate_lr_schedule',
 
     env_name=MultiAgentHighwayPOEnvMerge4Collaborate,
     network=MergeNetwork,
@@ -177,19 +177,19 @@ def setup_exps(flow_params):
     config['train_batch_size'] = HORIZON * N_ROLLOUTS
     config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
-    config['gamma'] = 1  # discount rate
+    config['gamma'] = 0.998  # discount rate
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
     #config['lr'] = tune.grid_search([5e-4, 1e-4])
     config['lr_schedule'] = [
             [0, 5e-4],
-            [2000000, 5e-4],
-            [4000000, 5e-5],
-            [8000000, 5e-6]]
+            [1000000, 1e-4],
+            [4000000, 1e-5],
+            [8000000, 1e-6]]
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
     config["use_gae"] = True
-    config["lambda"] = 1.0
+    config["lambda"] = 0.95
     config["shuffle_sequences"] = True
     config["vf_clip_param"] = 1e8
     config["num_sgd_iter"] = 10

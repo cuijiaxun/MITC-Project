@@ -177,19 +177,19 @@ def setup_exps(flow_params):
     config['train_batch_size'] = HORIZON * N_ROLLOUTS
     config['sgd_minibatch_size'] = 4096
     #config['simple_optimizer'] = True
-    config['gamma'] = 1  # discount rate
+    config['gamma'] = 0.998  # discount rate
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
     #config['lr'] = tune.grid_search([5e-4, 1e-4])
     config['lr_schedule'] = [
-            [0, 5e-4],
-            [2000000, 5e-4],
+            [0, 5e-5],
+            [2000000, 5e-5],
             [4000000, 5e-5],
             [8000000, 5e-6]]
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
     config["use_gae"] = True
-    config["lambda"] = 1.0
+    config["lambda"] = 0.95
     config["shuffle_sequences"] = True
     config["vf_clip_param"] = 1e8
     config["num_sgd_iter"] = 10
