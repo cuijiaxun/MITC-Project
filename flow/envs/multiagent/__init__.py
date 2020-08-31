@@ -13,7 +13,17 @@ from flow.envs.multiagent.highway import MultiAgentHighwayPOEnv, MultiAgentHighw
                         MultiAgentHighwayPOEnvNewStates, MultiAgentHighwayPOEnvNewStatesNegative,\
                         MultiAgentHighwayPOEnvNewStatesCollaborate, MultiAgentHighwayPOEnvNewStatesZero,\
                         MultiAgentHighwayPOEnvNewStatesNegativeInflow,MultiAgentHighwayPOEnvMerge4,\
-                        MultiAgentHighwayPOEnvMerge4Negative, MultiAgentHighwayPOEnvMerge4Collaborate
+                        MultiAgentHighwayPOEnvMerge4Negative, MultiAgentHighwayPOEnvMerge4Collaborate,\
+                        MultiAgentHighwayPOEnvAblationDistance,\
+                        MultiAgentHighwayPOEnvAblationDistanceCollaborate,\
+                        MultiAgentHighwayPOEnvAblationConjestion,\
+                        MultiAgentHighwayPOEnvAblationConjestionCollaborate,\
+                        MultiAgentHighwayPOEnvAblationConjestionArrive,\
+                        MultiAgentHighwayPOEnvAblationMergeInfo,\
+                        MultiAgentHighwayPOEnvAblationMergeInfoCollaborate,\
+                        MultiAgentHighwayPOEnvWindow,\
+                        MultiAgentHighwayPOEnvWindowCollaborate
+
 
 __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
            'MultiTrafficLightGridPOEnv', 'MultiAgentHighwayPOEnv',
@@ -34,4 +44,17 @@ __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
            'MultiAgentHighwayPOEnvMerge4',
            'MultiAgentHighwayPOEnvMerge4Negative',
            'MultiAgentHighwayPOEnvMerge4Collaborate',
+
+           'MultiAgentHighwayPOEnvAblationDistance',
+           'MultiAgentHighwayPOEnvAblationDistanceCollaborate',
+
+           'MultiAgentHighwayPOEnvAblationConjestion',
+           'MultiAgentHighwayPOEnvAblationConjestionCollaborate',
+           'MultiAgentHighwayPOEnvAblationCOnjestionArrive',
+           
+           'MultiAgentHighwayPOEnvAblationMergeInfo',
+           'MultiAgentHighwayPOEnvAblationMergeInfoCollaborate',
+           
+           'MultiAgentHighwayPOEnvWindow',
+           'MultiAgentHighwayPOEnvWindowCollaborate'
            ]

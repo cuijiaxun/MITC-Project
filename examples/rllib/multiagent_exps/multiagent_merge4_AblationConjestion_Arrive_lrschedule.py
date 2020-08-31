@@ -22,7 +22,7 @@ from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvCollaborate
+from flow.envs.multiagent import MultiAgentHighwayPOEnvAblationConjestionArrive
 from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
 from flow.networks import MergeNetwork
 from flow.networks.merge import ADDITIONAL_NET_PARAMS
@@ -109,9 +109,9 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_Collaborate',
+    exp_tag='multiagent_highway_merge4_AblationConjestion_Arrive_lr_schedule',
 
-    env_name=MultiAgentHighwayPOEnvCollaborate,
+    env_name=MultiAgentHighwayPOEnvAblationConjestionArrive,
     network=MergeNetwork,
     simulator='traci',
 
@@ -181,10 +181,10 @@ def setup_exps(flow_params):
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
     #config['lr'] = tune.grid_search([5e-4, 1e-4])
     config['lr_schedule'] = [
-            [0, 5e-5],
-            [2000000, 5e-5],
-            [4000000, 5e-5],
-            [8000000, 5e-6]]
+            [0, 5e-4],
+            [1000000, 1e-4],
+            [4000000, 1e-5],
+            [8000000, 1e-6]]
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'

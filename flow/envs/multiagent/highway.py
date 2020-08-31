@@ -3,7 +3,7 @@ import numpy as np
 from gym.spaces.box import Box
 from flow.core.rewards import desired_velocity, average_velocity
 from flow.envs.multiagent.base import MultiEnv
-
+import collections
 
 ADDITIONAL_ENV_PARAMS = {
     # maximum acceleration of autonomous vehicles
@@ -198,6 +198,254 @@ class MultiAgentHighwayPOEnv(MultiEnv):
             if follow_id:
                 self.k.vehicle.set_observed(follow_id)
 
+class MultiAgentHighwayPOEnvWindow(MultiAgentHighwayPOEnv):
+    def __init__(self, env_params, sim_params, network, simulator='traci'):
+        for p in ADDITIONAL_ENV_PARAMS.keys():
+            if p not in env_params.additional_params:
+                raise KeyError(
+                    'Environment parameter "{}" not supplied'.format(p))
+        self.rl_queue = collections.deque()
+        self.rl_veh = []
+        self.exited_rl_veh = []
+        self.exiting_rl_veh = []
+        self.leader = []
+        self.follower = []
+
+        super().__init__(env_params, sim_params, network, simulator)
+
+    def step(self, rl_actions):
+        for _ in range(self.env_params.sims_per_step):
+            self.time_counter += 1
+            self.step_counter += 1
+
+            # perform acceleration actions for controlled human-driven vehicles
+            if len(self.k.vehicle.get_controlled_ids()) > 0:
+                accel = []
+                for veh_id in self.k.vehicle.get_controlled_ids():
+                    accel_contr = self.k.vehicle.get_acc_controller(veh_id)
+                    action = accel_contr.get_action(self)
+                    accel.append(action)
+                self.k.vehicle.apply_acceleration(
+                    self.k.vehicle.get_controlled_ids(), accel)
+
+            # perform lane change actions for controlled human-driven vehicles
+            if len(self.k.vehicle.get_controlled_lc_ids()) > 0:
+                direction = []
+                for veh_id in self.k.vehicle.get_controlled_lc_ids():
+                    target_lane = self.k.vehicle.get_lane_changing_controller(
+                        veh_id).get_action(self)
+                    direction.append(target_lane)
+                self.k.vehicle.apply_lane_change(
+                    self.k.vehicle.get_controlled_lc_ids(),
+                    direction=direction)
+
+            # perform (optionally) routing actions for all vehicle in the
+            # network, including rl and sumo-controlled vehicles
+            routing_ids = []
+            routing_actions = []
+            for veh_id in self.k.vehicle.get_ids():
+                if self.k.vehicle.get_routing_controller(veh_id) is not None:
+                    routing_ids.append(veh_id)
+                    route_contr = self.k.vehicle.get_routing_controller(veh_id)
+                    routing_actions.append(route_contr.choose_route(self))
+            self.k.vehicle.choose_routes(routing_ids, routing_actions)
+
+            self.apply_rl_actions(rl_actions)
+
+            self.additional_command()
+
+            # advance the simulation in the simulator by one step
+            self.k.simulation.simulation_step()
+
+            # store new observations in the vehicles and traffic lights class
+            self.k.update(reset=False)
+
+            # update the colors of vehicles
+            if self.sim_params.render:
+                self.k.vehicle.update_vehicle_colors()
+
+            # crash encodes whether the simulator experienced a collision
+            crash = self.k.simulation.check_collision()
+
+            # stop collecting new simulation steps if there is a collision
+            if crash:
+                break
+
+        states = self.get_state()
+        done = {key: key in self.k.vehicle.get_arrived_ids()
+                for key in states.keys()}
+        if crash:
+            done['__all__'] = True
+        else:
+            done['__all__'] = False
+
+        infos = {key: {} for key in states.keys()}
+
+        # compute the reward
+        if self.env_params.clip_actions:
+            clipped_actions = self.clip_actions(rl_actions)
+            reward = self.compute_reward(clipped_actions, fail=crash)
+        else:
+            reward = self.compute_reward(rl_actions, fail=crash)
+
+        for rl_id in self.exiting_rl_veh: #self.k.vehicle.get_arrived_rl_ids():
+            #done[rl_id] = True
+            reward[rl_id] = 20 #1 #0
+            #states[rl_id] = np.zeros(self.observation_space.shape[0])
+            #print("rl_id",rl_id, states)
+        for rl_id in self.k.vehicle.get_arrived_rl_ids():
+            #print("arrived:",rl_id)
+            done[rl_id] = True
+            reward[rl_id] = 0
+            states[rl_id] = np.zeros(self.observation_space.shape[0])
+
+        return states, reward, done, infos
+    
+    def _apply_rl_actions(self, rl_actions):
+        """See class definition."""
+        # in the warmup steps, rl_actions is None
+        if rl_actions:
+            for rl_id, actions in rl_actions.items():
+                accel = actions[0]
+                if rl_id not in self.rl_veh:
+                    continue
+                # lane_change_softmax = np.exp(actions[1:4])
+                # lane_change_softmax /= np.sum(lane_change_softmax)
+                # lane_change_action = np.random.choice([-1, 0, 1],
+                #                                       p=lane_change_softmax)
+                self.k.vehicle.apply_acceleration(rl_id, accel)
+                # self.k.vehicle.apply_lane_change(rl_id, lane_change_action)
+    def get_state(self):
+        """See class definition."""
+        obs = {}
+
+        # normalizing constants
+        max_speed = self.k.network.max_speed()
+        max_length = self.k.network.length()
+
+        for rl_id in self.k.vehicle.get_rl_ids():
+            this_speed = self.k.vehicle.get_speed(rl_id)
+            lead_id = self.k.vehicle.get_leader(rl_id)
+            follower = self.k.vehicle.get_follower(rl_id)
+
+            if lead_id in ["", None]:
+                # in case leader is not visible
+                lead_speed = max_speed
+                lead_head = max_length
+            else:
+                lead_speed = self.k.vehicle.get_speed(lead_id)
+                lead_head = self.k.vehicle.get_headway(rl_id)
+
+            if follower in ["", None]:
+                # in case follower is not visible
+                follow_speed = 0
+                follow_head = max_length
+            else:
+                follow_speed = self.k.vehicle.get_speed(follower)
+                follow_head = self.k.vehicle.get_headway(follower)
+            
+            observation = np.array([
+                this_speed / max_speed,
+                (lead_speed - this_speed) / max_speed,
+                lead_head / max_length,
+                (this_speed - follow_speed) / max_speed,
+                follow_head / max_length
+            ])
+            '''
+            observation = np.array([
+                this_speed / max_speed,
+                lead_speed / max_speed,
+                lead_head / max_length,
+                follow_speed / max_speed,
+                follow_head / max_length
+            ])
+            '''
+
+            obs.update({rl_id: observation})
+
+        return obs
+
+    def additional_command(self):
+        """See parent class.
+
+        Define which vehicles are observed for visualization purposes.
+        """
+        if 'ignore_edges' not in self.env_params.additional_params:
+                super().additional_command()
+        else:
+                rl_ids = self.k.vehicle.get_rl_ids()
+                self.exiting_rl_veh = []
+                # add rl vehicles that just entered the network into the rl queue
+                for veh_id in rl_ids:
+                    edge = self.k.vehicle.get_edge(veh_id)
+                    if (veh_id not in list(self.rl_queue)+self.rl_veh+self.exited_rl_veh)\
+                            and (edge not in self.env_params.additional_params['ignore_edges']):
+                        self.rl_queue.append(veh_id)
+
+                    elif veh_id in self.rl_veh and edge in self.env_params.additional_params['ignore_edges']:
+                        self.rl_veh.remove(veh_id)
+                        self.exited_rl_veh.append(veh_id)
+                        self.exiting_rl_veh.append(veh_id)
+
+                # remove rl vehicles that exited the network
+                for veh_id in list(self.rl_queue):
+                    if veh_id not in rl_ids:
+                        self.rl_queue.remove(veh_id)
+                for veh_id in self.rl_veh:
+                    if veh_id not in rl_ids:
+                        self.rl_veh.remove(veh_id)
+                # fil up rl_veh until they are enough controlled vehicles
+                while len(self.rl_queue) > 0:
+                    rl_id = self.rl_queue.popleft()
+                    self.rl_veh.append(rl_id)
+                # specify observed vehicles
+                for rl_id in self.rl_veh:
+                    # leader
+                    lead_id = self.k.vehicle.get_leader(rl_id)
+                    if lead_id:
+                        self.k.vehicle.set_observed(lead_id)
+                    # follower
+                    follow_id = self.k.vehicle.get_follower(rl_id)
+                    if follow_id:
+                        self.k.vehicle.set_observed(follow_id)
+                #print(self.exiting_rl_veh)
+
+
+
+    def reset(self):
+        self.rl_queue = collections.deque()
+        self.rl_veh = []
+        self.exited_rl_veh = []
+        self.leader = []
+        self.follower = []
+        self.exiting_rl_id = []
+        return super().reset()
+
+class MultiAgentHighwayPOEnvWindowCollaborate(MultiAgentHighwayPOEnvWindow):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        current_rl_vehs = self.rl_veh
+        edges = []
+        for veh_id in current_rl_vehs:
+            edge = self.k.vehicle.get_edge(veh_id)
+            if edge not in edges:
+                edges.append(edge)
+        interested_vehs = self.k.vehicle.get_ids_by_edge(edges)
+        if len(interested_vehs) >0:
+            reward2 = np.mean(self.k.vehicle.get_speed(interested_vehs))/300
+        else:
+            reward2 = 0
+
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
 
 class MultiAgentHighwayPOEnvAvgVel(MultiAgentHighwayPOEnv):
   
@@ -436,7 +684,7 @@ class MultiAgentHighwayPOEnvNewStates(MultiAgentHighwayPOEnv):
             if merge_dist == float('inf'):
                 merge_dist = 1
             states[rl_id] = np.array(list(states[rl_id]) + [rl_dist, veh_vel, merge_dist, merge_vel])
-        print(states)
+        #print(states)
         return states
 
 class MultiAgentHighwayPOEnvNewStatesNegative(MultiAgentHighwayPOEnvNewStates):
@@ -671,3 +919,107 @@ class MultiAgentHighwayPOEnvMerge4Collaborate(MultiAgentHighwayPOEnvMerge4):
             rewards[rl_id] = reward
         return rewards
 
+class MultiAgentHighwayPOEnvAblationDistance(MultiAgentHighwayPOEnvMerge4):
+    @property
+    def observation_space(self):
+        #See class definition
+        return Box(-float('inf'), float('inf'), shape=(8,), dtype=np.float32)
+
+    def get_state(self):
+        states = super().get_state()
+        for rl_id in states:
+            edge = self.k.vehicle.get_edge(rl_id)
+            state_rl_id = list(states[rl_id])
+            state_rl_id.pop(5)
+            states[rl_id] = state_rl_id
+        return states
+
+class MultiAgentHighwayPOEnvAblationDistanceCollaborate(MultiAgentHighwayPOEnvAblationDistance):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
+
+class MultiAgentHighwayPOEnvAblationConjestion(MultiAgentHighwayPOEnvMerge4):
+    @property
+    def observation_space(self):
+        #See class definition
+        return Box(-float('inf'), float('inf'), shape=(8,), dtype=np.float32)
+
+    def get_state(self):
+        states = super().get_state()
+        for rl_id in states:
+            edge = self.k.vehicle.get_edge(rl_id)
+            state_rl_id = list(states[rl_id])
+            state_rl_id.pop(6)
+            states[rl_id] = state_rl_id
+        return states
+
+class MultiAgentHighwayPOEnvAblationConjestionCollaborate(MultiAgentHighwayPOEnvAblationConjestion):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
+
+class MultiAgentHighwayPOEnvAblationConjestionArrive(MultiAgentHighwayPOEnvAblationConjestion):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+        if(len(self.k.vehicle._num_arrived)>0):
+            reward = self.k.vehicle._num_arrived[-1] * 0.05
+        else:
+            reward = 0
+
+        rewards = {}
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
+
+class MultiAgentHighwayPOEnvAblationMergeInfo(MultiAgentHighwayPOEnvMerge4):
+    @property
+    def observation_space(self):
+        #See class definition
+        return Box(-float('inf'), float('inf'), shape=(7,), dtype=np.float32)
+
+    def get_state(self):
+        states = super().get_state()
+        for rl_id in states:
+            edge = self.k.vehicle.get_edge(rl_id)
+            state_rl_id = list(states[rl_id])
+            state_rl_id.pop(-1)
+            state_rl_id.pop(-1)
+            states[rl_id] = state_rl_id
+        return states
+
+class MultiAgentHighwayPOEnvAblationMergeInfoCollaborate(MultiAgentHighwayPOEnvAblationMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
