@@ -22,7 +22,11 @@ from flow.envs.multiagent.highway import MultiAgentHighwayPOEnv, MultiAgentHighw
                         MultiAgentHighwayPOEnvAblationMergeInfo,\
                         MultiAgentHighwayPOEnvAblationMergeInfoCollaborate,\
                         MultiAgentHighwayPOEnvWindow,\
-                        MultiAgentHighwayPOEnvWindowCollaborate
+                        MultiAgentHighwayPOEnvWindowCollaborate,\
+                        MultiAgentHighwayPOEnvAblationConjestionDistance,\
+                        MultiAgentHighwayPOEnvAblationConjestionDistanceCollaborate,\
+                        MultiAgentHighwayPOEnvAblationConjestionMergeInfo,\
+                        MultiAgentHighwayPOEnvAblationConjestionMergeInfoCollaborate
 
 
 __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
@@ -51,6 +55,12 @@ __all__ = ['MultiEnv', 'MultiAgentAccelEnv', 'MultiWaveAttenuationPOEnv',
            'MultiAgentHighwayPOEnvAblationConjestion',
            'MultiAgentHighwayPOEnvAblationConjestionCollaborate',
            'MultiAgentHighwayPOEnvAblationCOnjestionArrive',
+           
+           'MultiAgentHighwayPOEnvAblationConjestionDistance',
+           'MultiAgentHighwayPOEnvAblationConjestionDistanceCollaborate',
+           
+           'MultiAgentHighwayPOEnvAblationConjestionMergeInfo',
+           'MultiAgentHighwayPOEnvAblationConjestionMergeInfoCollaborate',
            
            'MultiAgentHighwayPOEnvAblationMergeInfo',
            'MultiAgentHighwayPOEnvAblationMergeInfoCollaborate',

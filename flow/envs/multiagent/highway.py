@@ -978,6 +978,67 @@ class MultiAgentHighwayPOEnvAblationConjestionCollaborate(MultiAgentHighwayPOEnv
         for rl_id in self.k.vehicle.get_rl_ids():
             rewards[rl_id] = reward
         return rewards
+class MultiAgentHighwayPOEnvAblationConjestionDistance(MultiAgentHighwayPOEnvMerge4):
+    @property
+    def observation_space(self):
+        #See class definition
+        return Box(-float('inf'), float('inf'), shape=(7,), dtype=np.float32)
+
+    def get_state(self):
+        states = super().get_state()
+        for rl_id in states:
+            edge = self.k.vehicle.get_edge(rl_id)
+            state_rl_id = list(states[rl_id])
+            state_rl_id.pop(6)
+            state_rl_id.pop(5)
+            states[rl_id] = state_rl_id
+        return states
+
+class MultiAgentHighwayPOEnvAblationConjestionDistanceCollaborate(MultiAgentHighwayPOEnvAblationConjestionDistance):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
+class MultiAgentHighwayPOEnvAblationConjestionMergeInfo(MultiAgentHighwayPOEnvMerge4):
+    @property
+    def observation_space(self):
+        #See class definition
+        return Box(-float('inf'), float('inf'), shape=(6,), dtype=np.float32)
+
+    def get_state(self):
+        states = super().get_state()
+        for rl_id in states:
+            edge = self.k.vehicle.get_edge(rl_id)
+            state_rl_id = list(states[rl_id])
+            state_rl_id.pop(-1)
+            state_rl_id.pop(-1)
+            state_rl_id.pop(6)
+            states[rl_id] = state_rl_id
+        return states
+
+class MultiAgentHighwayPOEnvAblationConjestionMergeInfoCollaborate(MultiAgentHighwayPOEnvAblationConjestionMergeInfo):
+    def compute_reward(self, rl_actions, **kwargs):
+        if rl_actions is None:
+            return {}
+
+        rewards = {}
+        eta1 = 0.9
+        eta2 = 0.1
+        reward1 = -0.1
+        reward2 = average_velocity(self)/300
+        reward  = reward1 * eta1 + reward2 * eta2
+        for rl_id in self.k.vehicle.get_rl_ids():
+            rewards[rl_id] = reward
+        return rewards
 
 class MultiAgentHighwayPOEnvAblationConjestionArrive(MultiAgentHighwayPOEnvAblationConjestion):
     def compute_reward(self, rl_actions, **kwargs):
