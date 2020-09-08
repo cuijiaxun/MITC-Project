@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 750
+HORIZON = 2000
 # inflow rate at the highway
 FLOW_RATE = 2000
 # percent of autonomous vehicles
@@ -95,11 +95,11 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=2,
+        sims_per_step=1,
         warmup_steps=0,
         additional_params={
-            "max_accel": 9,
-            "max_decel": 9,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
         },
