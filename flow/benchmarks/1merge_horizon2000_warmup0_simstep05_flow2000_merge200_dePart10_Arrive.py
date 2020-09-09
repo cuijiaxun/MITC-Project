@@ -19,7 +19,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvAvgVel,MergePOEnv_noheadway, TestEnv,Env
+from flow.envs import MergePOEnvArrive,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -67,9 +67,9 @@ scenario_road_data = {"name" : "I696_ONE_LANE",
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 1500 #128#600
+HORIZON = 2000 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 20#1#20
+N_ROLLOUTS = 15#1#20
 # number of parallel workers
 N_CPUS = 4#8#2
 
@@ -246,11 +246,11 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="1merge_i696_horizon1500_SM9_inflow2000_merge200_depart10_AvgVel",
+    exp_tag="1merge_i696_horizon2000_SM9_inflow2000_merge200_depart10_Arrive",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
-    env_name=MergePOEnvAvgVel,
+    env_name=MergePOEnvArrive,
     # name of the scenario class the experiment is running on
     network=Network,
 
@@ -269,11 +269,11 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=2, #5,
+        sims_per_step=1, #5,
         warmup_steps=0,
         additional_params={
-            "max_accel": 9,
-            "max_decel": 9,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
             #"ignore_edges":["59440544#0"],

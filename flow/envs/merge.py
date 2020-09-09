@@ -520,6 +520,97 @@ class MergePOEnvWindow(MergePOEnv):
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
 
+class MergePOEnvWindowArrive(MergePOEnv):
+    def __init__(self, env_params, sim_params, network, simulator='traci'):
+        for p in ADDITIONAL_ENV_PARAMS.keys():
+            if p not in env_params.additional_params:
+                raise KeyError(
+                    'Environment parameter "{}" not supplied'.format(p))
+        self.rl_queue = collections.deque()
+        self.window_queue = collections.deque()
+        self.rl_veh = []
+        self.window_vehs = []
+        self.exited_rl_veh = []
+        self.exited_veh = []
+        self.exiting_rl_veh = []
+        self.exiting_veh =[]
+        self.leader = []
+        self.follower = []
+
+        super().__init__(env_params, sim_params, network, simulator)
+
+    def compute_reward(self, rl_actions, **kwargs):
+        reward=len(self.exiting_veh)
+        print(reward)
+        return reward
+    def additional_command(self):
+            if 'ignore_edges' not in self.env_params.additional_params:
+                super().additional_command()
+            else:
+                self.exiting_veh = []
+                rl_ids = self.k.vehicle.get_rl_ids()
+                veh_ids = self.k.vehicle.get_ids()
+
+                for veh_id in veh_ids:
+                    edge = self.k.vehicle.get_edge(veh_id)
+                    if (veh_id not in list(self.window_queue)+self.window_vehs+self.exited_veh)\
+                            and (edge not in self.env_params.additional_params['ignore_edges']):
+                        self.window_queue.append(veh_id)
+                    elif veh_id in self.window_vehs and edge in self.env_params.additional_params['ignore_edges']:
+                        self.window_vehs.remove(veh_id)
+                        self.exited_veh.append(veh_id)
+                        self.exiting_veh.append(veh_id)
+                for veh_id in list(self.window_queue):
+                    if veh_id not in veh_ids:
+                        self.veh_queue.remove(veh_id)
+                for veh_id in self.window_vehs:
+                    if veh_id not in veh_ids:
+                        self.window_vehs.remove(veh_id)
+                while len(self.window_queue)>0:
+                    veh_id = self.window_queue.popleft()
+                    self.window_vehs.append(veh_id)
+                print(self.exiting_veh)
+                # add rl vehicles that just entered the network into the rl queue
+                for veh_id in rl_ids:
+                    edge = self.k.vehicle.get_edge(veh_id) 
+                    if (veh_id not in list(self.rl_queue)+self.rl_veh+self.exited_rl_veh)\
+                            and (edge not in self.env_params.additional_params['ignore_edges']):
+                        self.rl_queue.append(veh_id)
+
+                    elif veh_id in self.rl_veh and edge in self.env_params.additional_params['ignore_edges']:
+                        self.rl_veh.remove(veh_id)
+                        self.exited_rl_veh.append(veh_id)
+
+                # remove rl vehicles that exited the network 
+                for veh_id in list(self.rl_queue):
+                    if veh_id not in rl_ids:
+                        self.rl_queue.remove(veh_id)
+                for veh_id in self.rl_veh:
+                    if veh_id not in rl_ids:
+                        self.rl_veh.remove(veh_id)
+                # fil up rl_veh until they are enough controlled vehicles
+                while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
+                    rl_id = self.rl_queue.popleft()
+                    self.rl_veh.append(rl_id)
+                # specify observed vehicles
+                for veh_id in self.leader + self.follower:
+                    self.k.vehicle.set_observed(veh_id)
+    def reset(self):
+        self.rl_queue = collections.deque()
+        self.window_queue = collections.deque()
+        self.rl_veh = []
+        self.window_vehs = []
+        self.exited_rl_veh = []
+        self.exited_veh = []
+        self.exiting_rl_veh = []
+        self.exiting_veh =[]
+        self.leader = []
+        self.follower = []      
+        return super().reset()
+
+
+  
+
 class MergePOEnvIgnoreAvgVel(MergePOEnvIgnore):
     def compute_reward(self, rl_actions, **kwargs):
         if self.env_params.evaluate:
