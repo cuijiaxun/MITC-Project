@@ -541,7 +541,7 @@ class MergePOEnvWindowArrive(MergePOEnv):
 
     def compute_reward(self, rl_actions, **kwargs):
         reward=len(self.exiting_veh)
-        print(reward)
+        #print(reward)
         return reward
     def additional_command(self):
             if 'ignore_edges' not in self.env_params.additional_params:
@@ -569,7 +569,7 @@ class MergePOEnvWindowArrive(MergePOEnv):
                 while len(self.window_queue)>0:
                     veh_id = self.window_queue.popleft()
                     self.window_vehs.append(veh_id)
-                print(self.exiting_veh)
+                #print(self.exiting_veh)
                 # add rl vehicles that just entered the network into the rl queue
                 for veh_id in rl_ids:
                     edge = self.k.vehicle.get_edge(veh_id) 
