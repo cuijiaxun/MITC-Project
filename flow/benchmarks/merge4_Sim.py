@@ -18,7 +18,7 @@ from flow.core.params import VehicleParams
 from flow.controllers import SimCarFollowingController, RLController,IDMController
 
 # time horizon of a single rollout
-HORIZON = 750
+HORIZON = 2000
 # inflow rate at the highway
 FLOW_RATE = 2000
 # percent of autonomous vehicles
@@ -74,7 +74,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim",
+    exp_tag="merge_4_Sim_FLOW_target30",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -95,12 +95,12 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=2,
+        sims_per_step=1,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
-            "target_velocity": 20,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
+            "target_velocity": 30,
             "num_rl": NUM_RL,
         },
     ),
