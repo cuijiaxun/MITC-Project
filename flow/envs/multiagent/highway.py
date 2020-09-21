@@ -289,14 +289,14 @@ class MultiAgentHighwayPOEnvWindow(MultiAgentHighwayPOEnv):
             reward = self.compute_reward(rl_actions, fail=crash)
 
         for rl_id in self.exiting_rl_veh: #self.k.vehicle.get_arrived_rl_ids():
-            #done[rl_id] = True
+            done[rl_id] = True
             reward[rl_id] = 20 #1 #0
-            #states[rl_id] = np.zeros(self.observation_space.shape[0])
+            states[rl_id] = np.zeros(self.observation_space.shape[0])
             #print("rl_id",rl_id, states)
         for rl_id in self.k.vehicle.get_arrived_rl_ids():
             #print("arrived:",rl_id)
             done[rl_id] = True
-            reward[rl_id] = 0
+            reward[rl_id] = 20
             states[rl_id] = np.zeros(self.observation_space.shape[0])
 
         return states, reward, done, infos
@@ -323,7 +323,7 @@ class MultiAgentHighwayPOEnvWindow(MultiAgentHighwayPOEnv):
         max_speed = self.k.network.max_speed()
         max_length = self.k.network.length()
 
-        for rl_id in self.k.vehicle.get_rl_ids():
+        for rl_id in self.rl_veh:
             this_speed = self.k.vehicle.get_speed(rl_id)
             lead_id = self.k.vehicle.get_leader(rl_id)
             follower = self.k.vehicle.get_follower(rl_id)
@@ -443,7 +443,7 @@ class MultiAgentHighwayPOEnvWindowCollaborate(MultiAgentHighwayPOEnvWindow):
             reward2 = 0
 
         reward  = reward1 * eta1 + reward2 * eta2
-        for rl_id in self.k.vehicle.get_rl_ids():
+        for rl_id in self.rl_veh:
             rewards[rl_id] = reward
         return rewards
 
