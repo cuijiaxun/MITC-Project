@@ -4,6 +4,7 @@ Trains a non-constant number of agents, all sharing the same policy, on the
 highway with ramps network.
 """
 import json
+from argparse import ArgumentParser
 import ray
 import os
 try:
@@ -226,7 +227,7 @@ inflow.add(
 
 
 flow_params = dict(
-    exp_tag='multiagent_highway_i696_1merge_Window_Collaborate_lrschedule',
+    exp_tag='multiagent_highway_i696_1merge_Window_Collaborate_lrschedule_transfer',
 
     env_name=MultiAgentHighwayPOEnvWindowCollaborate,
     network=MergeNetwork,
@@ -330,10 +331,9 @@ def setup_exps(flow_params):
     config['model'].update({'fcnet_hiddens': [100, 50, 25]})
     #config['lr'] = tune.grid_search([5e-4, 1e-4])
     config['lr_schedule'] = [
-            [0, 5e-4],
-            [1000000, 1e-4],
-            [4000000, 1e-5],
-            [8000000, 1e-6]]
+            [0, 1e-4],
+            [2000000,5e-5],
+            ]
     config['horizon'] = HORIZON
     config['clip_actions'] = False
     config['observation_filter'] = 'NoFilter'
@@ -387,7 +387,10 @@ def setup_exps(flow_params):
 # RUN EXPERIMENT
 
 if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('--restore', type=str, help='restore from which checkpoint?')
     alg_run, env_name, config = setup_exps(flow_params)
+    args = parser.parse_args()
     ray.init(num_cpus=N_CPUS + 1)
 
     run_experiments({
@@ -396,6 +399,7 @@ if __name__ == '__main__':
             'env': env_name,
             'checkpoint_freq': 5,
             'checkpoint_at_end': True,
+            'restore':args.restore,
             'stop': {
                 'training_iteration': N_TRAINING_ITERATIONS
             },
