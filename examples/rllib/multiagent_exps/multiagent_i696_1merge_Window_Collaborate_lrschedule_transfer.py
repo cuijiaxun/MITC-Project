@@ -34,7 +34,7 @@ from copy import deepcopy
 # SET UP PARAMETERS FOR THE SIMULATION
 
 # number of training iterations
-N_TRAINING_ITERATIONS = 500
+N_TRAINING_ITERATIONS = 1000
 # number of rollouts per training iteration
 N_ROLLOUTS = 30 
 # number of steps per rollout
