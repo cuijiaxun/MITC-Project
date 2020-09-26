@@ -19,7 +19,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvWindowAvgVel,MergePOEnv_noheadway, TestEnv,Env
+from flow.envs import MergePOEnvWindow,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -248,7 +248,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="i696_1merge_Window_transfer_AvgVel",
+    exp_tag="i696_1merge_Window_transfer_Flow",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -401,6 +401,7 @@ if __name__ == "__main__":
                 "stop": {
                     "training_iteration": 1000,
                 },
+                "num_samples":2,
             },
         },
         resume=False,
