@@ -1,75 +1,96 @@
-"""Multi-agent highway with ramps example.
+"""Open merge example.
 
-Trains a non-constant number of agents, all sharing the same policy, on the
-highway with ramps network.
+Trains a a small perce1tage of rl vehicles to dissipate shockwaves caused by
+merges in an open network.
 """
 import json
-from argparse import ArgumentParser
-import ray
 import os
+import random
+from copy import deepcopy
+import numpy as np
+import pickle
+from argparse import ArgumentParser
+
+import ray
 try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
-from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
-from ray import tune
-from ray.tune.registry import register_env
 from ray.tune import run_experiments
+from ray.tune.registry import register_env
+
+from flow.envs import MergePOEnvWindow,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
-from flow.controllers import SimCarFollowingController,IDMController, RLController, SimLaneChangeController, ContinuousRouter
-
-from flow.core.params import EnvParams, NetParams, InitialConfig, InFlows, \
-                             VehicleParams, SumoParams, \
-                             SumoCarFollowingParams, SumoLaneChangeParams
-
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
+from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
+    InFlows, SumoCarFollowingParams
+from flow.scenarios.merge import ADDITIONAL_NET_PARAMS
+from flow.core.params import VehicleParams, SumoLaneChangeParams
+from flow.controllers import SimCarFollowingController,IDMController, RLController, SimLaneChangeController, ContinuousRouter
 
-from flow.envs.multiagent import MultiAgentHighwayPOEnvWindowCollaborate
-from flow.envs.ring.accel import ADDITIONAL_ENV_PARAMS
-from flow.networks import MergeNetwork
-from flow.networks.merge import ADDITIONAL_NET_PARAMS
-from copy import deepcopy
-
-# SET UP PARAMETERS FOR THE SIMULATION
-
-# number of training iterations
-N_TRAINING_ITERATIONS = 1000
-# number of rollouts per training iteration
-N_ROLLOUTS = 30 
-# number of steps per rollout
-HORIZON = 2000
-# number of parallel workers
-N_CPUS = 15
-NUM_RL = 30
-# inflow rate on the highway in vehicles per hour
-FLOW_RATE = 2000
-# inflow rate on each on-ramp in vehicles per hour
-MERGE_RATE = 200
-# percentage of autonomous vehicles compared to human vehicles on highway
-RL_PENETRATION = 0.1
-
-
-# SET UP PARAMETERS FOR THE NETWORK
-additional_net_params = deepcopy(ADDITIONAL_NET_PARAMS)
+# TODO hard coded
+#scenarios_dir = os.path.join(os.path.expanduser("~/"), 'local', 'flow_2019_07', 'flow', 'scenarios')
 scenarios_dir = os.path.join(os.path.expanduser("~/"), 'Documents', 'MITC', 'flow', 'scenarios')
+# UNCOMMENT ONE OF THE FOLLOWING 3 VARIATIONS OF I696 SCENARIO 
+#
+#one-lane (no lane-changes), smaller
+####################################
+#scenario_road_data = {"name" : "I696_ONE_LANE_CROPPED",
+#            "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane_cropped.xml'), 
+#            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_cropped.xml')],
+#            "edges_distribution" : ["8666737", "124433709", "491266613", "404969345#1"] 
+#            }
+#
+#one-lane (no lane-changes)
+###########################
 scenario_road_data = {"name" : "I696_ONE_LANE",
             "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.i696_onelane.xml'), 
             "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
             #"rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.i696_onelane_Evenshorter.xml')],
             "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
             }
+#
+#the full I696 test
+###################
+#scenario_road_data = {"name" : "I696_FULL",
+#            "net" : os.path.join(scenarios_dir, 'i696', 'osm.net.xml'), 
+#            "rou" : [os.path.join(scenarios_dir, 'i696', 'i696.rou.xml')],
+#            "edges_distribution" : ["404969345#0", "59440544#0", "124433709", "38726647"] 
+#            }
+            
 
+# experiment number
+# - 0: 10% RL penetration,  5 max controllable vehicles
+# - 1: 25% RL penetration, 13 max controllable vehicles
+# - 2: 33% RL penetration, 17 max controllable vehicles
+EXP_NUM = 0
 
+# time horizon of a single rollout
+HORIZON = 2000 #128#600
+# number of rollouts per training iteration
+N_ROLLOUTS = 15#1#20
+# number of parallel workers
+N_CPUS = 15#8#2
 
-# SET UP PARAMETERS FOR THE ENVIRONMENT
+# inflow rate at the highway
+FLOW_RATE = 2000
+MERGE_RATE = 200
+# percent of autonomous vehicles
+RL_PENETRATION = [0.1, 0.25, 0.33][EXP_NUM]
+# num_rl term (see ADDITIONAL_ENV_PARAMs)
+#NUM_RL = [5, 13, 17][EXP_NUM]
+#NUM_RL = [30, 250, 333][EXP_NUM]
+NUM_RL = 5
+## We consider a highway network with an upstream merging lane producing
+# shockwaves
+additional_net_params = ADDITIONAL_NET_PARAMS.copy()
+#additional_net_params["merge_lanes"] = 1
+#additional_net_params["highway_lanes"] = 1
+#additional_net_params["pre_merge_length"] = 500
 
-additional_env_params = ADDITIONAL_ENV_PARAMS.copy()
-
-
-
-# CREATE VEHICLE TYPES AND INFLOWS
-
+# RL vehicles constitute 5% of the total number of vehicles
+# Daniel: adding vehicles and flow from osm.passenger.trips.xml
 vehicles = VehicleParams()
 vehicles.add(
     veh_id="human",
@@ -225,31 +246,32 @@ inflow.add(
     )
 '''
 
-
 flow_params = dict(
-    exp_tag='multiagent_highway_i696_1merge_Window_Collaborate_lrschedule_transfer',
+    # name of the experiment
+    exp_tag="i696_1merge_Window_transfer_Flow",
 
-    env_name=MultiAgentHighwayPOEnvWindowCollaborate,
-    network=MergeNetwork,
+    # name of the flow environment the experiment is running on
+    #env_name=MergePOEnv,
+    env_name=MergePOEnvWindow,
+    # name of the scenario class the experiment is running on
+    network=Network,
+
+    # simulator that is used by the experiment
     simulator='traci',
 
-    #env=EnvParams(
-    #    horizon=HORIZON,
-    #    warmup_steps=200,
-    #    sims_per_step=1,  # do not put more than one #FIXME why do not put more than one
-    #    additional_params=additional_env_params,
-    #),
-
+    # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
+        no_step_log=False,       # this disables log writing?
+        sim_step=0.5,            # Daniel updated from osm.sumocfg
+        lateral_resolution=0.25, # determines lateral discretization of lanes
+        render=False,#True,             # False for training, True for debugging
         restart_instance=True,
-        sim_step=0.5,
-        render=False,
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=1, #5,
+        sims_per_step=2, #5,
         warmup_steps=0,
         additional_params={
             "max_accel": 2.6,
@@ -281,6 +303,9 @@ flow_params = dict(
             #"max_inflow":FLOW_RATE + 3*MERGE_RATE,
         },
     ),
+
+    # network-related parameters (see flow.core.params.NetParams and the
+    # scenario's documentation or ADDITIONAL_NET_PARAMS component)
     net=NetParams(
         inflows=inflow,
         #no_internal_links=False,
@@ -291,118 +316,94 @@ flow_params = dict(
         }
     ),
 
-
+    # vehicles to be placed in the network at the start of a rollout (see
+    # flow.core.params.VehicleParams)
     veh=vehicles,
+
+    # parameters specifying the positioning of vehicles upon initialization/
+    # reset (see flow.core.params.InitialConfig)
     initial=InitialConfig(
-      # Distributing only at the beginning of routes
+      # Distributing only at the beginning of routes 
       scenario_road_data["edges_distribution"]
     ),
-
 )
 
 
-# SET UP EXPERIMENT
+def setup_exps(seeds_file=None):
 
-def setup_exps(flow_params):
-    """Create the relevant components of a multiagent RLlib experiment.
+    alg_run = "PPO"
 
-    Parameters
-    ----------
-    flow_params : dict
-        input flow-parameters
-
-    Returns
-    -------
-    str
-        name of the training algorithm
-    str
-        name of the gym environment to be trained
-    dict
-        training configuration parameters
-    """
-    alg_run = 'PPO'
     agent_cls = get_agent_class(alg_run)
     config = agent_cls._default_config.copy()
-    config['num_workers'] = N_CPUS
-    config['train_batch_size'] = HORIZON * N_ROLLOUTS
-    config['sgd_minibatch_size'] = 4096
-    #config['simple_optimizer'] = True
-    config['gamma'] = 0.998  # discount rate
-    config['model'].update({'fcnet_hiddens': [100, 50, 25]})
-    #config['lr'] = tune.grid_search([5e-4, 1e-4])
+    config["num_workers"] = N_CPUS
+    config["train_batch_size"] = HORIZON * N_ROLLOUTS
+    config["sgd_minibatch_size"]= 4096
+    config["num_gpus"] = args.num_gpus
+    config["gamma"] = 0.998  # discount rate
+    config["model"].update({"fcnet_hiddens": [100, 50, 25]})
     config['lr_schedule'] = [
             [0, 1e-4],
-            [2000000,5e-5],
+            [2000000,5e-5]
             ]
-    config['horizon'] = HORIZON
-    config['clip_actions'] = False
-    config['observation_filter'] = 'NoFilter'
     config["use_gae"] = True
     config["lambda"] = 0.95
-    config["shuffle_sequences"] = True
-    config["vf_clip_param"] = 1e8
+    config["kl_target"] = 0.02
     config["num_sgd_iter"] = 10
-    #config["kl_target"] = 0.003
-    config["kl_coeff"] = 0.01
-    config["entropy_coeff"] = 0.001
-    config["clip_param"] = 0.2
-    config["grad_clip"] = None
-    config["use_critic"] = True
+    config['clip_actions'] = False  # FIXME(ev) temporary ray bug
+    config["horizon"] = HORIZON
+    config["grad_clip"] = 0.5
+    config["entropy_coeff"] = 0.0001
+    config["lr"] = 1e-5
     config["vf_share_layers"] = True
     config["vf_loss_coeff"] = 0.5
-
-
     # save the flow params for replay
     flow_json = json.dumps(
         flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
     config['env_config']['flow_params'] = flow_json
     config['env_config']['run'] = alg_run
 
-    create_env, env_name = make_create_env(params=flow_params, version=0)
+    create_env, gym_name = make_create_env(params=flow_params, version=0, seeds_file=seeds_file)
 
-    # register as rllib env
-    register_env(env_name, create_env)
-
-    # multiagent configuration
-    temp_env = create_env()
-    policy_graphs = {'av': (PPOTFPolicy,
-                            temp_env.observation_space,
-                            temp_env.action_space,
-                            {})}
-
-    def policy_mapping_fn(_):
-        return 'av'
-
-    config.update({
-        'multiagent': {
-            'policies': policy_graphs,
-            'policy_mapping_fn': tune.function(policy_mapping_fn),
-            'policies_to_train': ['av']
-        }
-    })
-
-    return alg_run, env_name, config
+    # Register as rllib env
+    register_env(gym_name, create_env)
+    return alg_run, gym_name, config
 
 
-# RUN EXPERIMENT
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     parser = ArgumentParser()
-    parser.add_argument('--restore', type=str, help='restore from which checkpoint?')
-    alg_run, env_name, config = setup_exps(flow_params)
-    args = parser.parse_args()
-    ray.init(num_cpus=N_CPUS + 1)
+    parser.add_argument("-s", "--seeds_file", dest="seeds_file",
+                        help="pickle file containing seeds", default=None)
+    parser.add_argument('--resume',help="continue training",type=bool,default=False)
+    parser.add_argument('--restore',type=str, help="restore from which checkpoint?")
+    parser.add_argument(
+        '--num_gpus',
+        type=int,
+        default=0,
+        help="The number of gpus to use.")
 
-    run_experiments({
-        flow_params['exp_tag']: {
-            'run': alg_run,
-            'env': env_name,
-            'checkpoint_freq': 5,
-            'checkpoint_at_end': True,
-            'restore':args.restore,
-            'stop': {
-                'training_iteration': N_TRAINING_ITERATIONS
+    args = parser.parse_args()
+
+    alg_run, gym_name, config = setup_exps(args.seeds_file)
+    ray.init(num_cpus=N_CPUS + 1)
+    trials = run_experiments({
+            flow_params["exp_tag"]: {
+                "run": alg_run,
+                "env": gym_name,
+                "config": {
+                    **config
+                },
+                "restore":args.restore,
+                "checkpoint_freq": 1, 
+                "checkpoint_at_end": True,
+                "max_failures": 999,
+                "stop": {
+                    "training_iteration": 1000,
+                },
+                "num_samples":2,
             },
-            'config': config,
         },
-    })
+        resume=False,
+    )
+

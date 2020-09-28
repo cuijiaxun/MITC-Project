@@ -19,7 +19,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvWindow,MergePOEnv_noheadway, TestEnv,Env
+from flow.envs import MergePOEnvWindowAvgVel,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder

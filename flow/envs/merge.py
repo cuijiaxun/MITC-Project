@@ -473,53 +473,6 @@ class MergePOEnvIgnore(MergePOEnv):
                 for veh_id in self.leader + self.follower:
                     self.k.vehicle.set_observed(veh_id)
 
-class MergePOEnvWindow(MergePOEnv):
-    def compute_reward(self, rl_actions, **kwargs):
-        current_rl_vehs = self.rl_veh
-        edges = []
-        for veh_id in current_rl_vehs:
-            edge = self.k.vehicle.get_edge(veh_id)
-            if edge not in edges:
-                edges.append(edge)
-        interested_vehs = self.k.vehicle.get_ids_by_edge(edges)
-        #print(current_rl_vehs)
-        #print(interested_vehs)
-        if len(interested_vehs) >0:
-            return np.mean(self.k.vehicle.get_speed(interested_vehs))/30.0
-        else:
-            return 0
-
-    def additional_command(self):
-            if 'ignore_edges' not in self.env_params.additional_params:
-                super().additional_command()
-            else:
-                rl_ids = self.k.vehicle.get_rl_ids()
-                # add rl vehicles that just entered the network into the rl queue
-                for veh_id in rl_ids:
-                    edge = self.k.vehicle.get_edge(veh_id) 
-                    if (veh_id not in list(self.rl_queue)+self.rl_veh+self.exited_rl_veh)\
-                            and (edge not in self.env_params.additional_params['ignore_edges']):
-                        self.rl_queue.append(veh_id)
-
-                    elif veh_id in self.rl_veh and edge in self.env_params.additional_params['ignore_edges']:
-                        self.rl_veh.remove(veh_id)
-                        self.exited_rl_veh.append(veh_id)
-
-                # remove rl vehicles that exited the network 
-                for veh_id in list(self.rl_queue):
-                    if veh_id not in rl_ids:
-                        self.rl_queue.remove(veh_id)
-                for veh_id in self.rl_veh:
-                    if veh_id not in rl_ids:
-                        self.rl_veh.remove(veh_id)
-                # fil up rl_veh until they are enough controlled vehicles
-                while len(self.rl_queue) > 0 and len(self.rl_veh) < self.num_rl:
-                    rl_id = self.rl_queue.popleft()
-                    self.rl_veh.append(rl_id)
-                # specify observed vehicles
-                for veh_id in self.leader + self.follower:
-                    self.k.vehicle.set_observed(veh_id)
-
 class MergePOEnvWindowArrive(MergePOEnv):
     def __init__(self, env_params, sim_params, network, simulator='traci'):
         for p in ADDITIONAL_ENV_PARAMS.keys():
@@ -607,6 +560,54 @@ class MergePOEnvWindowArrive(MergePOEnv):
         self.leader = []
         self.follower = []      
         return super().reset()
+
+class MergePOEnvWindowAvgVel(MergePOEnvWindowArrive):
+    def compute_reward(self, rl_actions, **kwargs):
+        current_rl_vehs = self.rl_veh
+        edges = []
+        for veh_id in current_rl_vehs:
+            edge = self.k.vehicle.get_edge(veh_id)
+            if edge not in edges:
+                edges.append(edge)
+        interested_vehs = self.k.vehicle.get_ids_by_edge(edges)
+        #print(current_rl_vehs)
+        #print(interested_vehs)
+        if len(interested_vehs) >0:
+            return np.mean(self.k.vehicle.get_speed(interested_vehs))/30.0
+        else:
+            return 0
+
+class MergePOEnvWindow(MergePOEnvWindowArrive):
+    def compute_reward(self, rl_actions, **kwargs):
+        current_rl_vehs = self.rl_veh
+        edges = []
+        for veh_id in current_rl_vehs:
+            edge = self.k.vehicle.get_edge(veh_id)
+            if edge not in edges:
+                edges.append(edge)
+        interested_vehs = self.k.vehicle.get_ids_by_edge(edges)
+        if len(interested_vehs) >0:
+            cost1 = rewards.desired_velocity(self, fail=kwargs["fail"], edge_list=edges)
+
+            # penalize small time headways
+            cost2 = 0
+            t_min = 1  # smallest acceptable time headway
+            for rl_id in self.rl_veh:
+                lead_id = self.k.vehicle.get_leader(rl_id)
+                if lead_id not in ["", None] \
+                        and self.k.vehicle.get_speed(rl_id) > 0:
+                    t_headway = max(
+                        self.k.vehicle.get_headway(rl_id) /
+                        self.k.vehicle.get_speed(rl_id), 0)
+                    cost2 += min((t_headway - t_min) / t_min, 0)
+
+            # weights for cost1, cost2, and cost3, respectively
+            eta1, eta2 = 1.00, 0.10
+
+            return max(eta1 * cost1 + eta2 * cost2, 0)
+        else:
+            return 0
+
 
 
   
