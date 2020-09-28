@@ -341,21 +341,18 @@ def setup_exps(seeds_file=None):
     config["num_gpus"] = args.num_gpus
     config["gamma"] = 0.998  # discount rate
     config["model"].update({"fcnet_hiddens": [100, 50, 25]})
-    config['lr_schedule'] = [
-            [0, 1e-4],
-            [2000000,5e-5]
-            ]
     config["use_gae"] = True
-    config["lambda"] = 0.95
-    config["kl_target"] = 0.02
+    config["lambda"] = 0.97
+    #config["kl_target"] = 0.02
+    config["vf_clip_param"] = 1e6
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
-    config["grad_clip"] = 0.5
-    config["entropy_coeff"] = 0.0001
+    #config["grad_clip"] = 0.5
+    #config["entropy_coeff"] = 0.0001
     config["lr"] = 1e-5
-    config["vf_share_layers"] = True
-    config["vf_loss_coeff"] = 0.5
+    #config["vf_share_layers"] = True
+    #config["vf_loss_coeff"] = 0.5
     # save the flow params for replay
     flow_json = json.dumps(
         flow_params, cls=FlowParamsEncoder, sort_keys=True, indent=4)
