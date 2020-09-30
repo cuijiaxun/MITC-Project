@@ -19,7 +19,7 @@ except ImportError:
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 
-from flow.envs import MergePOEnvWindow,MergePOEnv_noheadway, TestEnv,Env
+from flow.envs import MergePOEnvWindowAvgVel,MergePOEnv_noheadway, TestEnv,Env
 from flow.networks import Network
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import FlowParamsEncoder
@@ -69,9 +69,9 @@ EXP_NUM = 0
 # time horizon of a single rollout
 HORIZON = 2000 #128#600
 # number of rollouts per training iteration
-N_ROLLOUTS = 15#1#20
+N_ROLLOUTS = 1#1#20
 # number of parallel workers
-N_CPUS = 10#8#2
+N_CPUS = 0#8#2
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -248,7 +248,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="i696_1merge_Window_transfer_Flow",
+    exp_tag="i696_1merge_Window_ZeroShot_transfer_AvgVel",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
@@ -337,7 +337,7 @@ def setup_exps(seeds_file=None):
     config = agent_cls._default_config.copy()
     config["num_workers"] = N_CPUS
     config["train_batch_size"] = HORIZON * N_ROLLOUTS
-    config["sgd_minibatch_size"]= 4096
+    config["sgd_minibatch_size"]= 128
     config["num_gpus"] = args.num_gpus
     config["gamma"] = 0.998  # discount rate
     config["model"].update({"fcnet_hiddens": [100, 50, 25]})
@@ -349,12 +349,12 @@ def setup_exps(seeds_file=None):
     config["lambda"] = 0.97
     #config["kl_target"] = 0.02
     config["vf_clip_param"] = 1e6
-    config["num_sgd_iter"] = 10
+    config["num_sgd_iter"] = 1
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
     config["horizon"] = HORIZON
     #config["grad_clip"] = 0.5
     #config["entropy_coeff"] = 0.0001
-    config["lr"] = 1e-5
+    config["lr"] = 0.0
     #config["vf_share_layers"] = True
     #config["vf_loss_coeff"] = 0.5
     # save the flow params for replay
@@ -400,7 +400,7 @@ if __name__ == "__main__":
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {
-                    "training_iteration": 1000,
+                    "training_iteration": 501,
                 },
                 "num_samples":2,
             },
