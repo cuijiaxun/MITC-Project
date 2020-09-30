@@ -271,7 +271,7 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        sims_per_step=2, #5,
+        sims_per_step=1, #5,
         warmup_steps=0,
         additional_params={
             "max_accel": 2.6,

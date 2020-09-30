@@ -398,6 +398,7 @@ if __name__ == "__main__":
                 "stop": {
                     "training_iteration": 1000,
                 },
+                "num_samples":2,
             },
         },
         resume=False,
