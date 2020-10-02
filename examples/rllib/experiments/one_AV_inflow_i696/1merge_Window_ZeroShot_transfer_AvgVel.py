@@ -400,9 +400,9 @@ if __name__ == "__main__":
                 "checkpoint_at_end": True,
                 "max_failures": 999,
                 "stop": {
-                    "training_iteration": 501,
+                    "training_iteration": 1,
                 },
-                "num_samples":2,
+                "num_samples":1,
             },
         },
         resume=False,
