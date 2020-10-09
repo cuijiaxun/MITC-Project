@@ -251,5 +251,6 @@ if __name__ == '__main__':
                 'training_iteration': N_TRAINING_ITERATIONS
             },
             'config': config,
+            'num_samples': 3,
         },
     })
