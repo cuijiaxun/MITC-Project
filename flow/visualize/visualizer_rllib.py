@@ -172,6 +172,7 @@ def visualizer_rllib(args):
         sim_params.render = 'drgb'
         sim_params.pxpm = 4
         sim_params.save_render = True
+    flow_params["env"].additional_params["use_seeds"] = args.use_seeds
 
     # Create and register a gym+rllib env
     create_env, env_name = make_create_env(params=flow_params, version=0)
@@ -507,6 +508,7 @@ def create_parser():
         action='store_true',
         help='Specifies whether to use the \'evaluate\' reward '
              'for the environment.')
+    parser.add_argument("-s", "--use_seeds", dest="use_seeds", help="name of pickle file containing seeds")
     parser.add_argument(
         '--render_mode',
         type=str,

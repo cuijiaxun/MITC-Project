@@ -145,27 +145,73 @@ class MultiEnv(MultiAgentEnv, Env):
             the initial observation of the space. The initial reward is assumed
             to be zero.
         """
+
+        if "use_seeds" in self.env_params.additional_params:
+            use_seeds = self.env_params.additional_params["use_seeds"]
+        else:
+            use_seeds = None
+        if use_seeds: 
+            if use_seeds == "per_process":
+                # FIXED SEEDS: always same random seeds for each rollout worker run and see whether the agent learns quicker
+            if self.process_seeds_file: # i.e. iteration > 1 -- keep loading the file from iteration 1 for each simulation
+                with open(self.process_seeds_file, 'rb') as handle:
+                    print ("loading seeds file " + self.process_seeds_file)
+                  loaded_seeds = pickle.load(handle)
+                  random.setstate(loaded_seeds['old_state_random'])
+                  np.random.set_state(loaded_seeds['old_state_np'])
+            else: # first iteration, create file to be used by all runs of this worker
+                logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+              if not os.path.exists(logs_path):
+                  os.makedirs(logs_path)
+              seeds = {
+                      'old_state_random' : random.getstate(),
+                      'old_state_np' : np.random.get_state()
+                      }
+              self.process_seeds_file = logs_path + "/seeds.pkl"
+              with open(self.process_seeds_file, 'wb') as handle:
+                  pickle.dump(seeds, handle)
+          else:
+              # FIXED SEEDS: same seed for *all* rollout workers
+            with open(use_seeds, 'rb') as handle:
+                loaded_seeds = pickle.load(handle)
+                random.setstate(loaded_seeds['old_state_random'])
+                np.random.set_state(loaded_seeds['old_state_np'])
+                print("loaded seeds file " + use_seeds)
+        # regardless of the above, always save seeds to file
+        seeds = { 
+                'old_state_random' : random.getstate(),
+                'old_state_np' : np.random.get_state() 
+                }
+        # creating path to experiments' log files, using current time
+        logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+        if not os.path.exists(logs_path):
+            os.makedirs(logs_path)
+        ## send logs_path to sumo to write logs (TODO: but after constructor, a bit hacky)
+        #sim_params.logs_path=logs_path
+        with open(logs_path + "/seeds.pkl", 'wb') as handle:
+            pickle.dump(seeds, handle)
+
         # reset the time counter
         self.time_counter = 0
 
         # warn about not using restart_instance when using inflows
         if len(self.net_params.inflows.get()) > 0 and \
                 not self.sim_params.restart_instance:
-            print(
-                "**********************************************************\n"
-                "**********************************************************\n"
-                "**********************************************************\n"
-                "WARNING: Inflows will cause computational performance to\n"
-                "significantly decrease after large number of rollouts. In \n"
-                "order to avoid this, set SumoParams(restart_instance=True).\n"
-                "**********************************************************\n"
-                "**********************************************************\n"
-                "**********************************************************"
-            )
+                    print(
+                            "**********************************************************\n"
+                            "**********************************************************\n"
+                            "**********************************************************\n"
+                            "WARNING: Inflows will cause computational performance to\n"
+                            "significantly decrease after large number of rollouts. In \n"
+                            "order to avoid this, set SumoParams(restart_instance=True).\n"
+                            "**********************************************************\n"
+                            "**********************************************************\n"
+                            "**********************************************************"
+                            )
 
-        if self.sim_params.restart_instance or \
-                (self.step_counter > 2e6 and self.simulator != 'aimsun'):
-            self.step_counter = 0
+                    if self.sim_params.restart_instance or \
+                            (self.step_counter > 2e6 and self.simulator != 'aimsun'):
+                                self.step_counter = 0
             # issue a random seed to induce randomness into the next rollout
             self.sim_params.seed = random.randint(0, 1e5)
 
@@ -175,8 +221,8 @@ class MultiEnv(MultiAgentEnv, Env):
             self.restart_simulation(self.sim_params)
 
         # perform shuffling (if requested)
-        elif self.initial_config.shuffle:
-            self.setup_initial_state()
+    elif self.initial_config.shuffle:
+        self.setup_initial_state()
 
         # clear all vehicles from the network and the vehicles class
         if self.simulator == 'traci':
@@ -201,16 +247,16 @@ class MultiEnv(MultiAgentEnv, Env):
         # reintroduce the initial vehicles to the network
         for veh_id in self.initial_ids:
             type_id, edge, lane_index, pos, speed = \
-                self.initial_state[veh_id]
+                    self.initial_state[veh_id]
 
             try:
                 self.k.vehicle.add(
-                    veh_id=veh_id,
-                    type_id=type_id,
-                    edge=edge,
-                    lane=lane_index,
-                    pos=pos,
-                    speed=speed)
+                        veh_id=veh_id,
+                        type_id=type_id,
+                        edge=edge,
+                        lane=lane_index,
+                        pos=pos,
+                        speed=speed)
             except (FatalTraCIError, TraCIException):
                 # if a vehicle was not removed in the first attempt, remove it
                 # now and then reintroduce it
@@ -218,14 +264,14 @@ class MultiEnv(MultiAgentEnv, Env):
                 if self.simulator == 'traci':
                     self.k.kernel_api.vehicle.remove(veh_id)  # FIXME: hack
                 self.k.vehicle.add(
-                    veh_id=veh_id,
-                    type_id=type_id,
-                    edge=edge,
-                    lane=lane_index,
-                    pos=pos,
-                    speed=speed)
+                        veh_id=veh_id,
+                        type_id=type_id,
+                        edge=edge,
+                        lane=lane_index,
+                        pos=pos,
+                        speed=speed)
 
-        # advance the simulation in the simulator by one step
+                # advance the simulation in the simulator by one step
         self.k.simulation.simulation_step()
 
         # update the information in each kernel to match the current state
@@ -238,9 +284,9 @@ class MultiEnv(MultiAgentEnv, Env):
         # check to make sure all vehicles have been spawned
         if len(self.initial_ids) > self.k.vehicle.num_vehicles:
             missing_vehicles = list(
-                set(self.initial_ids) - set(self.k.vehicle.get_ids()))
+                    set(self.initial_ids) - set(self.k.vehicle.get_ids()))
             msg = '\nNot enough vehicles have spawned! Bad start?\n' \
-                  'Missing vehicles / initial state:\n'
+                    'Missing vehicles / initial state:\n'
             for veh_id in missing_vehicles:
                 msg += '- {}: {}\n'.format(veh_id, self.initial_state[veh_id])
             raise FatalFlowError(msg=msg)
@@ -278,10 +324,10 @@ class MultiEnv(MultiAgentEnv, Env):
         if isinstance(self.action_space, Box):
             for key, action in rl_actions.items():
                 rl_actions[key] = np.clip(
-                    action,
-                    a_min=self.action_space.low,
-                    a_max=self.action_space.high)
-        return rl_actions
+                        action,
+                        a_min=self.action_space.low,
+                        a_max=self.action_space.high)
+                return rl_actions
 
     def apply_rl_actions(self, rl_actions=None):
         """Specify the actions to be performed by the rl agent(s).

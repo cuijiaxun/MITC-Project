@@ -171,6 +171,7 @@ class Env(gym.Env):
 
             # advance the simulation in the simulator by one step
         """
+        self.process_seeds_file = None
         self.env_params = env_params
         self.time_with_no_vehicles = 0
         if scenario is not None:
