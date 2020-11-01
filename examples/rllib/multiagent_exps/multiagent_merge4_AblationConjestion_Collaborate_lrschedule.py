@@ -83,11 +83,7 @@ vehicles.add(
     acceleration_controller=(RLController, {}),
     car_following_params=SumoCarFollowingParams(
         speed_mode=9,
-    ),"22723058#1",
-            #                "491515539",
-            #                ":gneJ24_1",
-            #                "341040160#0",
-                            ":4308145961_0",
+    ),
     num_vehicles=0)
 
 # Vehicles are introduced from both sides of merge, with RL vehicles entering
