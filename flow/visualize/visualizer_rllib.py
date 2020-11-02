@@ -21,6 +21,7 @@ import sys
 import time
 import pprint
 import matplotlib.pyplot as plt
+import glob
 import ray
 try:
     from ray.rllib.agents.agent import get_agent_class
@@ -34,6 +35,8 @@ from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
 
+seed_filename = glob.glob("eval_seeds/*")
+print(seed_filename)
 
 EXAMPLE_USAGE = """
 example usage:

@@ -21,6 +21,7 @@ import sys
 import time
 import pprint
 import matplotlib.pyplot as plt
+import glob
 import ray
 import copy
 from ray.tune.utils import merge_dicts
@@ -36,7 +37,9 @@ from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
 from ray.rllib.agents.callbacks import DefaultCallbacks
-
+seed_filename = glob.glob("eval_seeds/*/seeds.pkl")
+print(seed_filename)
+print("Using ", len(seed_filename), " random seeds")
 EXAMPLE_USAGE = """
 example usage:
     python ./visualizer_rllib.py /ray_results/experiment_dir/result_dir 1
@@ -106,7 +109,7 @@ class MyCallbacks(DefaultCallbacks):
         episode.user_data["initial_state"] = state
 
 
-def visualizer_rllib(args):
+def visualizer_rllib(args, seed=None):
     """Visualizer for RLlib experiments.
 
     This function takes args (see function create_parser below for
@@ -189,8 +192,10 @@ def visualizer_rllib(args):
         sim_params.render = 'drgb'
         sim_params.pxpm = 4
         sim_params.save_render = True
-    
-
+    if seed is not None: 
+        flow_params["env"].additional_params["use_seeds"] = seed
+    else:
+        flow_params["env"].additional_params["use_seeds"] = args.use_seeds
     if args.horizon:
         config['horizon'] = args.horizon
         flow_params['env'].horizon = args.horizon
@@ -408,7 +413,6 @@ def visualizer_rllib(args):
 
     print('==== Summary of results ====')
     print("Return:")
-    print(mean_speed)
     if multiagent:
         for agent_id, rew in rets.items():
             print('For agent', agent_id)
@@ -492,7 +496,7 @@ def visualizer_rllib(args):
         os_cmd += " -pix_fmt yuv420p " + dirs[-1] + ".mp4"
         os_cmd += "&& cp " + dirs[-1] + ".mp4 " + save_dir + "/"
         os.system(os_cmd)
-    
+    return mean_speed, final_inflows, final_outflows 
 
 def create_parser():
     """Create the parser to capture CLI arguments."""
@@ -557,7 +561,12 @@ def create_parser():
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
-    ray.init(
-        num_cpus=1,
-        object_store_memory=1024*1024*1024)
-    visualizer_rllib(args)
+    for i in range(len(seed_filename)):
+        seed = seed_filename[i]
+        print("Using seed: ", seed)
+        ray.init(
+            num_cpus=1,
+            object_store_memory=1024*1024*1024)
+        speed, inflow, outflow = visualizer_rllib(args, seed)
+        print("Round ",i, ":", speed, inflow, outflow)
+        ray.shutdown()
