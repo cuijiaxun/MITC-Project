@@ -24,7 +24,9 @@ import matplotlib.pyplot as plt
 import glob
 import ray
 import copy
-from ray.tune.utils import merge_dicts
+#from ray.tune.utils import merge_dicts
+from ray.rllib.utils import merge_dicts
+import pickle
 try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
@@ -137,6 +139,14 @@ def visualizer_rllib(args, seed=None):
     flow_params = get_flow_params(config)
     flow_params['env'].additional_params["use_seeds"]=args.use_seeds
     print(args.use_seeds)
+    if seed:
+        with open(seed, 'rb') as f:
+            seed_tmp = pickle.load(f)
+        config['seed'] = seed_tmp['rllib_seed']
+    elif args.use_seeds:
+        with open(args.use_seeds, 'rb') as f:
+            seed_tmp = pickle.load(f)
+        config['seed'] = seed_tmp['rllib_seed']
     # hack for old pkl files
     # TODO(ev) remove eventually
     sim_params = flow_params['sim']
