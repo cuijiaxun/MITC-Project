@@ -137,8 +137,9 @@ def visualizer_rllib(args, seed=None):
     config['num_workers'] = 0
 
     flow_params = get_flow_params(config)
-    flow_params['env'].additional_params["use_seeds"]=args.use_seeds
-    print(args.use_seeds)
+    #flow_params['env'].additional_params["use_seeds"]=args.use_seeds
+#    print(args.use_seeds)
+    seed_tmp = None
     if seed:
         with open(seed, 'rb') as f:
             seed_tmp = pickle.load(f)
@@ -151,6 +152,9 @@ def visualizer_rllib(args, seed=None):
     # TODO(ev) remove eventually
     sim_params = flow_params['sim']
     setattr(sim_params, 'num_clients', 1)
+    if seed_tmp:
+        #setattr(sim_params, 'seed', seed_tmp['sumo_seed'])
+        sim_params.seed = seed_tmp['sumo_seed']
 
     # Determine agent and checkpoint
     config_run = config['env_config']['run'] if 'run' in config['env_config'] \
@@ -202,16 +206,18 @@ def visualizer_rllib(args, seed=None):
         sim_params.render = 'drgb'
         sim_params.pxpm = 4
         sim_params.save_render = True
-    if seed is not None: 
-        flow_params["env"].additional_params["use_seeds"] = seed
-    else:
-        flow_params["env"].additional_params["use_seeds"] = args.use_seeds
+    #if seed is not None: 
+    #    print(seed)
+    #    flow_params["env"].additional_params["use_seeds"] = seed
+    #    input()
+    #else:
+    #    flow_params["env"].additional_params["use_seeds"] = args.use_seeds
     if args.horizon:
         config['horizon'] = args.horizon
         flow_params['env'].horizon = args.horizon
 
     # Create and register a gym+rllib env
-    create_env, env_name = make_create_env(params=flow_params, version=0)
+    create_env, env_name = make_create_env(params=flow_params, version=0, seeds_file=seed)
     register_env(env_name, create_env)
 
     # check if the environment is a single or multiagent environment, and
@@ -574,6 +580,7 @@ if __name__ == '__main__':
     for i in range(len(seed_filename)):
         seed = seed_filename[i]
         print("Using seed: ", seed)
+        input()
         ray.init(
             num_cpus=1,
             object_store_memory=1024*1024*1024)
