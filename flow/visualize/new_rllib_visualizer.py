@@ -580,7 +580,6 @@ if __name__ == '__main__':
     for i in range(len(seed_filename)):
         seed = seed_filename[i]
         print("Using seed: ", seed)
-        input()
         ray.init(
             num_cpus=1,
             object_store_memory=1024*1024*1024)
