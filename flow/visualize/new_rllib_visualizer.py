@@ -32,7 +32,7 @@ try:
 except ImportError:
     from ray.rllib.agents.registry import get_agent_class
 from ray.tune.registry import register_env,get_trainable_cls
-
+from ray.rllib import _register_all
 from flow.core.util import emission_to_csv
 from flow.utils.registry import make_create_env
 from flow.utils.rllib import get_flow_params
@@ -143,19 +143,21 @@ def visualizer_rllib(args, seed=None):
     if seed:
         with open(seed, 'rb') as f:
             seed_tmp = pickle.load(f)
-        config['seed'] = seed_tmp['rllib_seed']
+        config['seed'] = int(seed_tmp['rllib_seed'])
     elif args.use_seeds:
         with open(args.use_seeds, 'rb') as f:
             seed_tmp = pickle.load(f)
-        config['seed'] = seed_tmp['rllib_seed']
+        config['seed'] = int(seed_tmp['rllib_seed'])
     # hack for old pkl files
     # TODO(ev) remove eventually
     sim_params = flow_params['sim']
     setattr(sim_params, 'num_clients', 1)
     if seed_tmp:
         #setattr(sim_params, 'seed', seed_tmp['sumo_seed'])
-        sim_params.seed = seed_tmp['sumo_seed']
-
+        sim_params.seed = int(int(seed_tmp['sumo_seed'])/10**6)
+        print(sim_params.seed)
+    #import IPython
+    #IPython.embed()
     # Determine agent and checkpoint
     config_run = config['env_config']['run'] if 'run' in config['env_config'] \
         else None
@@ -577,6 +579,9 @@ def create_parser():
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
+    Speed = []
+    Inflow = []
+    Outflow = []
     for i in range(len(seed_filename)):
         seed = seed_filename[i]
         print("Using seed: ", seed)
@@ -584,5 +589,13 @@ if __name__ == '__main__':
             num_cpus=1,
             object_store_memory=1024*1024*1024)
         speed, inflow, outflow = visualizer_rllib(args, seed)
-        print("Round ",i, ":", speed, inflow, outflow)
+        Speed.append(speed)
+        Inflow.append(inflow)
+        Outflow.append(outflow)
+        print("Round ",i+1, ":", speed, inflow, outflow)
+        print("Moving Stats at Round ", i+1, ":")
+        print("Speed: ", np.mean(Speed), np.std(Speed))
+        print("Inflow: ", np.mean(Inflow), np.std(Inflow))
+        print("Outflow: ", np.mean(Outflow), np.std(Outflow))
         ray.shutdown()
+        _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
