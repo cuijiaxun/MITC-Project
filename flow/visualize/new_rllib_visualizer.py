@@ -599,3 +599,5 @@ if __name__ == '__main__':
         print("Outflow: ", np.mean(Outflow), np.std(Outflow))
         ray.shutdown()
         _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
+        os.system('kill -9 $(pgrep sumo)')
+        os.system('kill -9 $(pgrep ray::IDLE)')
