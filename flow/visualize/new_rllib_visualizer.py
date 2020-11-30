@@ -577,6 +577,12 @@ def create_parser():
     parser.add_argument('--use_delay',type=int,default=-1,help='weather use time delay or not')
     parser.add_argument("-s","--use_seeds",dest = "use_seeds",help="name of pickle file containing seeds", default=None)
     return parser
+
+from subprocess import check_output
+import signal
+def get_pid(name):
+    return  check_output(["pidof", name]).split()
+    
 if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
@@ -598,7 +604,15 @@ if __name__ == '__main__':
         print("Speed: ", np.mean(Speed), np.std(Speed))
         print("Inflow: ", np.mean(Inflow), np.std(Inflow))
         print("Outflow: ", np.mean(Outflow), np.std(Outflow))
-    ray.shutdown()
-    _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
-    os.system('kill -9 $(pgrep sumo)')
-    os.system('kill -9 $(pgrep ray::IDLE)')
+        ray.shutdown()
+        _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
+        
+        if i%1 ==0:
+            name = 'sumo'
+            pids = get_pid(name)
+            #pid =  int(pid.split('\\')[0])
+            for pid in pids:
+                pid = int(pid)
+                print("Killing", pid)
+                if pid > 0:
+                    os.kill(pid, signal.SIGKILL)
