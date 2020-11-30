@@ -607,7 +607,7 @@ if __name__ == '__main__':
         ray.shutdown()
         _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
         
-        if i%1 ==0:
+        if i%1 ==0 and i!=99:
             name = 'sumo'
             pids = get_pid(name)
             #pid =  int(pid.split('\\')[0])
