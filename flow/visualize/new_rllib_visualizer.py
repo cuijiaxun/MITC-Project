@@ -431,6 +431,7 @@ def visualizer_rllib(args, seed=None):
 
     print('==== Summary of results ====')
     print("Return:")
+    env.close()
     if multiagent:
         for agent_id, rew in rets.items():
             print('For agent', agent_id)
@@ -582,12 +583,12 @@ if __name__ == '__main__':
     Speed = []
     Inflow = []
     Outflow = []
+    ray.init(
+        num_cpus=1,
+        object_store_memory=1024*1024*1024)
     for i in range(len(seed_filename)):
         seed = seed_filename[i]
         print("Using seed: ", seed)
-        ray.init(
-            num_cpus=1,
-            object_store_memory=1024*1024*1024)
         speed, inflow, outflow = visualizer_rllib(args, seed)
         Speed.append(speed)
         Inflow.append(inflow)
@@ -597,7 +598,7 @@ if __name__ == '__main__':
         print("Speed: ", np.mean(Speed), np.std(Speed))
         print("Inflow: ", np.mean(Inflow), np.std(Inflow))
         print("Outflow: ", np.mean(Outflow), np.std(Outflow))
-        ray.shutdown()
-        _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
-        os.system('kill -9 $(pgrep sumo)')
-        os.system('kill -9 $(pgrep ray::IDLE)')
+    ray.shutdown()
+    _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
+    os.system('kill -9 $(pgrep sumo)')
+    os.system('kill -9 $(pgrep ray::IDLE)')
