@@ -118,34 +118,20 @@ if __name__ == "__main__":
     #config["sgd_minibatch_size"] = 1024
     config["use_gae"] = True
     config["horizon"] = horizon
-    gae_lambda = 0.95
+    gae_lambda = 0.97
     step_size = 5.0e-4
     if benchmark_name == "grid0":
         gae_lambda = 0.5
         step_size = 5e-5
     elif benchmark_name == "grid1":
         gae_lambda = 0.3
-    config["gamma"] = 0.999
     config["lambda"] = gae_lambda
     config["lr"] = args.lr
-    
-    #config["lr_schedule"] = [
-    #        [0, args.lr],
-    #        [1000000,args.lr/1.5],
-    #        [4000000,args.lr/5]]
-    
     config["vf_clip_param"] = 1e6
     config["num_sgd_iter"] = 10
     config['clip_actions'] = False  # FIXME(ev) temporary ray bug
-    config["model"]["fcnet_hiddens"] = [256,256]
+    config["model"]["fcnet_hiddens"] = [100,50,25]
     config["observation_filter"] = "NoFilter"
-    config["entropy_coeff"] = 0.0001
-    config["kl_coeff"] = 0.0
-    config["kl_target"] = 0.01
-    #config["vf_loss_coeff"] = 0.5
-    #config["vf_share_layers"] = True
-    config["clip_param"] = 0.2
-    #config["seed"] = 123 # seed for PPO?
 
     # save the flow params for replay
     flow_json = json.dumps(
@@ -167,7 +153,7 @@ if __name__ == "__main__":
         "stop": {
             "training_iteration": args.training_iterations,
         },
-        "num_samples": 2,
+        "num_samples": 3,
 
     }
 

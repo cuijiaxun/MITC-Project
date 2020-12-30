@@ -135,7 +135,6 @@ dependencies:
     - redis==3.4.1
     - scipy==1.4.1
     - soupsieve==2.1
-    - sumotools==0.3.1
     - tabulate==0.8.7
     - tensorboard==2.0.2
     - tensorboard-plugin-wit==1.7.0

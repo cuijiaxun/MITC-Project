@@ -589,10 +589,11 @@ if __name__ == '__main__':
     Speed = []
     Inflow = []
     Outflow = []
-    ray.init(
+    for i in range(len(seed_filename)):
+        ray.init(
         num_cpus=1,
         object_store_memory=1024*1024*1024)
-    for i in range(len(seed_filename)):
+
         seed = seed_filename[i]
         print("Using seed: ", seed)
         speed, inflow, outflow = visualizer_rllib(args, seed)

@@ -74,7 +74,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="merge_4_Sim_FLOW_target30",
+    exp_tag="merge_4_Sim_FLOW_target20_old_params",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,

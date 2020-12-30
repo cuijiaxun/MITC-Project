@@ -31,7 +31,7 @@ from flow.controllers import IDMController, RLController,SimCarFollowingControll
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 750
+HORIZON = 2000
 # number of rollouts per training iteration
 N_ROLLOUTS = 1
 # number of parallel workers
@@ -77,20 +77,20 @@ inflow.add(
     veh_type="human",
     edge="inflow_highway",
     vehs_per_hour=(1 - RL_PENETRATION) * FLOW_RATE,
-    departLane="free",
-    departSpeed=10)
+    depart_lane="free",
+    depart_speed=10)
 inflow.add(
     veh_type="human2",
     edge="inflow_highway",
     vehs_per_hour=RL_PENETRATION * FLOW_RATE,
-    departLane="free",
-    departSpeed=10)
+    depart_lane="free",
+    depart_speed=10)
 inflow.add(
     veh_type="human",
     edge="inflow_merge",
     vehs_per_hour=200,
-    departLane="free",
-    departSpeed=7.5)
+    depart_lane="free",
+    depart_speed=7.5)
 
 
 flow_params = dict(
@@ -119,9 +119,9 @@ flow_params = dict(
         sims_per_step=1,
         warmup_steps=0,
         additional_params={
-            "max_accel": 1.5,
-            "max_decel": 1.5,
-            "target_velocity": 20,
+            "max_accel": 2.6,
+            "max_decel": 4.5,
+            "target_velocity": 30,
             "num_rl": NUM_RL,
         },
     ),
