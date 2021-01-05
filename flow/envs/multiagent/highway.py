@@ -4,14 +4,18 @@ from gym.spaces.box import Box
 from flow.core.rewards import desired_velocity, average_velocity
 from flow.envs.multiagent.base import MultiEnv
 import collections
-
+import os
 ADDITIONAL_ENV_PARAMS = {
     # maximum acceleration of autonomous vehicles
     'max_accel': 1,
     # maximum deceleration of autonomous vehicles
     'max_decel': 1,
     # desired velocity for all vehicles in the network, in m/s
-    "target_velocity": 25
+    "target_velocity": 25,
+    # selfishness, coeff before -1
+    #"eta1": 0.9,
+    # collaborative, coeff before average speed
+    #"eta2": 0.1
 }
 
 
@@ -783,9 +787,14 @@ class MultiAgentHighwayPOEnvCollaborate(MultiAgentHighwayPOEnv):
     def compute_reward(self, rl_actions, **kwargs):
         if rl_actions is None:
             return {}
+
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
@@ -910,8 +919,12 @@ class MultiAgentHighwayPOEnvMerge4Collaborate(MultiAgentHighwayPOEnvMerge4):
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
@@ -940,8 +953,12 @@ class MultiAgentHighwayPOEnvAblationDistanceCollaborate(MultiAgentHighwayPOEnvAb
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
@@ -970,14 +987,19 @@ class MultiAgentHighwayPOEnvAblationConjestionCollaborate(MultiAgentHighwayPOEnv
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
         for rl_id in self.k.vehicle.get_rl_ids():
             rewards[rl_id] = reward
         return rewards
+
 class MultiAgentHighwayPOEnvAblationConjestionDistance(MultiAgentHighwayPOEnvMerge4):
     @property
     def observation_space(self):
@@ -1000,14 +1022,19 @@ class MultiAgentHighwayPOEnvAblationConjestionDistanceCollaborate(MultiAgentHigh
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
         for rl_id in self.k.vehicle.get_rl_ids():
             rewards[rl_id] = reward
         return rewards
+
 class MultiAgentHighwayPOEnvAblationConjestionMergeInfo(MultiAgentHighwayPOEnvMerge4):
     @property
     def observation_space(self):
@@ -1031,8 +1058,12 @@ class MultiAgentHighwayPOEnvAblationConjestionMergeInfoCollaborate(MultiAgentHig
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
@@ -1076,11 +1107,16 @@ class MultiAgentHighwayPOEnvAblationMergeInfoCollaborate(MultiAgentHighwayPOEnvA
             return {}
 
         rewards = {}
-        eta1 = 0.9
-        eta2 = 0.1
+        if "eta1" in self.env_params.additional_params.keys():
+            eta1 = self.env_params.additional_params["eta1"]
+            eta2 = self.env_params.additional_params["eta2"]
+        else:
+            eta1 = 0.9
+            eta2 = 0.1
         reward1 = -0.1
         reward2 = average_velocity(self)/300
         reward  = reward1 * eta1 + reward2 * eta2
         for rl_id in self.k.vehicle.get_rl_ids():
             rewards[rl_id] = reward
         return rewards
+

@@ -45,6 +45,9 @@ FLOW_RATE = 2000
 MERGE_RATE = 200
 # percentage of autonomous vehicles compared to human vehicles on highway
 RL_PENETRATION = 0.1
+# Selfishness constant
+ETA_1 = 0.9
+ETA_2 = 0.1
 
 
 # SET UP PARAMETERS FOR THE NETWORK
@@ -109,7 +112,7 @@ inflow.add(
     depart_speed=7.5)
 
 flow_params = dict(
-    exp_tag='multiagent_highway_merge4_AblationDistance_Collaborate_lr_schedule',
+    exp_tag='multiagent_highway_merge4_AblationDistance_Collaborate_lr_schedule_eta1_{}_eta2_{}'.format(ETA_1, ETA_2),
 
     env_name=MultiAgentHighwayPOEnvAblationDistanceCollaborate,
     network=MergeNetwork,
@@ -138,6 +141,8 @@ flow_params = dict(
             "max_decel": 4.5,
             "target_velocity": 30,
             "num_rl": NUM_RL,
+            "eta1": ETA_1,
+            "eta2": ETA_2,
         },
     ),
 

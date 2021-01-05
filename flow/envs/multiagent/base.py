@@ -1,5 +1,7 @@
 """Environment for training multi-agent experiments."""
-
+import os
+import pickle
+import datetime
 from copy import deepcopy
 import numpy as np
 import random
@@ -145,38 +147,37 @@ class MultiEnv(MultiAgentEnv, Env):
             the initial observation of the space. The initial reward is assumed
             to be zero.
         """
-
-        if "use_seeds" in self.env_params.additional_params:
+        # FIXED SEEDS: always setting same random seeds for each run and see whether the agent learns quicker
+        # Random seeds recording and optionally loading
+        use_seeds = None
+        if "use_seeds" in self.env_params.additional_params.keys():
             use_seeds = self.env_params.additional_params["use_seeds"]
-        else:
-            use_seeds = None
-        if use_seeds: 
+        if use_seeds is not None:
             if use_seeds == "per_process":
-                # FIXED SEEDS: always same random seeds for each rollout worker run and see whether the agent learns quicker
-            if self.process_seeds_file: # i.e. iteration > 1 -- keep loading the file from iteration 1 for each simulation
-                with open(self.process_seeds_file, 'rb') as handle:
-                    print ("loading seeds file " + self.process_seeds_file)
-                  loaded_seeds = pickle.load(handle)
-                  random.setstate(loaded_seeds['old_state_random'])
-                  np.random.set_state(loaded_seeds['old_state_np'])
-            else: # first iteration, create file to be used by all runs of this worker
-                logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
-              if not os.path.exists(logs_path):
-                  os.makedirs(logs_path)
-              seeds = {
-                      'old_state_random' : random.getstate(),
-                      'old_state_np' : np.random.get_state()
-                      }
-              self.process_seeds_file = logs_path + "/seeds.pkl"
-              with open(self.process_seeds_file, 'wb') as handle:
-                  pickle.dump(seeds, handle)
-          else:
-              # FIXED SEEDS: same seed for *all* rollout workers
-            with open(use_seeds, 'rb') as handle:
-                loaded_seeds = pickle.load(handle)
-                random.setstate(loaded_seeds['old_state_random'])
-                np.random.set_state(loaded_seeds['old_state_np'])
-                print("loaded seeds file " + use_seeds)
+                if self.process_seeds_file:
+                    with open(self.process_seeds_file, 'rb') as handle:
+                        print("loading seeds file"+self.process_seeds_file)
+                        loaded_seeds = pickle.load(handle)
+                        random.setstate(loaded_seeds['old_state_random'])
+                        np.random.set_state(loaded_seeds['old_state_np'])
+                else:
+                    logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+                    if not os.path.exists(logs_path):
+                        os.makedirs(logs_path)
+                    seeds = {
+                        'old_state_random' : random.getstate(),
+                        'old_state_np' : np.random.get_state()
+                    }
+                    self.process_seeds_file = logs_path + "/seeds.pkl"
+                    with open(self.process_seeds_file, 'wb') as handle:
+                        pickle.dump(seeds, handle)
+            else:
+                # FIXED SEEDS: same seed for *all* rollout workers
+                with open(use_seeds, 'rb') as handle:
+                    loaded_seeds = pickle.load(handle)
+                    random.setstate(loaded_seeds['old_state_random'])
+                    np.random.set_state(loaded_seeds['old_state_np'])
+                    print("loaded seeds file " + use_seeds)
         # regardless of the above, always save seeds to file
         seeds = { 
                 'old_state_random' : random.getstate(),
@@ -209,9 +210,9 @@ class MultiEnv(MultiAgentEnv, Env):
                             "**********************************************************"
                             )
 
-                    if self.sim_params.restart_instance or \
+        if self.sim_params.restart_instance or \
                             (self.step_counter > 2e6 and self.simulator != 'aimsun'):
-                                self.step_counter = 0
+            self.step_counter = 0
             # issue a random seed to induce randomness into the next rollout
             self.sim_params.seed = random.randint(0, 1e5)
 
@@ -221,8 +222,8 @@ class MultiEnv(MultiAgentEnv, Env):
             self.restart_simulation(self.sim_params)
 
         # perform shuffling (if requested)
-    elif self.initial_config.shuffle:
-        self.setup_initial_state()
+        elif self.initial_config.shuffle:
+            self.setup_initial_state()
 
         # clear all vehicles from the network and the vehicles class
         if self.simulator == 'traci':
@@ -327,7 +328,7 @@ class MultiEnv(MultiAgentEnv, Env):
                         action,
                         a_min=self.action_space.low,
                         a_max=self.action_space.high)
-                return rl_actions
+        return rl_actions
 
     def apply_rl_actions(self, rl_actions=None):
         """Specify the actions to be performed by the rl agent(s).
