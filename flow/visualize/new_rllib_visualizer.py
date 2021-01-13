@@ -589,10 +589,10 @@ if __name__ == '__main__':
     Speed = []
     Inflow = []
     Outflow = []
+    ray.init(
+    num_cpus=1,
+    object_store_memory=1024*1024*1024)
     for i in range(len(seed_filename)):
-        ray.init(
-        num_cpus=1,
-        object_store_memory=1024*1024*1024)
 
         seed = seed_filename[i]
         print("Using seed: ", seed)
@@ -605,15 +605,15 @@ if __name__ == '__main__':
         print("Speed: ", np.mean(Speed), np.std(Speed))
         print("Inflow: ", np.mean(Inflow), np.std(Inflow))
         print("Outflow: ", np.mean(Outflow), np.std(Outflow))
-        ray.shutdown()
-        _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
+    ray.shutdown()
+    _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
         
-        if i%1 ==0 and i!=99:
-            name = 'sumo'
-            pids = get_pid(name)
-            #pid =  int(pid.split('\\')[0])
-            for pid in pids:
-                pid = int(pid)
-                print("Killing", pid)
-                if pid > 0:
-                    os.kill(pid, signal.SIGKILL)
+    if i%1 ==0 and i!=99:
+        name = 'sumo'
+        pids = get_pid(name)
+        #pid =  int(pid.split('\\')[0])
+        for pid in pids:
+            pid = int(pid)
+            print("Killing", pid)
+            if pid > 0:
+                os.kill(pid, signal.SIGKILL)
