@@ -83,6 +83,7 @@ class TraCIKernelNetwork(BaseKernelNetwork):
         self.__non_internal_length = None  # total length of non-internal edges
         self.rts = None
         self.cfg = None
+        self.ntwk_proc = None
 
     def generate_network(self, network):
         """See parent class.
@@ -508,10 +509,9 @@ class TraCIKernelNetwork(BaseKernelNetwork):
         t.append(E('no-turnarounds', value='true'))
         x.append(t)
         printxml(x, self.net_path + self.cfgfn)
-
-        subprocess.call(
+        self.ntwk_proc=subprocess.call(
             [
-                'netconvert -c ' + self.net_path + self.cfgfn +
+                'exec '+'netconvert -c ' + self.net_path + self.cfgfn +
                 ' --output-file=' + self.cfg_path + self.netfn +
                 ' --no-internal-links="false"'
             ],

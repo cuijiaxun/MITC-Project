@@ -634,7 +634,7 @@ class Env(gym.Env):
             self.step_counter = 0
             # issue a random seed to induce randomness into the next rollout
             self.sim_params.seed = random.randint(0, 1e5)
-
+            print("sumo seed:", self.sim_params.seed)
             self.k.vehicle = deepcopy(self.initial_vehicles)
             self.k.vehicle.master_kernel = self.k
             # restart the sumo instance

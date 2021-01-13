@@ -175,7 +175,8 @@ class TraCISimulation(KernelSimulation):
                 self.sumo_proc = subprocess.Popen(
                     sumo_call,
                     stdout=subprocess.DEVNULL,
-                    preexec_fn=os.setsid
+                    #preexec_fn=os.setsid,
+                    start_new_session=True
                 )
 
                 # wait a small period of time for the subprocess to activate
@@ -199,6 +200,13 @@ class TraCISimulation(KernelSimulation):
     def teardown_sumo(self):
         """Kill the sumo subprocess instance."""
         try:
-            os.killpg(self.sumo_proc.pid, signal.SIGTERM)
+            os.killpg(self.sumo_proc.pid, signal.SIGKILL)
         except Exception as e:
             print("Error during teardown: {}".format(e))
+
+import psutil
+def pskill(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+        process.kill()

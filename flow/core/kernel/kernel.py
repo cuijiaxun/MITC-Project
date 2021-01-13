@@ -107,6 +107,8 @@ class Kernel(object):
         """Terminate all components within the simulation and network."""
         self.network.close()
         self.simulation.close()
+        self.traffic_light.close()
+        self.vehicle.close()
 
     @property
     def scenario(self):

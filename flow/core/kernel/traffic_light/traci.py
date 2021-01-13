@@ -74,3 +74,7 @@ class TraCITrafficLight(KernelTrafficLight):
     def get_state(self, node_id):
         """See parent class."""
         return self.__tls[node_id][tc.TL_RED_YELLOW_GREEN_STATE]
+    
+    def close(self):
+        """See parent class."""
+        self.kernel_api.close()

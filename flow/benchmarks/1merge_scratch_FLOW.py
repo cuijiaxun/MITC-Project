@@ -246,7 +246,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="1merge_i696_horizon2000_SM9_inflow2000_merge200_depart10_FLow_2000",
+    exp_tag="i696_1merge_scratch_Flow_target_20_old_params",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,

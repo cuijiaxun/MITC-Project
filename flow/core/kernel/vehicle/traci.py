@@ -1082,3 +1082,8 @@ class TraCIVehicle(KernelVehicle):
     def set_max_speed(self, veh_id, max_speed):
         """See parent class."""
         self.kernel_api.vehicle.setMaxSpeed(veh_id, max_speed)
+    
+    def close(self):
+        """See parent class."""
+        if self.kernel_api:
+            self.kernel_api.close()
