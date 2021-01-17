@@ -248,7 +248,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="i696_1merge_Window_scratch_Arrive",
+    exp_tag="i696_1merge_Window_scratch_Arrive_old_params",
 
     # name of the flow environment the experiment is running on
     #env_name=MergePOEnv,
