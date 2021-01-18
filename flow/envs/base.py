@@ -566,7 +566,10 @@ class Env(gym.Env):
             else: # first iteration, create file to be used by all runs of this worker
               logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
               if not os.path.exists(logs_path):
-                  os.makedirs(logs_path)
+                  try:
+                      os.makedirs(logs_path)
+                  except:
+                      print("An exception occurred")
               seeds = {
                 'old_state_random' : random.getstate(),
                 'old_state_np' : np.random.get_state()
