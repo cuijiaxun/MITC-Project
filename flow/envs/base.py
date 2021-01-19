@@ -564,12 +564,12 @@ class Env(gym.Env):
                   random.setstate(loaded_seeds['old_state_random'])
                   np.random.set_state(loaded_seeds['old_state_np'])
             else: # first iteration, create file to be used by all runs of this worker
-              logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+              logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_') +"_"+str(random.randint(0,1000))
               if not os.path.exists(logs_path):
                   try:
                       os.makedirs(logs_path)
                   except:
-                      print("An exception occurred")
+                      print("File already exists")
               seeds = {
                 'old_state_random' : random.getstate(),
                 'old_state_np' : np.random.get_state()
@@ -590,9 +590,12 @@ class Env(gym.Env):
           'old_state_np' : np.random.get_state() 
         }
         # creating path to experiments' log files, using current time
-        logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
+        logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')+"_"+str(random.randint(0,1000))
         if not os.path.exists(logs_path):
-            os.makedirs(logs_path)
+            try:
+                os.makedirs(logs_path)
+            except:
+                print("File already exists")
         ## send logs_path to sumo to write logs (TODO: but after constructor, a bit hacky)
         #sim_params.logs_path=logs_path
         with open(logs_path + "/seeds.pkl", 'wb') as handle:

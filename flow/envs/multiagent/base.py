@@ -163,7 +163,10 @@ class MultiEnv(MultiAgentEnv, Env):
                 else:
                     logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
                     if not os.path.exists(logs_path):
-                        os.makedirs(logs_path)
+                        try:
+                            os.makedirs(logs_path)
+                        except:
+                            print("File already exists")
                     seeds = {
                         'old_state_random' : random.getstate(),
                         'old_state_np' : np.random.get_state()
@@ -186,7 +189,10 @@ class MultiEnv(MultiAgentEnv, Env):
         # creating path to experiments' log files, using current time
         logs_path = os.path.expanduser("~/flow_seeds/") + "flow_" + str(datetime.datetime.now()).replace(' ', '_').replace('-', '_').replace(':', '_')
         if not os.path.exists(logs_path):
-            os.makedirs(logs_path)
+            try:
+                os.makedirs(logs_path)
+            except:
+                print("File already exists")
         ## send logs_path to sumo to write logs (TODO: but after constructor, a bit hacky)
         #sim_params.logs_path=logs_path
         with open(logs_path + "/seeds.pkl", 'wb') as handle:
