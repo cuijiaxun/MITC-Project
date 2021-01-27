@@ -276,7 +276,7 @@ flow_params = dict(
         additional_params={
             "max_accel": 2.6,
             "max_decel": 4.5,
-            "target_velocity": 30,
+            "target_velocity": 20,
             "num_rl": NUM_RL, # used by WaveAttenuationMergePOEnv e.g. to fix action dimension
             "ignore_edges":[
                             #before window
