@@ -433,43 +433,50 @@ def visualizer_rllib(args, seed=None):
     print("Return:")
     env.close()
     if multiagent:
+        mean_rewards = []
         for agent_id, rew in rets.items():
             print('For agent', agent_id)
             print(rew)
             print('Average, std return: {}, {} for agent {}'.format(
                 np.mean(rew), np.std(rew), agent_id))
+            mean_rewards.extend(rew)
+        if len(mean_rewards) > 0:
+            mean_reward = np.mean(mean_rewards)
+        else:
+            mean_reward = 0
     else:
         print(rets)
-        print('Average, std: {:.2f}, {:.5f}'.format(
+        print('Average, std: {:.2f}, {:.2f}'.format(
             np.mean(rets), np.std(rets)))
+        mean_reward = np.mean(rets)
 
     print("\nSpeed, mean (m/s):")
     print(mean_speed)
-    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(mean_speed), np.std(
+    print('Average, std: {:.2f}, {:.2f}'.format(np.mean(mean_speed), np.std(
         mean_speed)))
     print("\nSpeed, std (m/s):")
     print(std_speed)
-    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(std_speed), np.std(
+    print('Average, std: {:.2f}, {:.2f}'.format(np.mean(std_speed), np.std(
         std_speed)))
 
     # Compute arrival rate of vehicles in the last 500 sec of the run
     print("\nOutflows (veh/hr):")
     print(final_outflows)
-    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(final_outflows),
+    print('Average, std: {:.2f}, {:.2f}'.format(np.mean(final_outflows),
                                         np.std(final_outflows)))
     # Compute departure rate of vehicles in the last 500 sec of the run
     print("Inflows (veh/hr):")
     print(final_inflows)
-    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(final_inflows),
+    print('Average, std: {:.2f}, {:.2f}'.format(np.mean(final_inflows),
                                         np.std(final_inflows)))
     # Compute throughput efficiency in the last 500 sec of the
     print("Throughput efficiency (veh/hr):")
     print(throughput_efficiency)
-    print('Average, std: {:.2f}, {:.5f}'.format(np.mean(throughput_efficiency),
+    print('Average, std: {:.2f}, {:.2f}'.format(np.mean(throughput_efficiency),
                                         np.std(throughput_efficiency)))
     print("Time Delay")
     print(times)
-    print("Time for certain number of vehicles to exit {:.2f},{:.5f}".format((np.mean(times)),np.std(times)))
+    print("Time for certain number of vehicles to exit {:.2f},{:.2f}".format((np.mean(times)),np.std(times)))
 
     if args.output:
         np.savetxt(args.output, [mean_speed, std_speed,final_inflows, final_outflows,times])
@@ -515,7 +522,10 @@ def visualizer_rllib(args, seed=None):
         os_cmd += " -pix_fmt yuv420p " + dirs[-1] + ".mp4"
         os_cmd += "&& cp " + dirs[-1] + ".mp4 " + save_dir + "/"
         os.system(os_cmd)
-    return mean_speed, final_inflows, final_outflows 
+    mean_speed, mean_inflows, mean_outflows = np.mean(mean_speed), np.mean(final_inflows), np.mean(final_outflows)
+    if multiagent:
+        return mean_speed, final_inflows, final_outflows, mean_reward
+    return mean_speed, final_inflows, final_outflows, mean_reward
 
 def create_parser():
     """Create the parser to capture CLI arguments."""
@@ -589,6 +599,7 @@ if __name__ == '__main__':
     Speed = []
     Inflow = []
     Outflow = []
+    Reward = []
     ray.init(
     num_cpus=1,
     object_store_memory=1024*1024*1024)
@@ -596,15 +607,17 @@ if __name__ == '__main__':
 
         seed = seed_filename[i]
         print("Using seed: ", seed)
-        speed, inflow, outflow = visualizer_rllib(args, seed)
+        speed, inflow, outflow, reward = visualizer_rllib(args, seed)
         Speed.append(speed)
         Inflow.append(inflow)
         Outflow.append(outflow)
-        print("Round ",i+1, ":", speed, inflow, outflow)
+        Reward.append(reward)
+        print("Round ",i+1, ":", speed, inflow, outflow, reward)
         print("Moving Stats at Round ", i+1, ":")
-        print("Speed: ", np.mean(Speed), np.std(Speed))
-        print("Inflow: ", np.mean(Inflow), np.std(Inflow))
-        print("Outflow: ", np.mean(Outflow), np.std(Outflow))
+        print("Reward: {:.2f}, {:.2f}".format(np.mean(Reward), np.std(Reward)))
+        print("Speed: {:.2f}, {:.2f}".format(np.mean(Speed), np.std(Speed)))
+        print("Inflow: {:.2f}, {:.2f}".format(np.mean(Inflow), np.std(Inflow)))
+        print("Outflow: {:.2f}, {:.2f}".format(np.mean(Outflow), np.std(Outflow)))
     ray.shutdown()
     _register_all() #Fix reinit error, this does not happen in ray 0.9.0, only fix for ray 0.8.5
         
