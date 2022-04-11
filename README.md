@@ -57,6 +57,14 @@ See [our website](https://flow-project.github.io/) for more information on the a
         ```bash
         python flow/visualize/new_rllib_visualizer.py checkpoint_dir checkpoint_num
         ```
+
+- **Experiments**
+Here we will give an overview of the necessary python classes related to the experiment in our AAMAS paper “Scalable Multiagent Driving Policies For Reducing Traffic Congestion”
+
+Architecture(Centralized/Decentralized) | Section in AAMAS | Description | Benchmark/File name
+:-------------------------------------: | :--------------: | :---------: | :-----------------:
+ || Human | flow.benchmarks.merge4\_IDM
+
 # Technical questions
 
 If you have a bug, please report it. Otherwise, join the [Flow Users group](https://forms.gle/CuVBu6QtX3dfNaxz6) on Slack! You'll recieve an email shortly after filling out the form. 
