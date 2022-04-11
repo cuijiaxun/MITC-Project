@@ -62,7 +62,8 @@ See [our website](https://flow-project.github.io/) for more information on the a
 Here we will give an overview of the necessary python classes related to the experiment in our AAMAS paper “Scalable Multiagent Driving Policies For Reducing Traffic Congestion”
 
 Architecture| Section in AAMAS | Description | Benchmark/File name
-:-------------------------------------: | :--------------: | :---------: | :-----------------:
+:-------------------------------------: | :--------------: | :---------: | :-----------------
+Decentrailzed | Simple Merge | Full State Augmentation | multiagent\_merge4\_Merge4\_Collaborate\_lrschedule.py 
 Centralized | Simple Merge | Human | flow.benchmarks.merge4\_IDM
 Centralized | Simple Merge | Flow Reward | flow.benchmarks.merge4\_Sim
 Centralized | Simple Merge | Outflow Reward | flow/benchmarks/merge4\_Sim\_Arrive.py
