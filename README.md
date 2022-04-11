@@ -32,13 +32,14 @@ We welcome your contributions.
 
 # Citing Flow
 If you are interested in extending our research, please consider citing our paper:
-
+---
 @article{cui2021scalable,
   title={Scalable multiagent driving policies for reducing traffic congestion},
   author={Cui, Jiaxun and Macke, William and Yedidsion, Harel and Goyal, Aastha and Urielli, Daniel and Stone, Peter},
   journal={arXiv preprint arXiv:2103.00058},
   year={2021}
 }
+---
 
 If you use Flow for academic research, you are highly encouraged to cite the Flow paper:
 
