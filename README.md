@@ -12,12 +12,27 @@
 
 See [our website](https://flow-project.github.io/) for more information on the application of Flow to several mixed-autonomy traffic scenarios. Other [results and videos](https://sites.google.com/view/ieee-tro-flow/home) are available as well.
 
-# More information
+# Installations
 
 - [Documentation](https://flow.readthedocs.org/en/latest/)
 - [Installation instructions](http://flow.readthedocs.io/en/latest/flow_setup.html)
 - [Tutorials](https://github.com/flow-project/flow/tree/master/tutorials)
 - [Binder Build (beta)](https://mybinder.org/v2/gh/flow-project/flow/binder)
+
+# Experiments
+- Installation:
+    -- SUMO 1.6.0 Linux ubuntu
+    SUMO 1.6.0 needs to be installed by building from source
+    Download source code from here: https://sourceforge.net/projects/sumo/files/sumo/
+    Sumo-src-1.6.0.zip or sumo-src-1.6.0.tar.gz
+    Check the instructions here
+    https://sumo.dlr.de/docs/Installing/Linux_Build.html
+    -- Flow
+    conda env create -f environment.yml
+    conda activate flow
+    python setup.py develop
+
+
 
 # Technical questions
 
