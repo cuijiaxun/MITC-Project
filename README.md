@@ -63,7 +63,11 @@ Here we will give an overview of the necessary python classes related to the exp
 
 Architecture(Centralized/Decentralized) | Section in AAMAS | Description | Benchmark/File name
 :-------------------------------------: | :--------------: | :---------: | :-----------------:
- || Human | flow.benchmarks.merge4\_IDM
+Centralized | Section 6.1 Simple Merge | Human | flow.benchmarks.merge4\_IDM
+Centralized | Section 6.1 Simple Merge | Flow Reward | flow.benchmarks.merge4\_Sim
+Centralized | Section 6.1 Simple Merge | Outflow Reward | flow/benchmarks/merge4\_Sim\_Arrive.py
+Centralized | Section 6.1 Simple Merge | Average Speed Reward | flow.benchmarks.merge4\_Sim\_AvgVel
+
 
 # Technical questions
 
