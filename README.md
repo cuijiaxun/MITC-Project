@@ -21,24 +21,15 @@ See [our website](https://flow-project.github.io/) for more information on the a
 
 # Experiments
 - **Installation**:
-    - SUMO 1.6.0 Linux ubuntu
-    SUMO 1.6.0 needs to be installed by building from source
-    
-    Download source code from here: https://sourceforge.net/projects/sumo/files/sumo/
-    
-    Sumo-src-1.6.0.zip or sumo-src-1.6.0.tar.gz
-    
-    Check the instructions here
-    
-    https://sumo.dlr.de/docs/Installing/Linux_Build.html
-    
+    - SUMO 1.6.0 Linux ubuntu (please use the exact version for reproducibility)
+        - SUMO 1.6.0 needs to be installed by building from source
+        - Download source code from here: https://sourceforge.net/projects/sumo/files/sumo/
+        - Sumo-src-1.6.0.zip or sumo-src-1.6.0.tar.gz
+        - Check the instructions here https://sumo.dlr.de/docs/Installing/Linux_Build.html
     - Flow
-    
-    conda env create -f environment.yml
-    
-    conda activate flow
-    
-    python setup.py develop
+        - conda env create -f environment.yml
+        - conda activate flow
+        - python setup.py develop
 
 
 
