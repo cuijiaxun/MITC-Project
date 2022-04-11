@@ -27,11 +27,22 @@ See [our website](https://flow-project.github.io/) for more information on the a
         - Sumo-src-1.6.0.zip or sumo-src-1.6.0.tar.gz
         - Check the instructions here https://sumo.dlr.de/docs/Installing/Linux_Build.html
     - Flow
-        - conda env create -f environment.yml
-        - conda activate flow
-        - python setup.py develop
-
-
+        ```bash
+        conda env create -f environment.yml
+        conda activate flow
+        python setup.py develop
+        ```
+- **Training**:
+    - You can train using the file flow/benchmarks/rllib/ppo\_runner.py and passing in a benchmark name. I recommend passing in merge4\_Sim as a first step. Note that this will take several hours to train.
+    - For **centralized** experiments, you should run the command from the flow/benchmarks directory. The specific command you should run is: 
+        ```bash
+        PYTHONPATH=. python rllib/ppo_runner.py --benchmark_name merge4_Sim --num_cpus  number_of_cores --lr 5e-5 --num_rollouts 2
+        ```
+    - For **Distributed** experiments, please first go to the directory and then run the corresponding scripts:
+        ```bash
+        cd examples/rllib/multiagent_exps
+        python multiagent_merge4_Merge4_Collaborate_lrschedule.py 
+        ```
 
 # Technical questions
 
