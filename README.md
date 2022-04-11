@@ -63,10 +63,16 @@ Here we will give an overview of the necessary python classes related to the exp
 
 Architecture| Section in AAMAS | Description | Benchmark/File name
 :-------------------------------------: | :--------------: | :---------: | :-----------------:
-Centralized | Section 6.1 Simple Merge | Human | flow.benchmarks.merge4\_IDM
-Centralized | Section 6.1 Simple Merge | Flow Reward | flow.benchmarks.merge4\_Sim
-Centralized | Section 6.1 Simple Merge | Outflow Reward | flow/benchmarks/merge4\_Sim\_Arrive.py
-Centralized | Section 6.1 Simple Merge | Average Speed Reward | flow.benchmarks.merge4\_Sim\_AvgVel
+Centralized | Simple Merge | Human | flow.benchmarks.merge4\_IDM
+Centralized | Simple Merge | Flow Reward | flow.benchmarks.merge4\_Sim
+Centralized | Simple Merge | Outflow Reward | flow/benchmarks/merge4\_Sim\_Arrive.py
+Centralized | Simple Merge | Average Speed Reward | flow.benchmarks.merge4\_Sim\_AvgVel
+Centralized | I-696 | Window, Ouflow | flow.benchmarks.1merge\_Window\_transfer\_Arrive
+Centralized | I-696 | Window, AvgVel | flow.benchmarks.1merge\_Window\_transfer\_AvgVel
+Centralized | I-696 | Entire, Outflow | flow.benchmarks.1merge\_horizon2000\_warmup0\_simstep05\_flow2000\_merge200\_dePart10\_Arrive
+Centralized | I-696 | Entire, AvgVel | flow.benchmarks.1merge\_horizon2000\_warmup0\_simstep05\_flow2000\_merge200\_dePart10\_AvgVel
+Centralized | I-696 | ZeroShot | load policies trained in simple merge and test them in I-696
+
 
 
 # Technical questions
