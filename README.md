@@ -34,7 +34,7 @@ See [our website](https://flow-project.github.io/) for more information on the a
         ```
 - **Training**:
     - You can train using the file flow/benchmarks/rllib/ppo\_runner.py and passing in a benchmark name. I recommend passing in merge4\_Sim as a first step. Note that this will take several hours to train.
-    - For **centralized** experiments, you should run the command from the flow/benchmarks directory. The specific command you should run is: 
+    - For **Centralized** experiments, you should run the command from the flow/benchmarks directory. The specific command you should run is: 
         ```bash
         python rllib/ppo_runner.py --benchmark_name merge4_Sim --num_cpus  number_of_cores --lr 5e-5 --num_rollouts 2
         ```
@@ -66,7 +66,7 @@ Architecture| Section in AAMAS | Description | Benchmark/File name
 Decentrailzed | Simple Merge | Full State Augmentation | multiagent\_merge4\_Merge4\_Collaborate\_lrschedule.py 
 Centralized | Simple Merge | Human | flow.benchmarks.merge4\_IDM
 Centralized | Simple Merge | Flow Reward | flow.benchmarks.merge4\_Sim
-Centralized | Simple Merge | Outflow Reward | flow/benchmarks/merge4\_Sim\_Arrive.py
+Centralized | Simple Merge | Outflow Reward | flow.benchmarks.merge4\_Sim\_Arrive.py
 Centralized | Simple Merge | Average Speed Reward | flow.benchmarks.merge4\_Sim\_AvgVel
 Centralized | I-696 | Window, Ouflow | flow.benchmarks.1merge\_Window\_transfer\_Arrive
 Centralized | I-696 | Window, AvgVel | flow.benchmarks.1merge\_Window\_transfer\_AvgVel
