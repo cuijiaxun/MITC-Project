@@ -31,8 +31,16 @@ We welcome your contributions.
 - Submit your contributions using [pull requests](https://github.com/flow-project/flow/pulls). Please use [this template](https://github.com/flow-project/flow/blob/master/.github/PULL_REQUEST_TEMPLATE.md) for your pull requests.
 
 # Citing Flow
+If you are interested in extending our research, please consider citing our paper:
 
-If you use Flow for academic research, you are highly encouraged to cite our paper:
+@article{cui2021scalable,
+  title={Scalable multiagent driving policies for reducing traffic congestion},
+  author={Cui, Jiaxun and Macke, William and Yedidsion, Harel and Goyal, Aastha and Urielli, Daniel and Stone, Peter},
+  journal={arXiv preprint arXiv:2103.00058},
+  year={2021}
+}
+
+If you use Flow for academic research, you are highly encouraged to cite the Flow paper:
 
 C. Wu, A. Kreidieh, K. Parvate, E. Vinitsky, A. Bayen, "Flow: Architecture and Benchmarking for Reinforcement Learning in Traffic Control," CoRR, vol. abs/1710.05465, 2017. [Online]. Available: https://arxiv.org/abs/1710.05465
 
