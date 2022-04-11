@@ -44,6 +44,19 @@ See [our website](https://flow-project.github.io/) for more information on the a
         python multiagent_merge4_Merge4_Collaborate_lrschedule.py 
         ```
 
+- **Evaluation**
+    - Tensorboard 
+    You can view the results by running 
+    ```bash
+    tensorboard --logdir results_dir
+    ```
+    The results should be stored in your ~/ray\_results directory after training (e.g. ~/ray\_results/merge\_4/PPO/exp1) You can view the results by opening a browser to localhost:6006
+    * Install tensorboard in base and run this command in base.
+    - Policy Visualizer
+    Once it's finished try visualizing it with the file flow/visualize/new_rllib_visualizer.py. You do so by passing in a checkpoint directory and a checkpoint number. You should run the command from the MITC directory. The specific command you should run is:
+    ```bash
+    PYTHONPATH=. python flow/visualize/new_rllib_visualizer.py checkpoint_dir checkpoint_num
+    ```
 # Technical questions
 
 If you have a bug, please report it. Otherwise, join the [Flow Users group](https://forms.gle/CuVBu6QtX3dfNaxz6) on Slack! You'll recieve an email shortly after filling out the form. 
